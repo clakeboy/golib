@@ -120,6 +120,11 @@ func (m *CKRedis) SetDB(db_idx int) {
 	m.rd.Do("SELECT",db_idx)
 }
 
+//得到KEYS
+func (m *CKRedis) Keys(perm string) ([]string,error) {
+	return redis.Strings(m.rd.Do("KEYS",perm))
+}
+
 //关闭连接
 func (m *CKRedis) Close() {
 	m.rd.Close()
