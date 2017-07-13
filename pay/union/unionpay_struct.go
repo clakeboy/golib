@@ -43,6 +43,7 @@ type Config struct {
 	EncryptCertPath  string `json:"encrypt_cert_path"`  //敏感信息加密证书路径
 	MiddleCertPath   string `json:"middle_cert_path"`   //验签中级证书路径
 	RootCertPath     string `json:"root_cert_path"`     //验签根证书路径
+	MerId            string `json:"mer_id"`             //商户ID
 }
 
 //银联调用地址配置

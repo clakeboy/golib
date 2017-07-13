@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-func TestCKRedis_Set(t *testing.T) {
+func init() {
 	cfg := &RedisConfig{
 		RDDb:1,
 		RDListName:"dudulist",
@@ -18,7 +18,9 @@ func TestCKRedis_Set(t *testing.T) {
 	}
 
 	InitRedisPool(cfg)
+}
 
+func TestCKRedis_Set(t *testing.T) {
 	rd,err := NewCKRedis()
 	if err != nil {
 		panic(err)
@@ -37,4 +39,31 @@ func TestCKRedis_Set(t *testing.T) {
 	}
 
 	fmt.Println(string(data.([]byte)))
+}
+
+func TestCKRedis_ZAdd(t *testing.T) {
+	rd,err := NewCKRedis()
+	if err != nil {
+		panic(err)
+	}
+
+	defer rd.Close()
+
+	fmt.Println(rd.ZAdd("testset",400,"clake"))
+	fmt.Println(rd.ZCount("testset","100","400"))
+	fmt.Println(rd.ZRangeByScore("testset","100","400",false))
+}
+
+func TestCKRedis_GAdd(t *testing.T) {
+	rd,err := NewCKRedis()
+	if err != nil {
+		panic(err)
+	}
+
+	defer rd.Close()
+
+	fmt.Println(rd.GAdd("obd_gps","106.518648333333","29.5621716666667","164726775217"))
+
+	list,err := rd.GRadius("obd_gps","106.518648333333","29.5621716666667",1000)
+	fmt.Println(list[0])
 }

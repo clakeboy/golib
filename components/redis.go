@@ -5,6 +5,7 @@ import (
 	"github.com/garyburd/redigo/redis"
 	"time"
 	"errors"
+	"strconv"
 )
 
 //redis 配置
@@ -16,6 +17,14 @@ type RedisConfig struct {
 	RDListName string `json:"rd_list_name"`
 	RDPoolSize int `json:"rd_pool_size"`
 	RDIdleSize int `json:"rd_idle_size"`
+}
+
+//GEO地理位置
+type RedisGeo struct {
+	Member string `json:"member"`
+	Lon    float64 `json:"lon"`
+	Lat    float64 `json:"lat"`
+	Dist   float64 `json:"dist"`
 }
 
 type CKRedis struct {
@@ -123,6 +132,81 @@ func (m *CKRedis) SetDB(db_idx int) {
 //得到KEYS
 func (m *CKRedis) Keys(perm string) ([]string,error) {
 	return redis.Strings(m.rd.Do("KEYS",perm))
+}
+
+//添加一个member有序集合
+func (m *CKRedis) ZAdd(key string,score int,member string) (bool,error) {
+	return redis.Bool(m.rd.Do("ZADD",key,score,member))
+}
+
+//返回有序集合的基数
+func (m *CKRedis) ZCard(key string) (int,error) {
+	return redis.Int(m.rd.Do("ZCARD",key))
+}
+
+//返回指定score 大小之间的成员数量
+func (m *CKRedis) ZCount(key string,min string,max string) (int,error) {
+	return redis.Int(m.rd.Do("ZCOUNT",key,min,max))
+}
+
+//返回指定 score 大小之间的成员列表
+func (m *CKRedis) ZRangeByScore(key string,min string,max string,with_score bool) ([]string,error) {
+	args := []interface{}{
+		key,min,max,
+	}
+
+	if with_score {
+		args = append(args,"WITHSCORES")
+	}
+
+	return redis.Strings(m.rd.Do("ZRANGEBYSCORE",args...))
+}
+
+//----------------------------------- GEOHASH
+
+//添加一个坐标到 GEOHASH
+func (m *CKRedis) GAdd(key string,lon string,lat string,member string) (bool,error) {
+	return redis.Bool(m.rd.Do("GEOADD",key,lon,lat,member))
+}
+
+//得到一个member 的坐标
+func (m *CKRedis) GPos(key string,member string) ([]interface{},error) {
+	return redis.Values(m.rd.Do("GEOPOS",key,member))
+}
+
+//计算两个位置的距离,返回米
+func (m *CKRedis) GDist(key string,member string,member2 string) (int,error) {
+	return redis.Int(m.rd.Do("GEODIST",key,member,member2))
+}
+
+//得到传入坐标半径的所有所坐标
+func (m *CKRedis) GRadius(key string,lon string,lat string,radius int) ([]*RedisGeo,error) {
+	list,err := redis.Values(m.rd.Do("GEORADIUS",key,lon,lat,radius,"m","WITHCOORD","WITHDIST","ASC"))
+	if err != nil {
+		return nil,err
+	}
+	return m.transGeo(list),nil
+}
+
+//转换取得的坐标数据为geo结构体
+func (m *CKRedis) transGeo(geo_list []interface{}) []*RedisGeo {
+	list := []*RedisGeo{}
+
+	for _,v := range geo_list {
+		val := v.([]interface{})
+		geo := &RedisGeo{}
+		geo.Member = string(val[0].([]byte))
+		geo.Dist,_ = strconv.ParseFloat(string(val[1].([]byte)),64)
+		geo.Lon,_ = strconv.ParseFloat(string(val[2].([]interface{})[0].([]byte)),64)
+		geo.Lat,_ = strconv.ParseFloat(string(val[2].([]interface{})[1].([]byte)),64)
+		list = append(list,geo)
+	}
+	return list
+}
+
+//执行命令
+func (m *CKRedis) Do(command string,args ...interface{}) (interface{},error) {
+	return m.rd.Do(command,args...)
 }
 
 //关闭连接
