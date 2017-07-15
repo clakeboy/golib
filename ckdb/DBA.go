@@ -278,12 +278,16 @@ func (d *DBA) formatWhere(column string, table string, length int) string {
 	var format_str string
 	if length > 0 {
 		var mask_args []string
+		where_icon := "IN"
 		for i:=0;i<length;i++ {
 			mask_args = append(mask_args,"?")
 		}
-		format_str = fmt.Sprintf("%s.%s IN (%s)", d.FormatColumn(table),column_str,strings.Join(mask_args,","))
+		if icon == "!" {
+			where_icon = "NOT IN"
+		}
+		format_str = fmt.Sprintf("%s.%s %s (%s)", d.FormatColumn(table),column_str,where_icon,strings.Join(mask_args,","))
 	} else {
-		format_str = fmt.Sprintf("%s.%s %s ?", d.FormatColumn(table), column_str, icon)
+		format_str = fmt.Sprintf("%s.%s %v ?", d.FormatColumn(table), column_str, utils.YN(icon == "!","!=",icon))
 	}
 	return format_str
 }

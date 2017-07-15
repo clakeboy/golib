@@ -137,10 +137,11 @@ func (this *Weixin) GetAccessToken() (*WxAccessToken, error) {
 }
 
 //发起 WEB 验证受权
-func (this *Weixin) WebAuth(redirect_uri string) string {
-	u := fmt.Sprintf("https://open.weixin.qq.com/connect/oauth2/authorize?appid=%v&redirect_uri=%v&response_type=code&scope=snsapi_userinfo&state=ckcore%v",
+func (this *Weixin) WebAuth(redirect_uri string,mpid string) string {
+	u := fmt.Sprintf("https://open.weixin.qq.com/connect/oauth2/authorize?appid=%v&redirect_uri=%v&response_type=code&scope=snsapi_userinfo&state=%v%v",
 		this.appId,
 		redirect_uri,
+		mpid,
 		"#wechat_redirect",
 	)
 	return u

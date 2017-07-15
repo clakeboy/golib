@@ -155,7 +155,7 @@ func Inet_ntoa(ipnr int64) string {
 
 	return fmt.Sprintf(
 		"%v.%v.%v.%v",
-		bytes[0],bytes[1],bytes[2],bytes[3])
+		bytes[3],bytes[2],bytes[1],bytes[0])
 }
 
 // Convert net.IP to int64 ,  http://www.outofmemory.cn
