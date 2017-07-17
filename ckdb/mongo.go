@@ -61,3 +61,7 @@ func (this *DBMongo) Close() {
 		this.session.Close()
 	}
 }
+
+func (this *DBMongo) Collection(collection_name string) *CKCollection {
+	return NewCollection(this,collection_name)
+}

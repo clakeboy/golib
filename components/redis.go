@@ -10,13 +10,13 @@ import (
 
 //redis 配置
 type RedisConfig struct {
-	RDServer   string `json:"rd_server"`
-	RDPort     string `json:"rd_port"`
-	RDDb       int    `json:"rd_db"`
-	RDPassword string `json:"rd_password"`
-	RDListName string `json:"rd_list_name"`
-	RDPoolSize int `json:"rd_pool_size"`
-	RDIdleSize int `json:"rd_idle_size"`
+	RDServer   string `json:"rd_server" yaml:"rd_server"`
+	RDPort     string `json:"rd_port" yaml:"rd_port"`
+	RDDb       int    `json:"rd_db" yaml:"rd_db"`
+	RDPassword string `json:"rd_password" yaml:"rd_password"`
+	RDListName string `json:"rd_list_name" yaml:"rd_list_name"`
+	RDPoolSize int `json:"rd_pool_size" yaml:"rd_pool_size"`
+	RDIdleSize int `json:"rd_idle_size" yaml:"rd_idle_size"`
 }
 
 //GEO地理位置
