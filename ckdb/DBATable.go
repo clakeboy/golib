@@ -3,6 +3,7 @@ package ckdb
 import (
 	"fmt"
 	"strings"
+	"ck_go_lib/utils"
 )
 
 type TBField struct {
@@ -20,7 +21,7 @@ type TBJoin struct {
 
 //Table 主结构
 type DBATable struct {
-	where DM
+	where utils.M
 	where_str string
 	join_str string
 	group_str string
@@ -68,7 +69,7 @@ func (t *DBATable) explainField(field string) *TBField {
 	return tb
 }
 //设置WHERE条件
-func (t *DBATable) Where(fields DM, table string) *DBATable {
+func (t *DBATable) Where(fields utils.M, table string) *DBATable {
 	t.where = fields
 	if table == "" {
 		table = t.table
@@ -164,7 +165,7 @@ func (t *DBATable) Query() *DBATable {
 }
 
 //得到所有列表结果集
-func (t *DBATable) Result() ([]map[string]interface{},error) {
+func (t *DBATable) Result() ([]utils.M,error) {
 	defer t.Clear()
 	return t.db.Query(t.sql_str,t.values...)
 }
@@ -214,7 +215,7 @@ func (t *DBATable) Insert(data interface{}) (int,bool) {
 }
 
 //更新数据
-func (t *DBATable) Update(data DM) bool {
+func (t *DBATable) Update(data utils.M) bool {
 	err := t.db.Update(data,t.where,t.table)
 	if err != nil {
 		return false

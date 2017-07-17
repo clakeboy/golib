@@ -99,7 +99,7 @@ func (d *DBA) Insert(table string, org_data interface{}) (int, bool) {
 }
 
 //更新数据库数据
-func (d *DBA) Update(data DM, where DM, table string) error {
+func (d *DBA) Update(data utils.M, where utils.M, table string) error {
 	var values []interface{}
 	var tmp []string
 	for i, v := range data {
@@ -130,7 +130,7 @@ func (d *DBA) Update(data DM, where DM, table string) error {
 }
 
 //条件删除数据
-func (d *DBA) Delete(where DM,table string) (int,error){
+func (d *DBA) Delete(where utils.M,table string) (int,error){
 	var values []interface{}
 	where_str, where_val := d.WhereRecursion(where, "AND", table)
 	values = append(values, where_val...)
@@ -150,7 +150,7 @@ func (d *DBA) Delete(where DM,table string) (int,error){
 }
 
 //查询数据库
-func (d *DBA) Query(sql_str string, args ...interface{}) ([]map[string]interface{},error) {
+func (d *DBA) Query(sql_str string, args ...interface{}) ([]utils.M,error) {
 	rows,err := d.db.Query(sql_str, args...)
 	d.LastSql = sql_str
 	d.LastArgs = args
@@ -181,7 +181,7 @@ func (d *DBA) Exec(sql_str string, args ...interface{}) (sql.Result, error) {
 	return res, err
 }
 
-func (d *DBA) QueryOne(sql_str string, args ...interface{}) (map[string]interface{},error) {
+func (d *DBA) QueryOne(sql_str string, args ...interface{}) (utils.M,error) {
 	rows,err := d.db.Query(sql_str, args...)
 	d.LastSql = sql_str
 	d.LastArgs = args
@@ -209,7 +209,7 @@ func (d *DBA) QueryRow(sql_str string, args ...interface{}) *sql.Row {
 	return d.db.QueryRow(sql_str, args...)
 }
 
-func (d *DBA) FetchAll(query *sql.Rows) ([]map[string]interface{},error) {
+func (d *DBA) FetchAll(query *sql.Rows) ([]utils.M,error) {
 	column, _ := query.Columns()
 	values := make([]interface{}, len(column))
 	scans := make([]interface{}, len(column))
@@ -217,13 +217,13 @@ func (d *DBA) FetchAll(query *sql.Rows) ([]map[string]interface{},error) {
 		scans[i] = &values[i]
 	}
 
-	results := []map[string]interface{}{}
+	results := []utils.M{}
 
 	for query.Next() {
 		if err := query.Scan(scans...); err != nil {
 			return nil,err
 		}
-		row := make(map[string]interface{})
+		row := utils.M{}
 		for k, v := range values {
 			key := column[k]
 			switch v.(type) {
@@ -242,12 +242,12 @@ func (d *DBA) FetchAll(query *sql.Rows) ([]map[string]interface{},error) {
 }
 
 //处理where条件列表
-func (d *DBA) WhereRecursion(where DM, icon string, table string) (string, []interface{}) {
+func (d *DBA) WhereRecursion(where utils.M, icon string, table string) (string, []interface{}) {
 	var where_strings []string
 	var values []interface{}
 	for i, v := range where {
 		if i == "AMD" || i == "OR" {
-			tmp_where, val := d.WhereRecursion(v.(DM), i, table)
+			tmp_where, val := d.WhereRecursion(v.(utils.M), i, table)
 			where_strings = append(where_strings, tmp_where)
 			values = append(values, val...)
 		} else {
