@@ -88,18 +88,13 @@ func (ck *CKCollection) Query(where bson.M, page int, number int,sort_list []str
 		count, _ = c.Find(where).Count()
 	}
 
-	if struct_type == nil {
-		struct_type = utils.M{}
-	}
-
-	t := reflect.TypeOf(struct_type)
-	result := reflect.New(t).Interface()
+	result := ck.getQueryType(struct_type)
 	for res_list.Next(result) {
 		if format != nil {
 			format(result)
 		}
 		list = append(list, result)
-		result = reflect.New(t).Interface()
+		result = ck.getQueryType(struct_type)
 	}
 
 	res := &QueryResult{
@@ -108,6 +103,15 @@ func (ck *CKCollection) Query(where bson.M, page int, number int,sort_list []str
 	}
 
 	return res, err
+}
+
+func (ck *CKCollection) getQueryType(i interface{}) interface{} {
+	if i == nil {
+		return utils.M{}
+	}
+
+	t := reflect.TypeOf(i)
+	return reflect.New(t).Interface()
 }
 
 //关闭数据库连接

@@ -40,7 +40,7 @@ func NewDBATable(db *DBA, table string) *DBATable {
 }
 
 //设置要显示的字段
-func (t *DBATable) Select(fields DM) *DBATable {
+func (t *DBATable) Select(fields utils.M) *DBATable {
 	var tmp []string
 	for column,column_table := range fields {
 		var table string
