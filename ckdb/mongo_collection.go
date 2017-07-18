@@ -105,6 +105,35 @@ func (ck *CKCollection) Query(where bson.M, page int, number int,sort_list []str
 	return res, err
 }
 
+//查询数据库返回列表
+func (ck *CKCollection) List(where bson.M, page int, number int,sort_list []string, struct_type interface{}, format func(interface{})) ([]interface{}, error) {
+	c := ck.db.Table(ck.tab)
+	var list []interface{}
+	var err error
+	var res_list *mgo.Iter
+
+	if sort_list == nil {
+		sort_list = []string{"-_id"}
+	}
+
+	if where == nil {
+		res_list = c.Find(nil).Sort(sort_list...).Skip((page - 1) * number).Limit(number).Iter()
+	} else {
+		res_list = c.Find(where).Sort(sort_list...).Skip((page - 1) * number).Limit(number).Iter()
+	}
+
+	result := ck.getQueryType(struct_type)
+	for res_list.Next(result) {
+		if format != nil {
+			format(result)
+		}
+		list = append(list, result)
+		result = ck.getQueryType(struct_type)
+	}
+
+	return list, err
+}
+
 func (ck *CKCollection) getQueryType(i interface{}) interface{} {
 	if i == nil {
 		return utils.M{}

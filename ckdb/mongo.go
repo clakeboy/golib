@@ -55,6 +55,10 @@ func (this *DBMongo) Table(tab_name string) *mgo.Collection {
 	return this.database.C(tab_name)
 }
 
+func (this *DBMongo) ChangeDB(db_name string) {
+	this.db_name = db_name
+}
+
 func (this *DBMongo) Close() {
 	if this.is_open {
 		this.is_open = false
