@@ -267,7 +267,6 @@ func (w *Weixin) GetMedia(access_token string,media_id string) (*MediaData,error
 		access_token,
 		media_id,
 	)
-
 	ck_http := utils.NewHttpClient()
 	res,err := ck_http.Request("GET",url_str,nil)
 	if err != nil {

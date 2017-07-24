@@ -328,6 +328,8 @@ func (d *DBA) ConvertData(org_data interface{}) (DM,error) {
 	case reflect.Map:
 		if t.Name() == "DM" {
 			return org_data.(DM),nil
+		} else if t.Name() == "M" {
+			return DM(org_data.(utils.M)),nil
 		}
 		return DM(org_data.(map[string]interface{})),nil
 	case reflect.Ptr:

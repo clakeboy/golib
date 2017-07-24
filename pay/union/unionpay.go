@@ -94,20 +94,20 @@ func (u *Pay) BackBind(user *UserInfo, bind *BackBind) error {
 }
 
 //代收费用
-func (u *Pay) BackPay(user *UserInfo, dk *BackDK) error {
+func (u *Pay) BackPay(user *UserInfo, dk *BackDK) (UMP,error) {
 	enCrt, err := u.getEncryptCertInfo()
 	if err != nil {
-		return err
+		return nil,err
 	}
 
 	accno, err := u.EncryptData(dk.AccNo)
 	if err != nil {
-		return err
+		return nil,err
 	}
 
 	enc_custom, err := u.EncryptCustomerData(user)
 	if err != nil {
-		return err
+		return nil,err
 	}
 
 	post_data := UMP{
@@ -133,26 +133,26 @@ func (u *Pay) BackPay(user *UserInfo, dk *BackDK) error {
 	err = u.sign(post_data)
 
 	if err != nil {
-		return err
+		return nil,err
 	}
 
 	req, err := u.post(u.urls.BackTransUrl, post_data)
 	if err != nil {
-		return err
+		return nil,err
 	}
 
 	success, err := u.validate(req)
 	if err != nil {
-		return err
+		return nil,err
 	}
 
 	if !success {
-		return errors.New("数据返回验证不成功")
+		return nil,errors.New("数据返回验证不成功")
 	}
 
 	fmt.Println(req["respMsg"])
 
-	return nil
+	return req,nil
 }
 
 //退款

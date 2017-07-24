@@ -3,6 +3,7 @@ package union
 import (
 	"testing"
 	"time"
+	"fmt"
 )
 
 var cfg = &Config{
@@ -14,13 +15,13 @@ var cfg = &Config{
 }
 
 var urls = &UrlConfig{
-	FrontTransUrl:  "https://gateway.test.95516.com/gateway/api/frontTransReq.do",
-	BackTransUrl:   "https://gateway.test.95516.com/gateway/api/backTransReq.do",
-	SingleQueryUrl: "https://gateway.test.95516.com/gateway/api/queryTrans.do",
-	BatchTransUrl:  "https://gateway.test.95516.com/gateway/api/batchTrans.do",
-	FileTransUrl:   "https://filedownload.test.95516.com/",
-	AppTransUrl:    "https://gateway.test.95516.com/gateway/api/appTransReq.do",
-	CardTransUrl:   "https://gateway.test.95516.com/gateway/api/cardTransReq.do",
+	FrontTransUrl:  "https://gateway.95516.com/gateway/api/frontTransReq.do",
+	BackTransUrl:   "https://gateway.95516.com/gateway/api/backTransReq.do",
+	SingleQueryUrl: "https://gateway.95516.com/gateway/api/queryTrans.do",
+	BatchTransUrl:  "https://gateway.95516.com/gateway/api/batchTrans.do",
+	FileTransUrl:   "https://filedownload.95516.com/",
+	AppTransUrl:    "https://gateway.95516.com/gateway/api/appTransReq.do",
+	CardTransUrl:   "https://gateway.95516.com/gateway/api/cardTransReq.do",
 	CallbackUrl:    "http://pay.b.clake.cc:7908/pay/union/recv",
 }
 
@@ -76,4 +77,21 @@ func TestPay_BackPay(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func TestPay_QueryPay(t *testing.T) {
+	union_pay := NewPay(cfg, urls)
+
+
+	order := &QueryOrder{
+		MerId   :"",
+		OrderId :"",
+		TxnTime :"",
+	}
+
+	res,err := union_pay.QueryPay(order)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("%+v",res)
 }
