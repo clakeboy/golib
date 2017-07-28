@@ -6,9 +6,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"regexp"
 	"sort"
 	"strings"
-	"regexp"
 )
 
 type WxError struct {
@@ -54,7 +54,7 @@ type WxUser struct {
 
 //用公众号接口获取的用户数据
 type WxUserInfo struct {
-	Subscribe      int `json:"subscribe"`
+	Subscribe      int    `json:"subscribe"`
 	Subscribe_time int    `json:"subscribe_time"`
 	Nickname       string `json:"nickname"`
 	OpenId         string `json:"openid"`
@@ -78,8 +78,8 @@ func NewWeixin(app_id, app_secret string) *Weixin {
 }
 
 //发起HTTP连接
-func (this *Weixin) Http(uri string) (string, error) {
-	s,err := utils.HttpGet(uri)
+func (w *Weixin) Http(uri string) (string, error) {
+	s, err := utils.HttpGet(uri)
 	if err != nil {
 		return "", err
 	}
@@ -98,10 +98,10 @@ func (this *Weixin) Http(uri string) (string, error) {
 }
 
 //发起HTTP POSTJSON
-func (w *Weixin) post(uri string,data utils.M) (string,error) {
-	res,err := utils.HttpPostJsonString(uri,data)
+func (w *Weixin) post(uri string, data utils.M) (string, error) {
+	res, err := utils.HttpPostJsonString(uri, data)
 	if err != nil {
-		return "",err
+		return "", err
 	}
 	var info WxError
 	err = json.Unmarshal([]byte(res), &info)
@@ -113,16 +113,16 @@ func (w *Weixin) post(uri string,data utils.M) (string,error) {
 		return "", err
 	}
 
-	return res,nil
+	return res, nil
 }
 
 //得到公众号全局 ACCESS_TOKEN
-func (this *Weixin) GetAccessToken() (*WxAccessToken, error) {
+func (w *Weixin) GetAccessToken() (*WxAccessToken, error) {
 	url := fmt.Sprintf(
 		"https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%v&secret=%v",
-		this.appId,
-		this.appSecret)
-	raw, err := this.Http(url)
+		w.appId,
+		w.appSecret)
+	raw, err := w.Http(url)
 	if err != nil {
 		return nil, err
 	}
@@ -137,9 +137,9 @@ func (this *Weixin) GetAccessToken() (*WxAccessToken, error) {
 }
 
 //发起 WEB 验证受权
-func (this *Weixin) WebAuth(redirect_uri string,mpid string) string {
+func (w *Weixin) WebAuth(redirect_uri string, mpid string) string {
 	u := fmt.Sprintf("https://open.weixin.qq.com/connect/oauth2/authorize?appid=%v&redirect_uri=%v&response_type=code&scope=snsapi_userinfo&state=%v%v",
-		this.appId,
+		w.appId,
 		redirect_uri,
 		mpid,
 		"#wechat_redirect",
@@ -148,14 +148,14 @@ func (this *Weixin) WebAuth(redirect_uri string,mpid string) string {
 }
 
 //使用code获取用户access token
-func (this *Weixin) GetUserAccessToken(code string) (*WxUserAccessToken, error) {
+func (w *Weixin) GetUserAccessToken(code string) (*WxUserAccessToken, error) {
 	url := fmt.Sprintf("https://api.weixin.qq.com/sns/oauth2/access_token?%v&%v&%v&%v",
-		"appid="+this.appId,
-		"secret="+this.appSecret,
+		"appid="+w.appId,
+		"secret="+w.appSecret,
 		"code="+code,
 		"grant_type=authorization_code",
 	)
-	raw, err := this.Http(url)
+	raw, err := w.Http(url)
 	if err != nil {
 		return nil, err
 	}
@@ -169,13 +169,13 @@ func (this *Weixin) GetUserAccessToken(code string) (*WxUserAccessToken, error) 
 }
 
 //使用用户access token 获取用户信息
-func (this *Weixin) GetUserInfoAccessToken(access_token string, openid string) (*WxUser, error) {
+func (w *Weixin) GetUserInfoAccessToken(access_token string, openid string) (*WxUser, error) {
 	url := fmt.Sprintf("https://api.weixin.qq.com/sns/userinfo?%v&%v&%v",
 		"access_token="+access_token,
 		"openid="+openid,
 		"lang=zh_CN",
 	)
-	raw, err := this.Http(url)
+	raw, err := w.Http(url)
 	if err != nil {
 		return nil, err
 	}
@@ -190,12 +190,12 @@ func (this *Weixin) GetUserInfoAccessToken(access_token string, openid string) (
 }
 
 //拉取用户信息
-func (this *Weixin) GetUserInfo(access_token string, openid string) (*WxUserInfo,error) {
+func (w *Weixin) GetUserInfo(access_token string, openid string) (*WxUserInfo, error) {
 	url := fmt.Sprintf("https://api.weixin.qq.com/cgi-bin/user/info?access_token=%v&openid=%v&lang=zh_CN",
 		access_token,
 		openid,
 	)
-	raw, err := this.Http(url)
+	raw, err := w.Http(url)
 	if err != nil {
 		return nil, err
 	}
@@ -210,9 +210,9 @@ func (this *Weixin) GetUserInfo(access_token string, openid string) (*WxUserInfo
 }
 
 //获取JsTicket
-func (this *Weixin) GetJsapiTicket(access_token string) (*WxJsapiTicket, error) {
+func (w *Weixin) GetJsapiTicket(access_token string) (*WxJsapiTicket, error) {
 	url := fmt.Sprintf("https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=%v&type=jsapi", access_token)
-	raw, err := this.Http(url)
+	raw, err := w.Http(url)
 	if err != nil {
 		return nil, err
 	}
@@ -227,7 +227,7 @@ func (this *Weixin) GetJsapiTicket(access_token string) (*WxJsapiTicket, error) 
 }
 
 //进行JSTICKET签名
-func (this *Weixin) SignJsTicket(data map[string]interface{}) string {
+func (w *Weixin) SignJsTicket(data map[string]interface{}) string {
 	keys := utils.MapKeys(data)
 	sort.Strings(keys)
 	val := []string{}
@@ -244,9 +244,9 @@ func (this *Weixin) SignJsTicket(data map[string]interface{}) string {
 }
 
 //发送模板消息
-func (w *Weixin) SendTemplateMessage(access_token string,data utils.M) error {
-	url_str := fmt.Sprintf("https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=%s",access_token)
-	_,err := w.post(url_str,data)
+func (w *Weixin) SendTemplateMessage(access_token string, data utils.M) error {
+	url_str := fmt.Sprintf("https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=%s", access_token)
+	_, err := w.post(url_str, data)
 	if err != nil {
 		return err
 	}
@@ -257,38 +257,94 @@ func (w *Weixin) SendTemplateMessage(access_token string,data utils.M) error {
 type MediaData struct {
 	FileType string
 	FileName string
-	Content []byte
+	Content  []byte
 }
 
 //得到临时素材
-func (w *Weixin) GetMedia(access_token string,media_id string) (*MediaData,error) {
+func (w *Weixin) GetMedia(access_token string, media_id string) (*MediaData, error) {
 	url_str := fmt.Sprintf(
 		"https://api.weixin.qq.com/cgi-bin/media/get?access_token=%s&media_id=%s",
 		access_token,
 		media_id,
 	)
 	ck_http := utils.NewHttpClient()
-	res,err := ck_http.Request("GET",url_str,nil)
+	res, err := ck_http.Request("GET", url_str, nil)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	if res.StatusCode != 200 {
-		return nil,errors.New(fmt.Sprintf("request error code: %d",res.StatusCode))
+		return nil, errors.New(fmt.Sprintf("request error code: %d", res.StatusCode))
 	}
 
-	if res.Headers.Get("Content-Type") != "text/plain" {
+	if res.Headers.Get("Content-Type") != "text/plain" || res.Headers.Get("Content-Type") != "application/json" {
 		dis := res.Headers.Get("Content-disposition")
 		reg := regexp.MustCompile(`filename="(.+)"`)
 		list := reg.FindStringSubmatch(dis)
 		media := &MediaData{
-			FileType:res.Headers.Get("Content-Type"),
-			FileName:list[1],
-			Content:res.Content,
+			FileType: res.Headers.Get("Content-Type"),
+			FileName: list[1],
+			Content:  res.Content,
 		}
-		return media,nil
+		return media, nil
 	}
 	err_msg := utils.M{}
-	json.Unmarshal(res.Content,&err_msg)
-	return nil,errors.New(fmt.Sprintf("code:%v,msg:%v",err_msg["errcode"],err_msg["errmsg"]))
+	json.Unmarshal(res.Content, &err_msg)
+	return nil, errors.New(fmt.Sprintf("code:%v,msg:%v", err_msg["errcode"], err_msg["errmsg"]))
+}
+
+//微信二维码结构
+type WxQrCode struct {
+	Ticket        string `json:"ticket"`
+	ExpireSeconds int    `json:"expire_seconds"`
+	Url           string `json:"url"`
+}
+
+//创建临时二维码
+func (w *Weixin) CreateTempQrCode(token, content string, time_s int) (*WxQrCode, error) {
+	data := utils.M{
+		"expire_seconds": time_s,
+		"action_name":    "QR_STR_SCENE",
+		"action_info": utils.M{
+			"scene": utils.M{
+				"scene_str": content,
+			},
+		},
+	}
+
+	url_str := fmt.Sprintf("https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=%v", token)
+
+	res, err := w.post(url_str, data)
+	if err != nil {
+		return nil, err
+	}
+
+	res_data := &WxQrCode{}
+	json.Unmarshal([]byte(res), res_data)
+
+	return res_data, nil
+}
+
+//创建永久二维码
+func (w *Weixin) CreateQrCode(token, content string) (*WxQrCode, error) {
+	data := utils.M{
+		"action_name": "QR_LIMIT_STR_SCENE",
+		"action_info": utils.M{
+			"scene": utils.M{
+				"scene_str": content,
+			},
+		},
+	}
+
+	url_str := fmt.Sprintf("https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=%v", token)
+
+	res, err := w.post(url_str, data)
+	if err != nil {
+		return nil, err
+	}
+
+	res_data := &WxQrCode{}
+	json.Unmarshal([]byte(res), res_data)
+
+	return res_data, nil
 }

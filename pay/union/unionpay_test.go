@@ -73,7 +73,7 @@ func TestPay_BackPay(t *testing.T) {
 		BindId:  "UN000000001",
 	}
 
-	err := union_pay.BackPay(user,dk)
+	_,err := union_pay.BackPay(user,dk)
 	if err != nil {
 		panic(err)
 	}
