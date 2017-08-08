@@ -6,6 +6,7 @@ import (
 	"strings"
 	"io/ioutil"
 	"time"
+	"io"
 )
 
 type HttpRequestData struct {
@@ -33,59 +34,26 @@ func (h *HttpClient) Post(url_str string, data M) ([]byte, error) {
 		post_data.Add(k, v.(string))
 	}
 
-	req, err := http.NewRequest("POST", url_str, strings.NewReader(post_data.Encode()))
+	req, err := h.Request("POST",url_str,strings.NewReader(post_data.Encode()))
+
 	if err != nil {
 		return nil, err
 	}
 
-	if len(h.headers) > 0 {
-		for k, v := range h.headers {
-			req.Header.Set(k, v.(string))
-		}
-	} else {
-		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	}
-
-	resp,err := h.client.Do(req)
-	if err != nil {
-		return nil,err
-	}
-	defer resp.Body.Close()
-
-	body,err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil,err
-	}
-
-	return body, nil
+	return req.Content, nil
 }
 
 func (h *HttpClient) Get(url_str string) ([]byte, error) {
-	req,err := http.NewRequest("GET",url_str,nil)
+	resp,err := h.Request("GET",url_str,nil)
 	if err != nil {
 		return nil,err
 	}
-	resp,err :=  h.client.Do(req)
-	if err != nil {
-		return nil,err
-	}
-	defer resp.Body.Close()
-
-	body,err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil,err
-	}
-	return body,nil
+	return resp.Content,nil
 }
 
-func (h *HttpClient) Request(method string,url_str string,data M) (*HttpRequestData,error) {
-	post_data := &url.Values{}
+func (h *HttpClient) Request(method string,url_str string,content io.Reader) (*HttpRequestData,error) {
 
-	for k, v := range data {
-		post_data.Add(k, v.(string))
-	}
-
-	req,err := http.NewRequest(method,url_str,strings.NewReader(post_data.Encode()))
+	req,err := http.NewRequest(method,url_str,content)
 	if err != nil {
 		return nil,err
 	}

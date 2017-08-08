@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/xml"
 	"io"
+	"fmt"
 )
 
 type XMLMap map[string]string
@@ -50,7 +51,7 @@ func (m *XMLMap) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 		} else if err != nil {
 			return err
 		}
-
+		fmt.Println(e.XMLName.Local)
 		(*m)[e.XMLName.Local] = e.Value
 	}
 	return nil

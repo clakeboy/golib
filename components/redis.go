@@ -161,6 +161,10 @@ func (m *CKRedis) ZRangeByScore(key string,min string,max string,with_score bool
 
 	return redis.Strings(m.rd.Do("ZRANGEBYSCORE",args...))
 }
+//删除有序集合里面的成员
+func (m *CKRedis) ZRem(key ,member string) (bool,error) {
+	return redis.Bool(m.rd.Do("ZREM",key,member))
+}
 
 //----------------------------------- GEOHASH
 
@@ -202,6 +206,30 @@ func (m *CKRedis) transGeo(geo_list []interface{}) []*RedisGeo {
 		list = append(list,geo)
 	}
 	return list
+}
+
+//--- HASH ---
+//设置一个HASH值
+func (m *CKRedis) HSet(key,field string,val interface{}) (bool,error) {
+	return redis.Bool(m.rd.Do("HSET",key,field,val))
+}
+
+//得到一个HASH值
+func (m *CKRedis) HGet(key,field string) (interface{},error) {
+	val,err := m.rd.Do("HGET",key,field)
+	if err != nil {
+		return nil,err
+	}
+	return val,nil
+}
+//检查是否存在一个HASH值
+func (m *CKRedis) HExists(key,field string) (bool,error) {
+	return redis.Bool(m.rd.Do("HEXISTS",key,field))
+}
+
+//得到多个HASH 值
+func (m *CKRedis) HMGet(key string,field ...interface{}) ([]interface{},error) {
+	return redis.Values(m.rd.Do("HMGET",field...))
 }
 
 //执行命令
