@@ -201,13 +201,12 @@ func (u *Pay) UndoPay(undo *OrderUndo) (UMP,error) {
 func (u *Pay) QueryPay(query *QueryOrder) (UMP, error) {
 	post_data := UMP{
 		"version":     "5.1.0",
-		"encoding":    "utf-8",
+		"encoding":    "UTF-8",
 		"signMethod":  "01",
 		"txnType":     "00",
 		"txnSubType":  "00",
 		"bizType":     "000501",
 		"accessType":  "0",
-		"channelType": "07",
 		"merId":       query.MerId,
 		"orderId":     query.OrderId,
 		"txnTime":     query.TxnTime,
@@ -265,6 +264,7 @@ func (u *Pay) sign(data UMP) error {
 
 //签证回传数据签名
 func (u *Pay) validate(req UMP) (bool, error) {
+	//fmt.Println(req)
 	signature_base64 := req["signature"].(string)
 	delete(req, "signature")
 	link_str := u.createLinkString(req, true)
@@ -384,7 +384,7 @@ func (u *Pay) getVerifyCertPublicKey(sign_data string) (*rsa.PublicKey, error) {
 		return nil, err
 	}
 
-	fmt.Println()
+	//fmt.Println()
 
 	return crt.PublicKey.(*rsa.PublicKey), nil
 }
@@ -434,6 +434,7 @@ func (u *Pay) post(url_str string, post_data UMP) (UMP, error) {
 
 //解释POST返回数据
 func (u *Pay) explainResponse(data []byte) UMP {
+	//fmt.Println(string(data))
 	req_map := UMP{}
 	req_str := string(data)
 	req_str_list := strings.Split(req_str, "&")

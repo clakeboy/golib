@@ -38,25 +38,25 @@ func (m *UMP) ParseJsonString(data string) error {
 
 //银联证书配置
 type Config struct {
-	SignCertPath     string `json:"sign_cert_path"`     //加密证书路径
-	SignCertPassword string `json:"sign_cert_password"` //加密证书密码
-	EncryptCertPath  string `json:"encrypt_cert_path"`  //敏感信息加密证书路径
-	MiddleCertPath   string `json:"middle_cert_path"`   //验签中级证书路径
-	RootCertPath     string `json:"root_cert_path"`     //验签根证书路径
-	MerId            string `json:"mer_id"`             //商户ID
+	SignCertPath     string `json:"sign_cert_path" yaml:"sign_cert_path"`         //加密证书路径
+	SignCertPassword string `json:"sign_cert_password" yaml:"sign_cert_password"` //加密证书密码
+	EncryptCertPath  string `json:"encrypt_cert_path" yaml:"encrypt_cert_path"`   //敏感信息加密证书路径
+	MiddleCertPath   string `json:"middle_cert_path" yaml:"middle_cert_path"`     //验签中级证书路径
+	RootCertPath     string `json:"root_cert_path" yaml:"root_cert_path"`         //验签根证书路径
+	MerId            string `json:"mer_id" yaml:"mer_id"`                         //商户ID
 }
 
 //银联调用地址配置
 type UrlConfig struct {
-	FrontTransUrl   string `json:"front_trans_url"`  //前台调用地址
-	BackTransUrl    string `json:"back_trans_url"`   //后台调用地址
-	SingleQueryUrl  string `json:"single_query_url"` //单次查询调用地址
-	BatchTransUrl   string `json:"batch_trans_url"`  //
-	FileTransUrl    string `json:"file_trans_url"`
-	AppTransUrl     string `json:"app_trans_url"`
-	CardTransUrl    string `json:"card_trans_url"`
-	CallbackUrl     string `json:"callback_url"`      //后台通知调用地址
-	UndoCallbackUrl string `json:"undo_callback_url"` //退款通知调用地址
+	FrontTransUrl   string `json:"front_trans_url" yaml:"front_trans_url"`   //前台调用地址
+	BackTransUrl    string `json:"back_trans_url" yaml:"back_trans_url"`     //后台调用地址
+	SingleQueryUrl  string `json:"single_query_url" yaml:"single_query_url"` //单次查询调用地址
+	BatchTransUrl   string `json:"batch_trans_url" yaml:"batch_trans_url"`   //
+	FileTransUrl    string `json:"file_trans_url" yaml:"file_trans_url"`
+	AppTransUrl     string `json:"app_trans_url" yaml:"app_trans_url"`
+	CardTransUrl    string `json:"card_trans_url" yaml:"card_trans_url"`
+	CallbackUrl     string `json:"callback_url" yaml:"callback_url"`           //后台通知调用地址
+	UndoCallbackUrl string `json:"undo_callback_url" yaml:"undo_callback_url"` //退款通知调用地址
 }
 
 //后台绑定用户银行卡数据
@@ -99,9 +99,9 @@ type OrderUndo struct {
 
 //查询数据
 type QueryOrder struct {
-	MerId   string `json:"merId"`    //商户代码
-	OrderId string `json:"orderId"`  //商户订单号
-	TxnTime string `json:"txnTime"`  //订单发送时间
+	MerId   string `json:"merId"`   //商户代码
+	OrderId string `json:"orderId"` //商户订单号
+	TxnTime string `json:"txnTime"` //订单发送时间
 }
 
 //pkcs 证书信息

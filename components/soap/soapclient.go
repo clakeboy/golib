@@ -5,7 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"encoding/xml"
+
+	"regexp"
 )
 
 type SoapClient struct {
@@ -33,10 +34,10 @@ func NewSoapClient(soap_url string) (*SoapClient,error) {
 }
 
 //调用一个方法
-func (s *SoapClient) Call(func_name string,args ...interface{}) (error) {
+func (s *SoapClient) Call(func_name string,args ...interface{}) (string,error) {
 	funcs := s.ws.GetFunc(func_name)
 	if funcs == nil {
-		return errors.New("not this function!")
+		return "",errors.New("not this function!")
 	}
 
 	xml_con := "<?xml version='1.0' encoding='UTF-8'?>"
@@ -49,9 +50,19 @@ func (s *SoapClient) Call(func_name string,args ...interface{}) (error) {
 	xml_con += fmt.Sprintf("</ns1:%s>",funcs.Name)
 	xml_con += `</soap:Body>`
 	xml_con += `</soap:Envelope>`
-	fmt.Println(xml_con)
-	s.httpPost(s.request_url,xml_con)
-	return nil
+	return_str,err := s.httpPost(s.request_url,xml_con)
+
+	if err != nil {
+		return "",err
+	}
+
+	reg := regexp.MustCompile(fmt.Sprintf("(?si)<%s>(.+?)</%s>", funcs.ReturnArgs[0].Name, funcs.ReturnArgs[0].Name))
+	list := reg.FindStringSubmatch(return_str)
+	if len(list) <= 0 {
+		return "",nil
+	}
+
+	return replaceXml(list[1],false),nil
 }
 //重新设置调用地址
 func (s *SoapClient) SetAddress(addr string) {
@@ -64,15 +75,8 @@ func (s *SoapClient) httpPost(url_str ,content string) (string,error) {
 	if err != nil {
 		return "",err
 	}
-	fmt.Printf("%+v\n",req)
-	fmt.Println(string(req.Content))
-	xml_map := utils.XMLMap{}
-	err = xml.Unmarshal(req.Content,&xml_map)
-	if err != nil {
-		return "",err
-	}
-	fmt.Println(xml_map)
-	return "",nil
+
+	return string(req.Content),nil
 }
 
 //解释WSDL文件
@@ -88,4 +92,23 @@ func (s *SoapClient) explain() error {
 
 	s.request_url = s.ws.GetAddress()
 	return nil
+}
+//替换XML特殊字符
+func replaceXml(str string, toxml bool) string {
+	replace_list := map[string]string{
+		"&":  "&amp;",
+		"<":  "&lt;",
+		">":  "&gt;",
+		"\"": "&quot;",
+		"'":  "&apos;",
+	}
+
+	for k, v := range replace_list {
+		if toxml {
+			str = strings.Replace(str, k, v, -1)
+		} else {
+			str = strings.Replace(str, v, k, -1)
+		}
+	}
+	return str
 }

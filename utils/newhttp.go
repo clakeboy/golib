@@ -19,6 +19,7 @@ type HttpRequestData struct {
 type HttpClient struct {
 	client  *http.Client
 	headers HD
+	lastRequest *HttpRequestData
 }
 
 func NewHttpClient() *HttpClient {
@@ -28,6 +29,7 @@ func NewHttpClient() *HttpClient {
 }
 
 func (h *HttpClient) Post(url_str string, data M) ([]byte, error) {
+	h.SetHeader("Content-Type","application/x-www-form-urlencoded")
 	post_data := &url.Values{}
 
 	for k, v := range data {
@@ -36,6 +38,16 @@ func (h *HttpClient) Post(url_str string, data M) ([]byte, error) {
 
 	req, err := h.Request("POST",url_str,strings.NewReader(post_data.Encode()))
 
+	if err != nil {
+		return nil, err
+	}
+
+	return req.Content, nil
+}
+
+func (h *HttpClient) PostJson(url_str string,data M) ([]byte,error) {
+	h.SetHeader("Content-Type","application/json")
+	req, err := h.Request("POST",url_str,strings.NewReader(data.ToJsonString()))
 	if err != nil {
 		return nil, err
 	}
@@ -56,10 +68,6 @@ func (h *HttpClient) Request(method string,url_str string,content io.Reader) (*H
 	req,err := http.NewRequest(method,url_str,content)
 	if err != nil {
 		return nil,err
-	}
-
-	if method == "POST" {
-		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	}
 
 	if len(h.headers) > 0 {
@@ -84,7 +92,7 @@ func (h *HttpClient) Request(method string,url_str string,content io.Reader) (*H
 	res.Status = resp.Status
 	res.StatusCode = resp.StatusCode
 	res.Headers = resp.Header
-
+	h.lastRequest = res
 	return res,nil
 }
 
@@ -94,4 +102,8 @@ func (h *HttpClient) SetHeader(key, val string) {
 
 func (h *HttpClient) SetTimeout(sc time.Duration) {
 	h.client.Timeout = sc
+}
+
+func (h *HttpClient) GetLastResponse() *HttpRequestData {
+	return h.lastRequest
 }

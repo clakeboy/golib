@@ -11,3 +11,10 @@ func EncodeMD5(s string) string {
 	cipherStr := h.Sum(nil)
 	return hex.EncodeToString(cipherStr)
 }
+
+func EncodeMD5Std(s string) string {
+	h := md5.New()
+	h.Write([]byte(s))
+	cipherStr := h.Sum(nil)
+	return hex.EncodeToString(cipherStr)
+}

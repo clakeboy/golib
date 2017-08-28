@@ -18,30 +18,31 @@ const (
 	TCPEvent_Disconnected
 	TCPEvent_Recv
 )
-
+//TCP连接
 type TCPConnect struct {
 	conn net.Conn
 	status int
 	event IEventTCP
 }
 
+//新建TCP服务连接
 func NewTCPConnect(c net.Conn,evt IEventTCP) *TCPConnect {
 	return &TCPConnect{conn:c,status:TCPStatus_None,event:evt}
 }
-
+//运行
 func (tp *TCPConnect) Run() {
 	go tp.mainRun()
 }
-
+//主TCP线程
 func (tp *TCPConnect) mainRun() {
 	tp.status = TCPStatus_Connected
 	fmt.Println(time.Now().String(),"TCP connected, with remoto ip:",tp.conn.RemoteAddr().String())
 	tp.read()
 }
-
+//读取线程
 func (tp *TCPConnect) read() {
 	defer func() {
-		fmt.Println(time.Now().String(),"TCP disconnected, with remoto ip:",tp.conn.RemoteAddr().String())
+		fmt.Println(time.Now().String(),"TCP Read disconnected, with remoto ip:",tp.conn.RemoteAddr().String())
 		tp.conn.Close()
 		tp.status = TCPStatus_Disconnected
 	}()
@@ -56,7 +57,18 @@ func (tp *TCPConnect) read() {
 		tp.emit(TCPEvent_Recv,buf[:msg_len])
 	}
 }
+//写入线程
+func (tp *TCPConnect) write() {
+	defer func() {
+		fmt.Println(time.Now().String(),"TCP Write disconnected, with remoto ip:",tp.conn.RemoteAddr().String())
+		tp.conn.Close()
+		tp.status = TCPStatus_Disconnected
+	}()
 
+
+}
+
+//触发一个事件
 func (tp *TCPConnect) emit(event_type int,data []byte) {
 	evt := &TCPConnEvent{
 		EventType:TCPEvent_Connected,
@@ -71,6 +83,11 @@ func (tp *TCPConnect) emit(event_type int,data []byte) {
 	case TCPEvent_Recv:
 		go tp.event.OnRecv(evt)
 	}
+}
+
+//得到当前TCP状态
+func (tp *TCPConnect) Status() int {
+	return tp.status
 }
 
 type TCPConnEvent struct {

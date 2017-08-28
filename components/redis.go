@@ -232,6 +232,11 @@ func (m *CKRedis) HMGet(key string,field ...interface{}) ([]interface{},error) {
 	return redis.Values(m.rd.Do("HMGET",field...))
 }
 
+//删除一个 hash 值
+func (m *CKRedis) HDel(key ,field string) (bool,error) {
+	return redis.Bool(m.rd.Do("HDEL",key,field))
+}
+
 //执行命令
 func (m *CKRedis) Do(command string,args ...interface{}) (interface{},error) {
 	return m.rd.Do(command,args...)
