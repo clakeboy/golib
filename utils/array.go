@@ -3,6 +3,7 @@ package utils
 import (
 	"reflect"
 	"errors"
+	"fmt"
 )
 
 func StringIndexOf(arr []string, search string) int {
@@ -39,4 +40,18 @@ func Contains(obj interface{}, target interface{}) (bool, error) {
 		}
 	}
 	return false, errors.New("not in")
+}
+
+func PrintMap(obj map[string]interface{},step string) {
+	fmt.Println(step,"{")
+	for k,v := range obj{
+		switch v.(type) {
+		case map[string]interface{},map[string]string:
+			fmt.Print(step,k,": ")
+			PrintMap(v.(map[string]interface{}),step+"     ")
+		default:
+			fmt.Println(step,k,": ",v)
+		}
+	}
+	fmt.Println(step,"}")
 }

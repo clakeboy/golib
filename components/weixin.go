@@ -348,3 +348,35 @@ func (w *Weixin) CreateQrCode(token, content string) (*WxQrCode, error) {
 
 	return res_data, nil
 }
+
+//创建微信小程序二维码
+func (w *Weixin) CreateWxAppQrCode(token, scene, page string, width int) (string,error) {
+	data := utils.M{
+		"scene":scene,
+		"page":page,
+		"width":width,
+	}
+
+	url_str := fmt.Sprintf("https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=%s", token)
+	res, err := utils.HttpPostJsonString(url_str, data)
+	if err != nil {
+		return "", err
+	}
+	return res,err
+}
+
+//向用户发送客户消息
+func (w *Weixin) SendCustomMessage(token ,openid ,msg_type string,data utils.M) (string,error) {
+	msg := utils.M{
+		"touser":openid,
+		"msgtype":msg_type,
+		msg_type:data,
+	}
+
+	url_str := fmt.Sprintf("https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token==%s", token)
+	res, err := utils.HttpPostJsonString(url_str, msg)
+	if err != nil {
+		return "", err
+	}
+	return res,err
+}

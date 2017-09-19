@@ -182,3 +182,23 @@ func YN(condition bool,yes interface{},no interface{}) interface{} {
 	}
 	return no
 }
+//转换任意数据为 float64
+func ConvertFloat(c interface{}) float64 {
+	rv := reflect.ValueOf(c)
+	switch rv.Kind() {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return float64(rv.Int())
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32:
+		return float64(rv.Uint())
+	case reflect.Float32, reflect.Float64:
+		return rv.Float()
+	case reflect.String:
+		fl,err := strconv.ParseFloat(rv.String(),64)
+		if err != nil {
+			return 0
+		}
+		return fl
+	}
+	return 0
+}
+

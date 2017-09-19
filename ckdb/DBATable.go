@@ -108,7 +108,7 @@ func (t *DBATable) JoinOne(join *TBJoin) *DBATable {
 }
 
 //设置ORDER 排序
-func (t *DBATable) Order(orders DM) *DBATable {
+func (t *DBATable) Order(orders utils.M) *DBATable {
 	var tmp []string
 	for column,order_type := range orders {
 		field := t.explainField(column)
@@ -222,6 +222,11 @@ func (t *DBATable) Update(data utils.M) bool {
 	}
 
 	return true
+}
+
+func (t *DBATable) One(row_struct interface{}) error {
+	defer t.Clear()
+	return nil
 }
 
 //删除数据

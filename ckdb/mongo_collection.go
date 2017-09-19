@@ -1,10 +1,10 @@
 package ckdb
 
 import (
-	"reflect"
-	"gopkg.in/mgo.v2/bson"
-	"gopkg.in/mgo.v2"
 	"ck_go_lib/utils"
+	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
+	"reflect"
 )
 
 //查询结果
@@ -14,12 +14,12 @@ type QueryResult struct {
 }
 
 type CKCollection struct {
-	db *DBMongo
+	db  *DBMongo
 	tab string
 }
 
-func NewCollection(mdb *DBMongo,tab_name string) *CKCollection {
-	return &CKCollection{db:mdb,tab:tab_name}
+func NewCollection(mdb *DBMongo, tab_name string) *CKCollection {
+	return &CKCollection{db: mdb, tab: tab_name}
 }
 
 //插入数据
@@ -43,9 +43,19 @@ func (ck *CKCollection) Update(where bson.M, update bson.M) error {
 }
 
 //更新所有条件数据
-func (ck *CKCollection) UpdateAll(where bson.M, update bson.M) (*mgo.ChangeInfo,error) {
+func (ck *CKCollection) UpdateAll(where bson.M, update bson.M) (*mgo.ChangeInfo, error) {
 	c := ck.db.Table(ck.tab)
 	return c.UpdateAll(where, update)
+}
+
+func (ck *CKCollection) Upset(where bson.M, update bson.M) error {
+	c := ck.db.Table(ck.tab)
+	_, err := c.Upsert(where, update)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 //删除数据
@@ -69,7 +79,7 @@ func (ck *CKCollection) Find(where bson.M, row interface{}) error {
 }
 
 //查询数据库
-func (ck *CKCollection) Query(where bson.M, page int, number int,sort_list []string, struct_type interface{}, format func(interface{})) (*QueryResult, error) {
+func (ck *CKCollection) Query(where bson.M, page int, number int, sort_list []string, struct_type interface{}, format func(interface{})) (*QueryResult, error) {
 	c := ck.db.Table(ck.tab)
 	var list []interface{}
 	var err error
@@ -106,7 +116,7 @@ func (ck *CKCollection) Query(where bson.M, page int, number int,sort_list []str
 }
 
 //查询数据库返回列表
-func (ck *CKCollection) List(where bson.M, page int, number int,sort_list []string, struct_type interface{}, format func(interface{})) ([]interface{}, error) {
+func (ck *CKCollection) List(where bson.M, page int, number int, sort_list []string, struct_type interface{}, format func(interface{})) ([]interface{}, error) {
 	c := ck.db.Table(ck.tab)
 	var list []interface{}
 	var err error
@@ -141,6 +151,11 @@ func (ck *CKCollection) getQueryType(i interface{}) interface{} {
 
 	t := reflect.TypeOf(i)
 	return reflect.New(t).Interface()
+}
+
+//删除 Collection
+func (ck *CKCollection) Drop() error {
+	return ck.db.Table(ck.tab).DropCollection()
 }
 
 //关闭数据库连接

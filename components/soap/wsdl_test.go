@@ -48,8 +48,7 @@ func TestWsdl_Explain(t *testing.T) {
 </wsdl:definitions>`
 	wsdl := NewWsdl()
 	wsdl.Explain([]byte(str))
-	funcs := wsdl.GetFunc("vchlRequest")
-	fmt.Printf("%+v",funcs)
+
 }
 
 func TestWsdl_GetFunc(t *testing.T) {

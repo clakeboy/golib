@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"regexp"
 	"testing"
+	"log"
+	"strings"
 )
 
 func TestNewSoapClient(t *testing.T) {
@@ -16,7 +18,7 @@ func TestNewSoapClient(t *testing.T) {
 	//no := utils.RandStr(10,nil)
 
 	//xml_con := fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?><Packet><Head><EChannelID>CHPC</EChannelID><RequestType>Q00</RequestType><SerialNo>%s</SerialNo></Head><Body><LicensePlateNo>渝B358U7</LicensePlateNo><VIN>LVSHJCAC3FE215302</VIN><AreaCode>50</AreaCode></Body></Packet>`,no)
-	xml_con := `<?xml version="1.0" encoding="UTF-8"?>
+	xml_con := `
 <Packet>
   <Head>
     <EChannelID>CHPC</EChannelID>
@@ -51,4 +53,478 @@ func TestSoapClient_Call(t *testing.T) {
 	matchs := reg.FindStringSubmatch(str)
 	fmt.Println(matchs)
 	//fmt.Println(replaceXml(matchs[1],false))
+}
+
+func TestNewSoapClient2(t *testing.T) {
+	wsdl_xml := `
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns="http://service.front.sinosoft.com" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ax273="http://busInterface.front.sinosoft.com/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:ax276="http://common.dto.front.sinosoft.com/xsd" xmlns:ax275="http://dto.front.sinosoft.com/xsd" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:ax279="http://out.CarQueryService.dto.front.sinosoft.com/xsd" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://service.front.sinosoft.com">
+    <wsdl:documentation>CarQueryService</wsdl:documentation>
+    <wsdl:types>
+        <xs:schema xmlns:ax277="http://common.dto.front.sinosoft.com/xsd" xmlns:ax280="http://out.CarQueryService.dto.front.sinosoft.com/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://dto.front.sinosoft.com/xsd">
+            <xs:import namespace="http://common.dto.front.sinosoft.com/xsd"/>
+            <xs:import namespace="http://out.CarQueryService.dto.front.sinosoft.com/xsd"/>
+            <xs:complexType name="CarQueryRequest">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="checkCode" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="checkNo" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="cityAreaCode" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="comCode" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="engineNo" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="frameNo" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="franchiserCode" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="handler1Code" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="licenseNo" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="licenseNoQueryFlag" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="licenseType" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="policySort" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="txInsuranceRequestEhm" nillable="true" type="ax277:TxInsuranceRequestEhm"/>
+                    <xs:element minOccurs="0" name="txInsuranceRequestExtensionEhm" nillable="true" type="ax277:TxInsuranceRequestExtensionEhm"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="CarQueryResponse">
+                <xs:sequence>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="carQueryInfoArr" nillable="true" type="ax280:CarQueryInfo"/>
+                    <xs:element minOccurs="0" name="checkCode" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="checkNo" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="policySort" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="txInsuranceResponseEhm" nillable="true" type="ax277:TxInsuranceResponseEhm"/>
+                    <xs:element minOccurs="0" name="txInsuranceResponseExtensionEhm" nillable="true" type="ax277:TxInsuranceResponseExtensionEhm"/>
+                </xs:sequence>
+            </xs:complexType>
+        </xs:schema>
+        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://busInterface.front.sinosoft.com/xsd">
+            <xs:complexType name="CarQueryTpInterface">
+                <xs:sequence/>
+            </xs:complexType>
+            <xs:complexType name="CarQueryTpCheckInterface">
+                <xs:sequence/>
+            </xs:complexType>
+        </xs:schema>
+        <xs:schema xmlns:ax274="http://busInterface.front.sinosoft.com/xsd" xmlns:ax278="http://dto.front.sinosoft.com/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://service.front.sinosoft.com">
+            <xs:import namespace="http://busInterface.front.sinosoft.com/xsd"/>
+            <xs:import namespace="http://dto.front.sinosoft.com/xsd"/>
+            <xs:element name="setCarQueryTpInterface">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="carQueryTpInterface" nillable="true" type="ax273:CarQueryTpInterface"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="setCarQueryTpCheckInterface">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="carQueryTpCheckInterface" nillable="true" type="ax273:CarQueryTpCheckInterface"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getCarQueryTpInterface">
+                <xs:complexType>
+                    <xs:sequence/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getCarQueryTpInterfaceResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax273:CarQueryTpInterface"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getCarQueryTpCheckInterface">
+                <xs:complexType>
+                    <xs:sequence/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getCarQueryTpCheckInterfaceResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax273:CarQueryTpCheckInterface"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="carQuery">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="request" nillable="true" type="ax275:CarQueryRequest"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="carQueryResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax275:CarQueryResponse"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:schema>
+        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://out.CarQueryService.dto.front.sinosoft.com/xsd">
+            <xs:complexType name="CarQueryInfo">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="brandName" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="carKindCode" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="carOwner" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="color" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="displacement" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="engineNo" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="frameNo" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="haulage" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="ineffectualDate" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="lastCheckDate" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="licenseNo" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="licenseType" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="limitLoad" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="limitLoadPerson" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="madeDate" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="madeFactory" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="modelCode" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="motorTypeCode" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="pmFuelType" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="producerType" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="registDate" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="rejectDate" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="salePrice" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="status" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="transferDate" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="useType" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="vehicleBrand1" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="vehicleBrand2" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="vehicleStyle" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="wholeWeight" nillable="true" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+        </xs:schema>
+        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://common.dto.front.sinosoft.com/xsd">
+            <xs:complexType name="TxInsuranceEhm">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="transExeDate" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="transExeTime" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="transRefGUID" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="transSubType" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="transType" nillable="true" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="TxInsuranceRequestEhm">
+                <xs:complexContent>
+                    <xs:extension base="ax276:TxInsuranceEhm">
+                        <xs:sequence>
+                            <xs:element minOccurs="0" name="iinsuranceExtensionEhm" nillable="true" type="ax276:IinsuranceExtensionEhm"/>
+                        </xs:sequence>
+                    </xs:extension>
+                </xs:complexContent>
+            </xs:complexType>
+            <xs:complexType name="IinsuranceExtensionEhm">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="maxRecords" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="orderField" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="orderFlag" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="pageFlag" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="pageRowNum" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="rowNumStart" nillable="true" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="TxInsuranceExtensionEhm">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="operator" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="operatorKey" nillable="true" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="TxInsuranceRequestExtensionEhm">
+                <xs:complexContent>
+                    <xs:extension base="ax276:TxInsuranceExtensionEhm">
+                        <xs:sequence/>
+                    </xs:extension>
+                </xs:complexContent>
+            </xs:complexType>
+            <xs:complexType name="TxInsuranceResponseEhm">
+                <xs:complexContent>
+                    <xs:extension base="ax276:TxInsuranceEhm">
+                        <xs:sequence>
+                            <xs:element minOccurs="0" name="oinsuranceExtensionEhm" nillable="true" type="ax276:OinsuranceExtensionEhm"/>
+                            <xs:element minOccurs="0" name="transResultEhm" nillable="true" type="ax276:TransResultEhm"/>
+                        </xs:sequence>
+                    </xs:extension>
+                </xs:complexContent>
+            </xs:complexType>
+            <xs:complexType name="OinsuranceExtensionEhm">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="maxRecords" nillable="true" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="TransResultEhm">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="errorNo" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="errorType" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="resultCode" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="resultInfoDesc" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="stackTrace" nillable="true" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="TxInsuranceResponseExtensionEhm">
+                <xs:complexContent>
+                    <xs:extension base="ax276:TxInsuranceExtensionEhm">
+                        <xs:sequence/>
+                    </xs:extension>
+                </xs:complexContent>
+            </xs:complexType>
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:message name="carQueryRequest">
+        <wsdl:part name="parameters" element="ns:carQuery"/>
+    </wsdl:message>
+    <wsdl:message name="carQueryResponse">
+        <wsdl:part name="parameters" element="ns:carQueryResponse"/>
+    </wsdl:message>
+    <wsdl:message name="setCarQueryTpInterfaceRequest">
+        <wsdl:part name="parameters" element="ns:setCarQueryTpInterface"/>
+    </wsdl:message>
+    <wsdl:message name="getCarQueryTpInterfaceRequest">
+        <wsdl:part name="parameters" element="ns:getCarQueryTpInterface"/>
+    </wsdl:message>
+    <wsdl:message name="getCarQueryTpInterfaceResponse">
+        <wsdl:part name="parameters" element="ns:getCarQueryTpInterfaceResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getCarQueryTpCheckInterfaceRequest">
+        <wsdl:part name="parameters" element="ns:getCarQueryTpCheckInterface"/>
+    </wsdl:message>
+    <wsdl:message name="getCarQueryTpCheckInterfaceResponse">
+        <wsdl:part name="parameters" element="ns:getCarQueryTpCheckInterfaceResponse"/>
+    </wsdl:message>
+    <wsdl:message name="setCarQueryTpCheckInterfaceRequest">
+        <wsdl:part name="parameters" element="ns:setCarQueryTpCheckInterface"/>
+    </wsdl:message>
+    <wsdl:portType name="CarQueryServicePortType">
+        <wsdl:operation name="carQuery">
+            <wsdl:input message="ns:carQueryRequest" wsaw:Action="urn:carQuery"/>
+            <wsdl:output message="ns:carQueryResponse" wsaw:Action="urn:carQueryResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="setCarQueryTpInterface">
+            <wsdl:input message="ns:setCarQueryTpInterfaceRequest" wsaw:Action="urn:setCarQueryTpInterface"/>
+        </wsdl:operation>
+        <wsdl:operation name="getCarQueryTpInterface">
+            <wsdl:input message="ns:getCarQueryTpInterfaceRequest" wsaw:Action="urn:getCarQueryTpInterface"/>
+            <wsdl:output message="ns:getCarQueryTpInterfaceResponse" wsaw:Action="urn:getCarQueryTpInterfaceResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getCarQueryTpCheckInterface">
+            <wsdl:input message="ns:getCarQueryTpCheckInterfaceRequest" wsaw:Action="urn:getCarQueryTpCheckInterface"/>
+            <wsdl:output message="ns:getCarQueryTpCheckInterfaceResponse" wsaw:Action="urn:getCarQueryTpCheckInterfaceResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="setCarQueryTpCheckInterface">
+            <wsdl:input message="ns:setCarQueryTpCheckInterfaceRequest" wsaw:Action="urn:setCarQueryTpCheckInterface"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="CarQueryServiceSoap11Binding" type="ns:CarQueryServicePortType">
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <wsdl:operation name="carQuery">
+            <soap:operation soapAction="urn:carQuery" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="setCarQueryTpInterface">
+            <soap:operation soapAction="urn:setCarQueryTpInterface" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="getCarQueryTpInterface">
+            <soap:operation soapAction="urn:getCarQueryTpInterface" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getCarQueryTpCheckInterface">
+            <soap:operation soapAction="urn:getCarQueryTpCheckInterface" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="setCarQueryTpCheckInterface">
+            <soap:operation soapAction="urn:setCarQueryTpCheckInterface" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="CarQueryServiceSoap12Binding" type="ns:CarQueryServicePortType">
+        <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <wsdl:operation name="carQuery">
+            <soap12:operation soapAction="urn:carQuery" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="setCarQueryTpInterface">
+            <soap12:operation soapAction="urn:setCarQueryTpInterface" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="getCarQueryTpInterface">
+            <soap12:operation soapAction="urn:getCarQueryTpInterface" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getCarQueryTpCheckInterface">
+            <soap12:operation soapAction="urn:getCarQueryTpCheckInterface" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="setCarQueryTpCheckInterface">
+            <soap12:operation soapAction="urn:setCarQueryTpCheckInterface" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="CarQueryServiceHttpBinding" type="ns:CarQueryServicePortType">
+        <http:binding verb="POST"/>
+        <wsdl:operation name="carQuery">
+            <http:operation location="carQuery"/>
+            <wsdl:input>
+                <mime:content type="application/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="application/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="setCarQueryTpInterface">
+            <http:operation location="setCarQueryTpInterface"/>
+            <wsdl:input>
+                <mime:content type="application/xml" part="parameters"/>
+            </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="getCarQueryTpInterface">
+            <http:operation location="getCarQueryTpInterface"/>
+            <wsdl:input>
+                <mime:content type="application/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="application/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getCarQueryTpCheckInterface">
+            <http:operation location="getCarQueryTpCheckInterface"/>
+            <wsdl:input>
+                <mime:content type="application/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="application/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="setCarQueryTpCheckInterface">
+            <http:operation location="setCarQueryTpCheckInterface"/>
+            <wsdl:input>
+                <mime:content type="application/xml" part="parameters"/>
+            </wsdl:input>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="CarQueryService">
+        <wsdl:port name="CarQueryServiceHttpSoap11Endpoint" binding="ns:CarQueryServiceSoap11Binding">
+            <soap:address location="http://114.255.29.204:8010/frontServiceCenter/services/CarQueryService.CarQueryServiceHttpSoap11Endpoint/"/>
+        </wsdl:port>
+        <wsdl:port name="CarQueryServiceHttpSoap12Endpoint" binding="ns:CarQueryServiceSoap12Binding">
+            <soap12:address location="http://114.255.29.204:8010/frontServiceCenter/services/CarQueryService.CarQueryServiceHttpSoap12Endpoint/"/>
+        </wsdl:port>
+        <wsdl:port name="CarQueryServiceHttpEndpoint" binding="ns:CarQueryServiceHttpBinding">
+            <http:address location="http://114.255.29.204:8010/frontServiceCenter/services/CarQueryService.CarQueryServiceHttpEndpoint/"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>
+`
+	soap_client, err := NewSoapClientForContent(wsdl_xml)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(soap_client.requestUrl)
+
+	res,err := soap_client.Call("carQuery",utils.M{
+		"policySort":"CQ0",
+		"licenseNo":"渝B6S919",
+		"licenseType":"02",
+		"cityAreaCode":"03",
+		"txInsuranceRequestEhm":utils.M{
+			"transExeDate":"",
+			"transExeTime":"",
+		},
+		"txInsuranceRequestExtensionEhm":utils.M{
+			"operator":"CQ0_Test",
+			"operatorKey":"123456",
+		},
+	})
+	if err != nil {
+		log.Println(err)
+	}
+
+	fmt.Println(res)
+}
+
+func TestNewSoapClient4(t *testing.T) {
+	soap_client, err := NewSoapClient("http://114.255.29.204:8010/frontServiceCenter/services/VehicleModelQueryService?wsdl")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(soap_client.requestUrl)
+
+	res,err := soap_client.Call("queryVehicleModel",utils.M{
+		"policySort":"CQ0",
+		"comCode":"03",
+		"localModelQueryFlag":"1",
+		"cityAreaCode":"500100",
+		"frameNo":"LVRHDFAL7GN545391",
+		"brandName":"马自达CAM7150A5轿车",
+		"txInsuranceRequestEhm":utils.M{
+			"transExeDate":"",
+			"transExeTime":"",
+		},
+		"txInsuranceRequestExtensionEhm":utils.M{
+			"operator":"CQ0_Test",
+			"operatorKey":"123456",
+		},
+	})
+	if err != nil {
+		log.Println(err)
+	}
+
+	fmt.Println(res)
+}
+
+func TestNewSoapClient3(t *testing.T) {
+	content := `<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ser="http://service.front.sinosoft.com" xmlns:xsd="http://dto.front.sinosoft.com/xsd" xmlns:xsd1="http://common.dto.front.sinosoft.com/xsd">
+   <soap:Header/>
+   <soap:Body>
+      <ser:carQuery>
+      </ser:carQuery>
+   </soap:Body>
+</soap:Envelope>`
+
+	url_str := "http://114.255.29.204:8010/frontServiceCenter/services/CarQueryService.CarQueryServiceHttpSoap12Endpoint/"
+	client := utils.NewHttpClient()
+	client.SetHeader("Content-Type","application/soap+xml; charset=utf-8")
+	client.SetHeader("Content-Length",fmt.Sprintf("%v",len(content)))
+	req,err := client.Request("POST",url_str,strings.NewReader(content))
+	if err != nil {
+		log.Println(err)
+	}
+
+	fmt.Println(string(req.Content))
 }

@@ -1,20 +1,20 @@
 package ckdb
 
 import (
+	"ck_go_lib/utils"
 	"database/sql"
+	"errors"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"reflect"
 	"regexp"
 	"strings"
-	"ck_go_lib/utils"
-	"errors"
 )
 
 type DBA struct {
-	db        *sql.DB
-	table     string
-	debug     bool
+	db       *sql.DB
+	table    string
+	debug    bool
 	LastSql  string
 	LastArgs []interface{}
 }
@@ -67,7 +67,7 @@ func NewDBA(db_conf *DBConfig) (*DBA, error) {
 
 //设置操作的表名
 func (d *DBA) Table(table_name string) *DBATable {
-	return NewDBATable(d,table_name)
+	return NewDBATable(d, table_name)
 }
 
 //插入记录到数据库
@@ -76,9 +76,9 @@ func (d *DBA) Insert(table string, org_data interface{}) (int, bool) {
 	var values []interface{}
 	var valmask []string
 
-	data,err := d.ConvertData(org_data)
+	data, err := d.ConvertData(org_data)
 	if err != nil {
-		return 0,false
+		return 0, false
 	}
 
 	for i, v := range data {
@@ -130,34 +130,34 @@ func (d *DBA) Update(data utils.M, where utils.M, table string) error {
 }
 
 //条件删除数据
-func (d *DBA) Delete(where utils.M,table string) (int,error){
+func (d *DBA) Delete(where utils.M, table string) (int, error) {
 	var values []interface{}
 	where_str, where_val := d.WhereRecursion(where, "AND", table)
 	values = append(values, where_val...)
-	sql_str := fmt.Sprintf("DELETE FROM %s WHERE %s",table, where_str)
+	sql_str := fmt.Sprintf("DELETE FROM %s WHERE %s", table, where_str)
 	res, err := d.Exec(sql_str, values...)
 	if err != nil {
-		return 0,err
+		return 0, err
 	}
 
 	rows, err := res.RowsAffected()
 	if err != nil {
-		return 0,err
+		return 0, err
 	}
 
-	return int(rows),err
+	return int(rows), err
 }
 
 //查询数据库
-func (d *DBA) Query(sql_str string, args ...interface{}) ([]utils.M,error) {
-	rows,err := d.db.Query(sql_str, args...)
+func (d *DBA) Query(sql_str string, args ...interface{}) ([]utils.M, error) {
+	rows, err := d.db.Query(sql_str, args...)
 	d.LastSql = sql_str
 	d.LastArgs = args
 	if err != nil {
 		if d.debug {
 			d.HaltError(err)
 		}
-		return nil,err
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -180,35 +180,36 @@ func (d *DBA) Exec(sql_str string, args ...interface{}) (sql.Result, error) {
 	return res, err
 }
 
-func (d *DBA) QueryOne(sql_str string, args ...interface{}) (utils.M,error) {
-	rows,err := d.db.Query(sql_str, args...)
+func (d *DBA) QueryOne(sql_str string, args ...interface{}) (utils.M, error) {
+	rows, err := d.db.Query(sql_str, args...)
 	d.LastSql = sql_str
 	d.LastArgs = args
 	if err != nil {
 		if d.debug {
 			d.HaltError(err)
 		}
-		return nil,err
+		return nil, err
 	}
 	defer rows.Close()
 
-	list,err := d.FetchAll(rows)
+	list, err := d.FetchAll(rows)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	if len(list) == 0 {
-		return nil,nil
+		return nil, nil
 	}
 
-	return list[0],nil
+	return list[0], nil
 }
 
 func (d *DBA) QueryRow(sql_str string, args ...interface{}) *sql.Row {
 	return d.db.QueryRow(sql_str, args...)
 }
 
-func (d *DBA) FetchAll(query *sql.Rows) ([]utils.M,error) {
+//取得所有数据
+func (d *DBA) FetchAll(query *sql.Rows) ([]utils.M, error) {
 	column, _ := query.Columns()
 	values := make([]interface{}, len(column))
 	scans := make([]interface{}, len(column))
@@ -220,7 +221,7 @@ func (d *DBA) FetchAll(query *sql.Rows) ([]utils.M,error) {
 
 	for query.Next() {
 		if err := query.Scan(scans...); err != nil {
-			return nil,err
+			return nil, err
 		}
 		row := utils.M{}
 		for k, v := range values {
@@ -234,10 +235,10 @@ func (d *DBA) FetchAll(query *sql.Rows) ([]utils.M,error) {
 
 		}
 
-		results = append(results,row)
+		results = append(results, row)
 	}
 
-	return results,nil
+	return results, nil
 }
 
 //处理where条件列表
@@ -252,7 +253,7 @@ func (d *DBA) WhereRecursion(where utils.M, icon string, table string) (string, 
 		} else {
 			vtype := reflect.TypeOf(v).Kind()
 			if vtype == reflect.Slice || vtype == reflect.Array {
-				values = append(values,v.([]interface{})...)
+				values = append(values, v.([]interface{})...)
 				//values = append(values, v)
 				where_strings = append(where_strings, d.formatWhere(i, table, len(v.([]interface{}))))
 			} else {
@@ -278,15 +279,15 @@ func (d *DBA) formatWhere(column string, table string, length int) string {
 	if length > 0 {
 		var mask_args []string
 		where_icon := "IN"
-		for i:=0;i<length;i++ {
-			mask_args = append(mask_args,"?")
+		for i := 0; i < length; i++ {
+			mask_args = append(mask_args, "?")
 		}
 		if icon == "!" {
 			where_icon = "NOT IN"
 		}
-		format_str = fmt.Sprintf("%s.%s %s (%s)", d.FormatColumn(table),column_str,where_icon,strings.Join(mask_args,","))
+		format_str = fmt.Sprintf("%s.%s %s (%s)", d.FormatColumn(table), column_str, where_icon, strings.Join(mask_args, ","))
 	} else {
-		format_str = fmt.Sprintf("%s.%s %v ?", d.FormatColumn(table), column_str, utils.YN(icon == "!","!=",icon))
+		format_str = fmt.Sprintf("%s.%s %v ?", d.FormatColumn(table), column_str, utils.YN(icon == "!", "!=", icon))
 	}
 	return format_str
 }
@@ -322,21 +323,21 @@ func (d *DBA) Close() {
 	d.db.Close()
 }
 
-func (d *DBA) ConvertData(org_data interface{}) (DM,error) {
+func (d *DBA) ConvertData(org_data interface{}) (DM, error) {
 	t := reflect.TypeOf(org_data)
 	switch t.Kind() {
 	case reflect.Map:
 		if t.Name() == "DM" {
-			return org_data.(DM),nil
+			return org_data.(DM), nil
 		} else if t.Name() == "M" {
-			return DM(org_data.(utils.M)),nil
+			return DM(org_data.(utils.M)), nil
 		}
-		return DM(org_data.(map[string]interface{})),nil
+		return DM(org_data.(map[string]interface{})), nil
 	case reflect.Ptr:
 		fallthrough
 	case reflect.Struct:
-		return DM(utils.Struct2Map(org_data,nil)),nil
+		return DM(utils.Struct2Map(org_data, nil)), nil
 	default:
-		return nil,errors.New("not support this data")
+		return nil, errors.New("not support this data")
 	}
 }
