@@ -486,12 +486,6 @@ func TestNewSoapClient4(t *testing.T) {
 	fmt.Println(soap_client.requestUrl)
 
 	res,err := soap_client.Call("queryVehicleModel",utils.M{
-		"policySort":"CQ0",
-		"comCode":"03",
-		"localModelQueryFlag":"1",
-		"cityAreaCode":"500100",
-		"frameNo":"LVRHDFAL7GN545391",
-		"brandName":"马自达CAM7150A5轿车",
 		"txInsuranceRequestEhm":utils.M{
 			"transExeDate":"",
 			"transExeTime":"",
@@ -500,6 +494,12 @@ func TestNewSoapClient4(t *testing.T) {
 			"operator":"CQ0_Test",
 			"operatorKey":"123456",
 		},
+		"policySort":"CQ0",
+		"comCode":"03",
+		"localModelQueryFlag":"1",
+		"cityAreaCode":"500100",
+		"standardName":"吉利美日牌MR7183C01",
+		"brandName":"吉利美日牌MR7183C01",
 	})
 	if err != nil {
 		log.Println(err)

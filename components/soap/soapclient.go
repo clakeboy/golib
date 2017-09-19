@@ -3,9 +3,10 @@ package soap
 import (
 	"ck_go_lib/utils"
 	"encoding/xml"
+	"errors"
 	"fmt"
-	"strings"
 	"regexp"
+	"strings"
 )
 
 type SoapMessageEnvelope struct {
@@ -37,6 +38,7 @@ type SoapClient struct {
 	soapBuilding  string            //SOAP 默认使用building
 	soapCache     bool              //SOAP 是否开启缓存
 	soapCacheTime int               //SOAP 缓存时间
+	returnAll     bool              //SOAP 返回时是否返回全格式
 	options       utils.M           //配置项
 }
 
@@ -75,9 +77,14 @@ func newDefaultSoap() *SoapClient {
 		httpClient:  utils.NewHttpClient(),
 		soapVersion: "1.1",
 		soapService: 0,
+		returnAll:   false,
 	}
 
 	return soap
+}
+//设置接口返回时是否返回全格式
+func (s *SoapClient) SetReturnAll(yes bool) {
+	s.returnAll = yes
 }
 
 //调用一个方法
@@ -114,6 +121,9 @@ func newDefaultSoap() *SoapClient {
 
 func (s *SoapClient) Call(func_name string, args ...interface{}) (string, error) {
 	fun := s.ws.GetFunction(s.ws.ws.Service.Port[s.soapService].Binding, func_name)
+	if fun == nil {
+		return "", errors.New("Not found function name")
+	}
 	var xml_str string
 
 	if len(args) > 1 {
@@ -128,7 +138,7 @@ func (s *SoapClient) Call(func_name string, args ...interface{}) (string, error)
 		return "", err
 	}
 
-	res_msg := s.explainResponse(res,fun)
+	res_msg := s.explainResponse(res, fun)
 
 	return res_msg, nil
 }
@@ -149,7 +159,6 @@ func (s *SoapClient) SetOptions(key, val string) {
 
 //发起HTTP请求
 func (s *SoapClient) httpPost(url_str, content string) (string, error) {
-	fmt.Println(content)
 	if s.soapVersion == "1.2" {
 		s.httpClient.SetHeader("Content-Type", "application/soap+xml; charset=utf-8")
 	} else {
@@ -228,6 +237,9 @@ func (s *SoapClient) buildSoapBody(elms ArgsMap, params interface{}, ns map[stri
 			case utils.M:
 				child_params, ok := params.(utils.M)[v.Name]
 				xml_con += s.buildSoapBody(v.Elements, utils.YN(ok, child_params, params), ns)
+			case map[string]interface{}:
+				child_params, ok := params.(map[string]interface{})[v.Name]
+				xml_con += s.buildSoapBody(v.Elements, utils.YN(ok, child_params, params), ns)
 			}
 		} else {
 			var val interface{}
@@ -236,9 +248,11 @@ func (s *SoapClient) buildSoapBody(elms ArgsMap, params interface{}, ns map[stri
 				val = params.([]interface{})[idx]
 			case utils.M:
 				val = params.(utils.M)[v.Name]
+			case map[string]interface{}:
+				val = params.(map[string]interface{})[v.Name]
 			}
 			if v.Type == "string" {
-				xml_con += fmt.Sprintf("<![CDATA[%v]]>", utils.YN(val==nil,"",val))
+				xml_con += fmt.Sprintf("<![CDATA[%v]]>", utils.YN(val == nil, "", val))
 			} else {
 				xml_con += fmt.Sprintf("%v", val)
 			}
@@ -250,24 +264,27 @@ func (s *SoapClient) buildSoapBody(elms ArgsMap, params interface{}, ns map[stri
 }
 
 //解释接口返回数据
-func (s *SoapClient) explainResponse(res string,fun *WsdlFunction) string {
-	fmt.Println(res)
+func (s *SoapClient) explainResponse(res string, fun *WsdlFunction) string {
 	//处理SOAP错误返回
 	reg_fault := regexp.MustCompile(`(?si)<(\w+:)?Fault([^>]+)?>(.+?)</(\w+:)?Fault>`)
 	if reg_fault.MatchString(res) {
 		sub := reg_fault.FindString(res)
 		fault := &SoapMessageFault{}
-		err := xml.Unmarshal([]byte(sub),fault)
+		err := xml.Unmarshal([]byte(sub), fault)
 		if err != nil {
 			return err.Error()
 		}
 		return fault.Faultstring
 	}
-
-	fmt.Println(fun.ResponseName,fun.ResponseArgs.Elements[0].Name)
-	reg := regexp.MustCompile(fmt.Sprintf(`(?si)<(\w+:)?%s([^>]+)?>(.+?)</(\w+:)?%s>`,fun.ResponseArgs.Elements[0].Name,fun.ResponseArgs.Elements[0].Name ))
-	res_sub := reg.FindString(res)
-	return reg.ReplaceAllString(res_sub,"$3")
+	if s.returnAll {
+		reg := regexp.MustCompile(fmt.Sprintf(`(?si)<(\w+:)?%s([^>]+)?>(.+?)</(\w+:)?%s>`, fun.ResponseArgs.Name, fun.ResponseArgs.Name))
+		res_sub := reg.FindString(res)
+		return res_sub
+	} else {
+		reg := regexp.MustCompile(fmt.Sprintf(`(?si)<(\w+:)?%s([^>]+)?>(.+?)</(\w+:)?%s>`, fun.ResponseArgs.Elements[0].Name, fun.ResponseArgs.Elements[0].Name))
+		res_sub := reg.FindString(res)
+		return reg.ReplaceAllString(res_sub, "$3")
+	}
 }
 
 //替换XML特殊字符

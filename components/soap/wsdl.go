@@ -3,7 +3,6 @@ package soap
 import (
 	"encoding/xml"
 	"strings"
-	"fmt"
 	"ck_go_lib/utils"
 )
 
@@ -253,7 +252,6 @@ func (w *Wsdl) explainComplexType() {
 func (w *Wsdl) GetFunction(build_name, func_name string) *WsdlFunction {
 	build_name = formatPrefixNs(build_name)
 	wsdl_fun := &WsdlFunction{}
-	fmt.Println(build_name,func_name)
 	build, ok := w.buildings[build_name]
 	if !ok {
 		return nil
