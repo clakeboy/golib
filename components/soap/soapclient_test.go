@@ -479,28 +479,13 @@ func TestNewSoapClient2(t *testing.T) {
 }
 
 func TestNewSoapClient4(t *testing.T) {
-	soap_client, err := NewSoapClient("http://114.255.29.204:8010/frontServiceCenter/services/VehicleModelQueryService?wsdl")
+	soap_client, err := NewSoapClient("http://114.255.29.204:8010/frontServiceCenter/services/PremiumCaculateService?wsdl")
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println(soap_client.requestUrl)
 
-	res,err := soap_client.Call("queryVehicleModel",utils.M{
-		"txInsuranceRequestEhm":utils.M{
-			"transExeDate":"",
-			"transExeTime":"",
-		},
-		"txInsuranceRequestExtensionEhm":utils.M{
-			"operator":"CQ0_Test",
-			"operatorKey":"123456",
-		},
-		"policySort":"CQ0",
-		"comCode":"03",
-		"localModelQueryFlag":"1",
-		"cityAreaCode":"500100",
-		"standardName":"吉利美日牌MR7183C01",
-		"brandName":"吉利美日牌MR7183C01",
-	})
+	res,err := soap_client.Call("premiumCaculate",getSoapData())
 	if err != nil {
 		log.Println(err)
 	}
@@ -527,4 +512,11 @@ func TestNewSoapClient3(t *testing.T) {
 	}
 
 	fmt.Println(string(req.Content))
+}
+
+func getSoapData() utils.M {
+	str := "{\"txInsuranceRequestEhm\":{\"transExeDate\":\"20170921\",\"transExeTime\":\"212532\"},\"txInsuranceRequestExtensionEhm\":{\"operator\":\"CQ0_Test\",\"operatorKey\":\"123456\"},\"main\":{\"policySort\":\"CQ0\",\"relationFlag\":\"1\",\"classCode\":\"05\",\"businessNature\":\"1\",\"agentCode\":\"500102199010215230\",\"startDate\":\"2017-09-21\",\"startHour\":\"0\",\"endDate\":\"2017-09-21\",\"endHour\":\"24\",\"inputDate\":\"2017-09-21\",\"operateDate\":\"2017-09-21\",\"cityAreaCode\":\"500100\",\"ipAddress\":\"113.204.136.118\"},\"applicant\":{\"appliName\":\"鹏诚保险代理有限公司\",\"insuredType\":\"1\",\"identifyType\":\"07\",\"identifyNumber\":\"915001035590277575\"},\"insuredDataArr\":[{\"insuredNature\":\"3\",\"insuredType\":\"\",\"identifyType\":\"01\",\"identifyNumber\":\"511202197512286847\",\"insuredFlag\":\"1\"}],\"carInfo\":{\"actualValue\":\"71400.00\",\"areaCode\":\"04\",\"areaName\":\"中国境内(不含港澳台)\",\"standardName\":\"长安SC7169B轿车\",\"carInsureRelation\":\"1\",\"carKindCode\":\"A0\",\"carType\":\"\",\"colorCode\":\"99\",\"completeKerbMass\":\"1323.00\",\"engineNo\":\"13983505598\",\"frameNo\":\"LS5A2ABE9DA201695\",\"licenseNo\":\"渝F389G1\",\"enrollDate\":\"2013-09-26\",\"exhaustScale\":1.598,\"importFlag\":\"B\",\"licenseType\":\"02\",\"licenseColorCode\":\"99\",\"purchasePrice\":\"71400.00\",\"modelCode\":\"CAADMD0004\",\"seatCount\":\"5\",\"useNatureCode\":\"8A\",\"useYears\":\"3\",\"vin\":\"LS5A2ABE9DA201695\",\"fuleType\":\"0\",\"vehicleStyleDesc\":\"未知\",\"chgowerFlag\":0,\"platmodelCode\":\"CAADMD0004\",\"platmodelname\":\"长安SC7169B轿车\",\"carBuyDate\":\"长安SC7169B轿车\",\"fairMarketValue\":\"\",\"carPriceType\":\"1\"},\"carShipTaxInfo\":{\"taxFlag\":\"\",\"taxPayerName\":\"王建华\"},\"combosDataArr\":[{\"serialNo\":\"1\",\"riskCode\":\"0507\",\"itemKindArr\":[{\"amount\":\"0.0\",\"startDate\":\"2017-09-22\",\"endDate\":\"2018-09-22\",\"deductableFlag\":0,\"kindName\":\"机动车交通事故责任强制保险\",\"kindCode\":\"BZ\",\"riskCode\":\"0507\"}]},{\"serialNo\":\"2\",\"riskCode\":\"0511\",\"itemKindArr\":[{\"amount\":\"0.0\",\"startDate\":\"2017-09-23\",\"endDate\":\"2018-09-23\",\"deductableFlag\":1,\"kindName\":\"机动车损失保险\",\"kindCode\":\"001\",\"riskCode\":\"0511\"},{\"amount\":\"0.0\",\"startDate\":\"2017-09-23\",\"endDate\":\"2018-09-23\",\"deductableFlag\":\"0\",\"kindName\":\"不计免赔率险（机动车损失保险）\",\"kindCode\":\"301\",\"riskCode\":\"0511\"},{\"amount\":\"500000\",\"startDate\":\"2017-09-23\",\"endDate\":\"2018-09-23\",\"deductableFlag\":1,\"kindName\":\"第三者责任保险\",\"kindCode\":\"002\",\"riskCode\":\"0511\"},{\"amount\":\"0.0\",\"startDate\":\"2017-09-23\",\"endDate\":\"2018-09-23\",\"deductableFlag\":\"0\",\"kindName\":\"不计免赔率险（第三者责任保险）\",\"kindCode\":\"302\",\"riskCode\":\"0511\"},{\"amount\":\"10000\",\"startDate\":\"2017-09-23\",\"endDate\":\"2018-09-23\",\"deductableFlag\":1,\"kindName\":\"车上人员责任保险(驾驶人)\",\"kindCode\":\"003\",\"riskCode\":\"0511\"},{\"amount\":\"0.0\",\"startDate\":\"2017-09-23\",\"endDate\":\"2018-09-23\",\"deductableFlag\":\"0\",\"kindName\":\"不计免赔率险（车上人员责任保险-驾驶人）\",\"kindCode\":\"303\",\"riskCode\":\"0511\"},{\"amount\":40000,\"startDate\":\"2017-09-23\",\"endDate\":\"2018-09-23\",\"deductableFlag\":1,\"kindName\":\"车上人员责任保险(乘客)\",\"kindCode\":\"006\",\"riskCode\":\"0511\"},{\"amount\":\"0.0\",\"startDate\":\"2017-09-23\",\"endDate\":\"2018-09-23\",\"deductableFlag\":\"0\",\"kindName\":\"不计免赔率险（车上人员责任保险-乘客）\",\"kindCode\":\"305\",\"riskCode\":\"0511\"},{\"amount\":\"0.0\",\"startDate\":\"2017-09-23\",\"endDate\":\"2018-09-23\",\"deductableFlag\":1,\"kindName\":\"发动机涉水损失险\",\"kindCode\":\"206\",\"riskCode\":\"0511\"},{\"amount\":\"0.0\",\"startDate\":\"2017-09-23\",\"endDate\":\"2018-09-23\",\"deductableFlag\":\"0\",\"kindName\":\"不计免赔率险（发动机涉水损失险）\",\"kindCode\":\"310\",\"riskCode\":\"0511\"}]}],\"bzRelationMain\":{\"startDate_bz\":\"2018-09-22\",\"endDate_bz\":\"2018-09-22\",\"startHour_bz\":\"0\",\"endHour_bz\":\"24\"}}"
+	data := utils.M{}
+	data.ParseJsonString(str)
+	return data
 }

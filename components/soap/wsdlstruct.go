@@ -14,7 +14,7 @@ type WsdlFunctionArgs struct {
 	Name      string //参数名
 	Namespace string //参数命名空间
 	MinOccurs int    //最小出现个数
-	MaxOccurs int    //最大出现个数
+	MaxOccurs string    //最大出现个数
 	Nillable  bool   //是否为空
 	Type      string //类型
 	Elements  ArgsMap //如果type为其它类型

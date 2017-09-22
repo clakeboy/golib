@@ -64,7 +64,7 @@ type WsdlTypeElement struct {
 	XMLName   xml.Name `xml:"element"`
 	Name      string   `xml:"name,attr"`
 	MinOccurs int      `xml:"minOccurs,attr"`
-	MaxOccurs int      `xml:"maxOccurs,attr"`
+	MaxOccurs string      `xml:"maxOccurs,attr"`
 	Nillable  bool     `xml:"nillable,attr"`
 	Type      string   `xml:"type,attr"`
 }

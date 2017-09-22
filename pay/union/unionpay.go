@@ -32,6 +32,10 @@ func NewPay(cfg *Config, urls *UrlConfig) *Pay {
 		urls: urls,
 	}
 }
+//设置支付回调地址
+func (u *Pay) SetCallbackUrl(url_str string) {
+	u.urls.CallbackUrl = url_str
+}
 
 //绑定卡号
 func (u *Pay) BackBind(user *UserInfo, bind *BackBind) error {
