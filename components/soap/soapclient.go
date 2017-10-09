@@ -137,7 +137,7 @@ func (s *SoapClient) Call(func_name string, args ...interface{}) (string, error)
 	if err != nil {
 		return "", err
 	}
-
+	fmt.Println(res)
 	res_msg := s.explainResponse(res, fun)
 
 	return res_msg, nil
@@ -204,9 +204,9 @@ func (s *SoapClient) buildSoapXML(fun *WsdlFunction, params interface{}) string 
 		body_ns += fmt.Sprintf(` xmlns:%s="%s"`, v, k)
 	}
 	if s.soapVersion == "1.1" {
-		xml_con += `<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">`
+		xml_con += `<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">`
 	} else {
-		xml_con += `<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope/">`
+		xml_con += `<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">`
 	}
 	xml_con += fmt.Sprintf(`<soap:Body %s>`, body_ns)
 	xml_con += xml_body
@@ -247,44 +247,66 @@ func (s *SoapClient) buildSoapBody(elms ArgsMap, params interface{}, ns map[stri
 				xml_con += s.buildSoapBody(ArgsMap{v},map[string]interface{}{},ns,true)
 			}
 		} else {
-			xml_con += fmt.Sprintf("<%s:%s>", ns_el, v.Name)
 			if len(v.Elements) > 0 {
 				switch params.(type) {
 				case []interface{}:
+					xml_con += fmt.Sprintf("<%s:%s>", ns_el, v.Name)
 					xml_con += s.buildSoapBody(v.Elements,
 						params,
 						ns,
 						false,
 					)
+					xml_con += fmt.Sprintf("</%s:%s>", ns_el, v.Name)
 				case utils.M:
 					child_params, ok := params.(utils.M)[v.Name]
-					xml_con += s.buildSoapBody(v.Elements, utils.YN(ok, child_params, params), ns,false)
+					child_con := s.buildSoapBody(v.Elements, utils.YN(ok, child_params, params), ns,false)
+					if child_con == "" {
+
+					} else {
+						xml_con += fmt.Sprintf("<%s:%s>", ns_el, v.Name)
+						xml_con += child_con
+						xml_con += fmt.Sprintf("</%s:%s>", ns_el, v.Name)
+					}
 				case map[string]interface{}:
 					child_params, ok := params.(map[string]interface{})[v.Name]
-					xml_con += s.buildSoapBody(v.Elements, utils.YN(ok, child_params, params), ns,false)
+					child_con := s.buildSoapBody(v.Elements, utils.YN(ok, child_params, params), ns,false)
+					if child_con == "" {
+
+					} else {
+						xml_con += fmt.Sprintf("<%s:%s>", ns_el, v.Name)
+						xml_con += child_con
+						xml_con += fmt.Sprintf("</%s:%s>", ns_el, v.Name)
+					}
 				}
+
 			} else {
 				var val interface{}
+				ok := true
 				switch params.(type) {
 				case []interface{}:
 					//fmt.Println(v.Name,v.Type,v.MaxOccurs,params.([]interface{})[idx],idx)
 					val = params.([]interface{})[idx]
 				case utils.M:
-					val = params.(utils.M)[v.Name]
+					val,ok = params.(utils.M)[v.Name]
 				case map[string]interface{}:
-					val = params.(map[string]interface{})[v.Name]
+					val,ok = params.(map[string]interface{})[v.Name]
 				}
 
+				if !ok {
+					//xml_con += fmt.Sprintf("<%s:%s %s:nil=\"true\"/>", ns_el, v.Name,ns_el)
+					continue
+				}
+				xml_con += fmt.Sprintf("<%s:%s>", ns_el, v.Name)
 				switch v.Type {
 				case "string" :
 					xml_con += fmt.Sprintf("<![CDATA[%v]]>", utils.YN(val == nil, "", val))
 				case "int","double":
-					xml_con += "0"
+					xml_con += fmt.Sprintf("%v", utils.YN(val == nil, "0", val))
 				default:
 					xml_con += fmt.Sprintf("%v", utils.YN(val == nil, "", val))
 				}
+				xml_con += fmt.Sprintf("</%s:%s>", ns_el, v.Name)
 			}
-			xml_con += fmt.Sprintf("</%s:%s>", ns_el, v.Name)
 		}
 	}
 

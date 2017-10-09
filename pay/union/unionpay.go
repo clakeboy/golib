@@ -22,19 +22,22 @@ import (
 
 //银联支付API
 type Pay struct {
-	conf *Config
-	urls *UrlConfig
+	conf        *Config
+	urls        *UrlConfig
+	callbackUrl string //支付回调地址
 }
 
 func NewPay(cfg *Config, urls *UrlConfig) *Pay {
 	return &Pay{
 		conf: cfg,
 		urls: urls,
+		callbackUrl:urls.CallbackUrl,
 	}
 }
+
 //设置支付回调地址
 func (u *Pay) SetCallbackUrl(url_str string) {
-	u.urls.CallbackUrl = url_str
+	u.callbackUrl = url_str
 }
 
 //绑定卡号
@@ -98,20 +101,20 @@ func (u *Pay) BackBind(user *UserInfo, bind *BackBind) error {
 }
 
 //代收费用
-func (u *Pay) BackPay(user *UserInfo, dk *BackDK) (UMP,error) {
+func (u *Pay) BackPay(user *UserInfo, dk *BackDK) (UMP, error) {
 	enCrt, err := u.getEncryptCertInfo()
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	accno, err := u.EncryptData(dk.AccNo)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	enc_custom, err := u.EncryptCustomerData(user)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	post_data := UMP{
@@ -124,7 +127,7 @@ func (u *Pay) BackPay(user *UserInfo, dk *BackDK) (UMP,error) {
 		"accessType":    "0",
 		"channelType":   "07",
 		"currencyCode":  "156",
-		"backUrl":       u.urls.CallbackUrl,
+		"backUrl":       u.callbackUrl,
 		"encryptCertId": fmt.Sprintf("%d", enCrt.Cert.SerialNumber),
 		"merId":         dk.MerId,
 		"orderId":       dk.OrderId,
@@ -137,83 +140,83 @@ func (u *Pay) BackPay(user *UserInfo, dk *BackDK) (UMP,error) {
 	err = u.sign(post_data)
 
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	req, err := u.post(u.urls.BackTransUrl, post_data)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	success, err := u.validate(req)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	if !success {
-		return nil,errors.New("数据返回验证不成功")
+		return nil, errors.New("数据返回验证不成功")
 	}
 
 	fmt.Println(req["respMsg"])
 
-	return req,nil
+	return req, nil
 }
 
 //退款
-func (u *Pay) UndoPay(undo *OrderUndo) (UMP,error) {
+func (u *Pay) UndoPay(undo *OrderUndo) (UMP, error) {
 	post_data := UMP{
-		"version":      "5.1.0",
-		"encoding":     "utf-8",
-		"signMethod":   "01",
-		"txnType":      "04",
-		"txnSubType":   "00",
-		"bizType":      "000501",
-		"accessType":   "0",
-		"channelType":  "07",
-		"backUrl":      u.urls.UndoCallbackUrl,
-		"merId":        undo.MerId,
-		"orderId":      undo.OrderId,
-		"txnTime":      undo.TxnTime,
-		"txnAmt":       undo.TxnAmt,
-		"origQryId":    undo.QueryId,
+		"version":     "5.1.0",
+		"encoding":    "utf-8",
+		"signMethod":  "01",
+		"txnType":     "04",
+		"txnSubType":  "00",
+		"bizType":     "000501",
+		"accessType":  "0",
+		"channelType": "07",
+		"backUrl":     u.urls.UndoCallbackUrl,
+		"merId":       undo.MerId,
+		"orderId":     undo.OrderId,
+		"txnTime":     undo.TxnTime,
+		"txnAmt":      undo.TxnAmt,
+		"origQryId":   undo.QueryId,
 	}
 
 	err := u.sign(post_data)
 
 	if err != nil {
-		return post_data,err
+		return post_data, err
 	}
 
 	req, err := u.post(u.urls.BackTransUrl, post_data)
 	if err != nil {
-		return post_data,err
+		return post_data, err
 	}
 
 	success, err := u.validate(req)
 	if err != nil {
-		return req,err
+		return req, err
 	}
 
 	if !success {
-		return req,errors.New("数据返回验证不成功")
+		return req, errors.New("数据返回验证不成功")
 	}
 
-	return req,nil
+	return req, nil
 }
 
 //查询订单交易是否成功
 func (u *Pay) QueryPay(query *QueryOrder) (UMP, error) {
 	post_data := UMP{
-		"version":     "5.1.0",
-		"encoding":    "UTF-8",
-		"signMethod":  "01",
-		"txnType":     "00",
-		"txnSubType":  "00",
-		"bizType":     "000501",
-		"accessType":  "0",
-		"merId":       query.MerId,
-		"orderId":     query.OrderId,
-		"txnTime":     query.TxnTime,
+		"version":    "5.1.0",
+		"encoding":   "UTF-8",
+		"signMethod": "01",
+		"txnType":    "00",
+		"txnSubType": "00",
+		"bizType":    "000501",
+		"accessType": "0",
+		"merId":      query.MerId,
+		"orderId":    query.OrderId,
+		"txnTime":    query.TxnTime,
 	}
 
 	err := u.sign(post_data)
