@@ -23,3 +23,8 @@ func TestInet_ntoa(t *testing.T) {
 	fmt.Println(ip_str)
 	run.End(true)
 }
+
+func TestBinaryStringToBytes(t *testing.T) {
+	a := byte(1)
+	fmt.Println(ByteToBinaryString(a))
+}

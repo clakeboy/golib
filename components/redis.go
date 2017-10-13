@@ -237,6 +237,15 @@ func (m *CKRedis) HDel(key ,field string) (bool,error) {
 	return redis.Bool(m.rd.Do("HDEL",key,field))
 }
 
+//得到所有 hash 键
+func (m *CKRedis) HKeys(key string) ([]interface{},error) {
+	return redis.Values(m.rd.Do("HKEYS",key))
+}
+//得到 hash 长度
+func (m *CKRedis) HLen(key string) (int,error) {
+	return redis.Int(m.rd.Do("HLEN",key))
+}
+
 //执行命令
 func (m *CKRedis) Do(command string,args ...interface{}) (interface{},error) {
 	return m.rd.Do(command,args...)

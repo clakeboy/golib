@@ -79,7 +79,7 @@ func parse_token(decoder *xml.Decoder, current_token xml.Token, parent_token xml
 			fmt.Println("start ",token.Name.Local)
 			if !end {
 				end = false
-				xml_map[root_token.Name.Local] = parse_token(decoder,token)
+				xml_map[root_token.Name.Local] = parse_token(decoder,token,token)
 			}
 		case xml.EndElement:
 			fmt.Println("end ",token.Name.Local)

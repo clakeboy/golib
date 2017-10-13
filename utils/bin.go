@@ -116,10 +116,10 @@ func BinaryStringToBytes(s string) (bs []byte) {
 
 func Float32ToByte(float float32) []byte {
 	bits := math.Float32bits(float)
-	bytes := make([]byte, 4)
-	binary.LittleEndian.PutUint32(bytes, bits)
+	byteArr := make([]byte, 4)
+	binary.LittleEndian.PutUint32(byteArr, bits)
 
-	return bytes
+	return byteArr
 }
 
 func ByteToFloat32(bytes []byte) float32 {
@@ -130,10 +130,10 @@ func ByteToFloat32(bytes []byte) float32 {
 
 func Float64ToByte(float float64) []byte {
 	bits := math.Float64bits(float)
-	bytes := make([]byte, 8)
-	binary.LittleEndian.PutUint64(bytes, bits)
+	byteArr := make([]byte, 8)
+	binary.LittleEndian.PutUint64(byteArr, bits)
 
-	return bytes
+	return byteArr
 }
 
 func ByteToFloat64(bytes []byte) float64 {
@@ -143,8 +143,18 @@ func ByteToFloat64(bytes []byte) float64 {
 }
 
 //整形转换成字节
-func IntToBytes(n int) []byte {
-	tmp := int32(n)
+func IntToBytes(n int,bit int) []byte {
+	var tmp interface{}
+	switch bit {
+	case 8:
+		tmp = int8(n)
+	case 16:
+		tmp = int16(n)
+	case 32:
+		tmp = int32(n)
+	case 64:
+		tmp = int64(n)
+	}
 	bytesBuffer := bytes.NewBuffer([]byte{})
 	binary.Write(bytesBuffer, binary.BigEndian, tmp)
 	return bytesBuffer.Bytes()
@@ -153,7 +163,25 @@ func IntToBytes(n int) []byte {
 //字节转换成整形
 func BytesToInt(b []byte) int {
 	bytesBuffer := bytes.NewBuffer(b)
-	var tmp int32
-	binary.Read(bytesBuffer, binary.BigEndian, &tmp)
-	return int(tmp)
+	lens := len(b)
+	switch lens {
+	case 1:
+		tmp := int8(0)
+		binary.Read(bytesBuffer, binary.BigEndian, &tmp)
+		return int(tmp)
+	case 2:
+		tmp := int16(0)
+		binary.Read(bytesBuffer, binary.BigEndian, &tmp)
+		return int(tmp)
+	case 4:
+		tmp := int32(0)
+		binary.Read(bytesBuffer, binary.BigEndian, &tmp)
+		return int(tmp)
+	case 16:
+		tmp := int64(0)
+		binary.Read(bytesBuffer, binary.BigEndian, &tmp)
+		return int(tmp)
+	default:
+		return 0
+	}
 }
