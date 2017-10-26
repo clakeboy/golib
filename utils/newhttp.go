@@ -55,6 +55,16 @@ func (h *HttpClient) PostJson(url_str string,data M) ([]byte,error) {
 	return req.Content, nil
 }
 
+func (h *HttpClient) PostXml(url_str string,data string) ([]byte,error) {
+	h.SetHeader("Content-Type","text/xml")
+	req, err := h.Request("POST",url_str,strings.NewReader(data))
+	if err != nil {
+		return nil, err
+	}
+
+	return req.Content, nil
+}
+
 func (h *HttpClient) Get(url_str string) ([]byte, error) {
 	resp,err := h.Request("GET",url_str,nil)
 	if err != nil {

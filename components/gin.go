@@ -52,6 +52,19 @@ func CallAction(i interface{}, c *gin.Context) {
 	}
 }
 
+//调用Controller 的 Action 方法 GET
+func CallActionGet(i interface{}, c *gin.Context) {
+	t := reflect.TypeOf(i)
+	method, ok := t.MethodByName("Action" + utils.Under2Hump(c.Param("action")))
+	if ok {
+		var params []reflect.Value
+		v := reflect.ValueOf(i)
+		v.MethodByName(method.Name).Call(params)
+	} else {
+		fmt.Println("not found action")
+	}
+}
+
 func buildOutput(v reflect.Value,rnflag *bool, msg *string) {
 	switch v.Type().String() {
 	case "bool":

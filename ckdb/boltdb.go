@@ -5,7 +5,7 @@ import (
 	"github.com/boltdb/bolt"
 	"log"
 	"os"
-	"wx_shake/utils"
+	"ck_go_lib/utils"
 )
 //创建一个新的 BlotDB
 func NewBoltDB(filepath string) *BoltDB {

@@ -32,6 +32,7 @@ type DBATable struct {
 	table string
 	values []interface{}
 	db *DBA
+	columnType interface{}
 }
 
 //新建一个table处理类
@@ -170,10 +171,20 @@ func (t *DBATable) Result() ([]utils.M,error) {
 	return t.db.Query(t.sql_str,t.values...)
 }
 
+func (t *DBATable) ResultStruct(i interface{}) ([]interface{},error) {
+	defer t.Clear()
+	t.db.SetQueryInterface(i)
+	return t.db.QueryStruct(t.sql_str,t.values...)
+}
+
 //只得到一条记录
 func (t *DBATable) Find() (map[string]interface{},error) {
 	defer t.Clear()
 	return t.db.QueryOne(t.sql_str,t.values...)
+}
+
+func (t *DBATable) FindStruct() {
+
 }
 
 func (t *DBATable) Rows() int {

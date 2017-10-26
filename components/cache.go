@@ -2,7 +2,7 @@ package components
 
 import (
 	"io/ioutil"
-	"ck_res_go/utils"
+	"ck_go_lib/utils"
 	"encoding/json"
 	"time"
 	"os"
@@ -33,11 +33,6 @@ type FileCache struct {
 	CacheIn
 	dir string
 	prefix string
-}
-
-type MemCache struct {
-	CacheIn
-	server string
 }
 
 func NewCache(cache_type int) *Cache{

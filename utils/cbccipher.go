@@ -13,13 +13,13 @@ type AesEncrypt struct {
 	key string
 	stringType string
 }
-
+//创建加密
 func NewAes(k string) *AesEncrypt{
 	enc := &AesEncrypt{}
 	enc.SetKey(k)
 	return enc
 }
-
+//设置加密KEY
 func (a *AesEncrypt) SetKey(k string) {
 	keyLen := len(k)
 	if keyLen < 16 {
@@ -27,7 +27,7 @@ func (a *AesEncrypt) SetKey(k string) {
 	}
 	a.key = k
 }
-
+//得到加密KEY
 func (a *AesEncrypt) GetKey() []byte {
 	keyLen := len(a.key)
 	if keyLen < 16 {
@@ -45,7 +45,7 @@ func (a *AesEncrypt) GetKey() []byte {
 	//取前16个字节
 	return arrKey[:16]
 }
-
+//加密方法
 func (a *AesEncrypt) Encrypt(plantText []byte) ([]byte, error) {
 	key := a.GetKey()
 	block, err := aes.NewCipher(key) //选择加密算法
@@ -65,7 +65,17 @@ func (a *AesEncrypt) Encrypt(plantText []byte) ([]byte, error) {
 	base64.StdEncoding.Encode(buf, ciphertext)
 	return buf, nil
 }
+//加密返回字符串
+func (a *AesEncrypt) EncryptString(plantText string) (string,error) {
+	res,err := a.Encrypt([]byte(plantText))
+	if err != nil {
+		return "",err
+	}
 
+	return string(res),nil
+}
+
+//解密方法
 func (a *AesEncrypt) Decrypt(deStr []byte) ([]byte, error) {
 	key := a.GetKey()
 	ciphertext := make([]byte, base64.StdEncoding.DecodedLen(len(deStr)))
@@ -84,12 +94,22 @@ func (a *AesEncrypt) Decrypt(deStr []byte) ([]byte, error) {
 	return plantText, nil
 }
 
+//解密字符串
+func (a *AesEncrypt) DecryptString(deStr string) (string,error) {
+	res,err := a.Decrypt([]byte(deStr))
+	if err != nil {
+		return "",err
+	}
+
+	return string(res),nil
+}
+//PKCS7 处理
 func (a *AesEncrypt) PKCS7Padding(ciphertext []byte, blockSize int) []byte {
 	padding := blockSize - len(ciphertext)%blockSize
 	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
 	return append(ciphertext, padtext...)
 }
-
+//PKCS7 反解
 func (a *AesEncrypt) PKCS7UnPadding(plantText []byte) []byte {
 	length := len(plantText)
 	unpadding := int(plantText[length-1])

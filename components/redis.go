@@ -86,6 +86,14 @@ func (m *CKRedis) Get(key string) (interface{}, error) {
 
 	return val, nil
 }
+//是否存在一个缓存值
+func (m *CKRedis) Exists(key string) bool {
+	val,err := redis.Int(m.rd.Do("EXISTS",key))
+	if err != nil {
+		return false
+	}
+	return val == 1
+}
 
 //删除一个缓存值
 func (m *CKRedis) Remove(key ...string) error {

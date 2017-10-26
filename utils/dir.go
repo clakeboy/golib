@@ -85,3 +85,14 @@ func ReadDir(path string) (files []string, dirs []string, err error){
 func fixDirPath(path string) string {
 	return strings.TrimRight(path,"/")
 }
+
+func PathExists(path string) bool {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true
+	}
+	if os.IsNotExist(err) {
+		return false
+	}
+	return false
+}

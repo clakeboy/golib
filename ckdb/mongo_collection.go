@@ -150,6 +150,9 @@ func (ck *CKCollection) getQueryType(i interface{}) interface{} {
 	}
 
 	t := reflect.TypeOf(i)
+	if t.Kind() == reflect.Ptr {
+		return reflect.New(t.Elem()).Interface()
+	}
 	return reflect.New(t).Interface()
 }
 

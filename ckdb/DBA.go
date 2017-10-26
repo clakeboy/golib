@@ -17,6 +17,7 @@ type DBA struct {
 	debug    bool
 	LastSql  string
 	LastArgs []interface{}
+	queryInterface interface{}
 }
 
 //数据库配置
@@ -164,6 +165,22 @@ func (d *DBA) Query(sql_str string, args ...interface{}) ([]utils.M, error) {
 	return d.FetchAll(rows)
 }
 
+//查询数据库并返回结果 (传入结构体)
+func (d *DBA) QueryStruct(sql_str string, args ...interface{}) ([]interface{}, error) {
+	rows, err := d.db.Query(sql_str, args...)
+	d.LastSql = sql_str
+	d.LastArgs = args
+	if err != nil {
+		if d.debug {
+			d.HaltError(err)
+		}
+		return nil, err
+	}
+	defer rows.Close()
+
+	return d.FetchAllOfStruct(rows,d.queryInterface)
+}
+
 //执行SQL语句
 func (d *DBA) Exec(sql_str string, args ...interface{}) (sql.Result, error) {
 	res, err := d.db.Exec(sql_str, args...)
@@ -207,6 +224,23 @@ func (d *DBA) QueryOne(sql_str string, args ...interface{}) (utils.M, error) {
 func (d *DBA) QueryRow(sql_str string, args ...interface{}) *sql.Row {
 	return d.db.QueryRow(sql_str, args...)
 }
+//取得所有数据到结构体,没传结构体为默认 utils.M
+func (d *DBA) FetchAllOfStruct(query *sql.Rows, i interface{}) ([]interface{},error) {
+	columns, _ := query.Columns()
+	scans := make([]interface{}, len(columns))
+
+	resultList := []interface{}{}
+
+	for query.Next() {
+		result := d.scanType(scans,columns,i)
+		if err := query.Scan(scans...); err != nil {
+			return nil, err
+		}
+		resultList = append(resultList,result)
+	}
+
+	return resultList,nil
+}
 
 //取得所有数据
 func (d *DBA) FetchAll(query *sql.Rows) ([]utils.M, error) {
@@ -239,6 +273,57 @@ func (d *DBA) FetchAll(query *sql.Rows) ([]utils.M, error) {
 	}
 
 	return results, nil
+}
+//扫描数据到传入的类型
+func (d *DBA) scanType(scans []interface{},columns []string,i interface{}) interface{} {
+	if i == nil {
+		return d.scanMap(scans,columns)
+	}
+	t := reflect.TypeOf(i)
+	switch t.Kind() {
+	case reflect.Ptr:
+		return d.scanStruct(t.Elem(),scans,columns)
+	case reflect.Struct:
+		return d.scanStruct(t,scans,columns)
+	case reflect.Map:
+		fallthrough
+	default:
+		return d.scanMap(scans,columns)
+	}
+}
+//扫描数据到结构体
+func (d *DBA) scanStruct(t reflect.Type,scans []interface{},columns []string) interface{} {
+	obj := reflect.New(t).Interface()
+	objV := reflect.ValueOf(obj).Elem()
+	for i,colName := range columns {
+		fmt.Println(colName)
+		idx := d.findTagOfStruct(t,colName)
+		if idx != -1 {
+			scans[i] = objV.Field(idx).Addr().Interface()
+		}
+	}
+	return obj
+}
+//在结构体查找TAG值是否存在
+func (d *DBA) findTagOfStruct(t reflect.Type,colName string) int {
+	for i:=0;i<t.NumField();i++ {
+		val,ok := t.Field(i).Tag.Lookup("json")
+		if ok && val == colName {
+			fmt.Println(val)
+			return i
+		}
+	}
+	return -1
+}
+//扫描数据到MAP 默认 utils.M
+func (d *DBA) scanMap(scans []interface{},columns []string) interface{} {
+	obj := utils.M{}
+	for i,v := range columns {
+		var val interface{}
+		obj[v] = val
+		scans[i] = &val
+	}
+	return obj
 }
 
 //处理where条件列表
@@ -340,4 +425,8 @@ func (d *DBA) ConvertData(org_data interface{}) (DM, error) {
 	default:
 		return nil, errors.New("not support this data")
 	}
+}
+
+func (d *DBA) SetQueryInterface(i interface{}) {
+	d.queryInterface = i
 }
