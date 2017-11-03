@@ -8,6 +8,7 @@ import (
 )
 
 type MemCache struct {
+	CacheIn
 	lock sync.RWMutex
 	content map[string]*MemCacheData
 }
@@ -66,10 +67,11 @@ func (m *MemCache) Set(key string,v interface{},expire int64) bool {
 	}
 }
 //删除缓存
-func (m *MemCache) Delete(key string) {
+func (m *MemCache) Delete(key string) bool {
 	m.lock.Lock()
 	delete(m.content,key)
 	m.lock.Unlock()
+	return true
 }
 
 func (m *MemCache) Dump() {

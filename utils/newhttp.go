@@ -56,7 +56,7 @@ func (h *HttpClient) PostJson(url_str string,data M) ([]byte,error) {
 }
 
 func (h *HttpClient) PostXml(url_str string,data string) ([]byte,error) {
-	h.SetHeader("Content-Type","text/xml")
+	h.SetHeader("Content-Type","text/xml;charset=utf-8")
 	req, err := h.Request("POST",url_str,strings.NewReader(data))
 	if err != nil {
 		return nil, err

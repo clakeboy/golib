@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"ck_go_lib/utils"
 	"github.com/DeanThompson/ginpprof"
+	"net/http"
 )
 //得到POST原始数据
 func GetProperty(c *gin.Context) []byte {
@@ -91,4 +92,8 @@ func Cross(c *gin.Context,is_cross bool,org string) {
 		c.Header("Access-Control-Allow-Headers", "Accept, Origin, No-Cache, X-Requested-With, If-Modified-Since, Pragma, Last-Modified, Cache-Control, Expires, Content-Type, X-E4M-With, CK-Pro-S")
 		c.Header("Access-Control-Allow-Credentials", "true")
 	}
+}
+//显示HTML数据
+func Display(c *gin.Context,html []byte) {
+	c.Data(http.StatusOK,"text/html;charset=utf-8",html)
 }

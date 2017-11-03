@@ -26,7 +26,7 @@ func HttpPost(url_str string, post_data *url.Values) (M,error){
 
 	return getRequestData(req)
 }
-
+//http post JSON 数据,返回一个MAP数据
 func HttpPostJson(url_str string,post_data M) (M,error){
 	b,err := json.Marshal(post_data)
 	if err != nil {
@@ -39,7 +39,7 @@ func HttpPostJson(url_str string,post_data M) (M,error){
 	}
 	return getRequestData(req)
 }
-
+//http post JSON 数据,返回一个 string 数据
 func HttpPostJsonString(url_str string,post_data M) (string,error){
 	b,err := json.Marshal(post_data)
 	if err != nil {
@@ -52,7 +52,16 @@ func HttpPostJsonString(url_str string,post_data M) (string,error){
 	}
 	return getRequestString(req)
 }
-
+//http post JSON 数据,返回一个 []byte 数组
+func HttpPostJsonBytes(url_str string,post_data []byte) ([]byte,error) {
+	body := bytes.NewBuffer(post_data)
+	req,err := http.Post(url_str,"application/json;charset=utf-8",body)
+	if err != nil {
+		return nil,err
+	}
+	return getRequestBytes(req)
+}
+//http get 请求
 func HttpGet(url_str string) (string,error){
 	req,err := http.Get(url_str)
 	if err != nil {
@@ -81,4 +90,13 @@ func getRequestString(req *http.Response) (string,error){
 	}
 	req.Body.Close()
 	return string(r),nil
+}
+
+func getRequestBytes(req *http.Response) ([]byte,error) {
+	defer req.Body.Close()
+	r, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		return nil,err
+	}
+	return r,nil
 }

@@ -77,6 +77,15 @@ func (ck *CKCollection) Find(where bson.M, row interface{}) error {
 	}
 	return nil
 }
+//得到所给条件的数据量
+func (ck *CKCollection) Count(where bson.M) int {
+	c := ck.db.Table(ck.tab)
+	count,err := c.Find(nil).Count()
+	if err != nil {
+		return 0
+	}
+	return count
+}
 
 //查询数据库
 func (ck *CKCollection) Query(where bson.M, page int, number int, sort_list []string, struct_type interface{}, format func(interface{})) (*QueryResult, error) {
