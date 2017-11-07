@@ -430,3 +430,44 @@ func (d *DBA) ConvertData(org_data interface{}) (DM, error) {
 func (d *DBA) SetQueryInterface(i interface{}) {
 	d.queryInterface = i
 }
+
+
+//输出表结构为GO struct
+func BuildTableStruct(table_name ,db_name string,dbconf *DBConfig) {
+	types := map[string]string{
+		"int":"int",
+		"tinyint":"int",
+		"varchar":"string",
+		"char":"string",
+		"text":"string",
+		"double":"float64",
+	}
+
+	dba,err := NewDBA(dbconf)
+	if err != nil {
+		panic(err)
+	}
+
+	res,err := dba.Table("COLUMNS").Where(utils.M{"TABLE_NAME":table_name,"TABLE_SCHEMA":db_name},"").Order(utils.M{"ORDINAL_POSITION":"ASC"}).Query().Result()
+	if err != nil {
+		panic(err)
+	}
+	var tmp []string
+	var (
+		column_name string
+		column_type string
+		column_comment string
+	)
+	for _,row := range res {
+		column_name = row["COLUMN_NAME"].(string)
+		column_type = row["DATA_TYPE"].(string)
+		column_comment = row["COLUMN_COMMENT"].(string)
+		tmp = append(tmp,fmt.Sprintf("\t%v %v `json:\"%v\" bson:\"%v\"` //%v",utils.Under2Hump(column_name),types[column_type],column_name,column_name,column_comment))
+	}
+
+	fmt.Println(fmt.Sprintf("type %s struct {",table_name))
+	for _,v := range tmp {
+		fmt.Println(v)
+	}
+	fmt.Println("}")
+}

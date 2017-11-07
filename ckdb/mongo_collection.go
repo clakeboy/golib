@@ -80,7 +80,7 @@ func (ck *CKCollection) Find(where bson.M, row interface{}) error {
 //得到所给条件的数据量
 func (ck *CKCollection) Count(where bson.M) int {
 	c := ck.db.Table(ck.tab)
-	count,err := c.Find(nil).Count()
+	count,err := c.Find(where).Count()
 	if err != nil {
 		return 0
 	}
