@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"time"
 	"io"
+	"fmt"
 )
 
 type HttpRequestData struct {
@@ -14,12 +15,33 @@ type HttpRequestData struct {
 	StatusCode int
 	Headers http.Header
 	Content []byte
+	Cookie *HttpCookies
 }
 
 type HttpClient struct {
 	client  *http.Client
-	headers HD
+	headers M
+	cookies []*http.Cookie
 	lastRequest *HttpRequestData
+}
+
+type HttpCookies struct {
+	Cookies []*http.Cookie
+}
+
+func NewHttpCookies(cookies ...*http.Cookie) *HttpCookies {
+	return &HttpCookies{
+		Cookies:YN(cookies == nil,[]*http.Cookie{},cookies).([]*http.Cookie),
+	}
+}
+
+func (hc *HttpCookies) GetCookieString() string {
+	arr := []string{}
+	for _,v := range hc.Cookies {
+		arr = append(arr,fmt.Sprintf("%s=%s",v.Name,v.Value))
+	}
+
+	return strings.Join(arr,"; ")
 }
 
 func NewHttpClient() *HttpClient {
@@ -74,7 +96,6 @@ func (h *HttpClient) Get(url_str string) ([]byte, error) {
 }
 
 func (h *HttpClient) Request(method string,url_str string,content io.Reader) (*HttpRequestData,error) {
-
 	req,err := http.NewRequest(method,url_str,content)
 	if err != nil {
 		return nil,err
@@ -83,6 +104,12 @@ func (h *HttpClient) Request(method string,url_str string,content io.Reader) (*H
 	if len(h.headers) > 0 {
 		for k, v := range h.headers {
 			req.Header.Set(k, v.(string))
+		}
+	}
+
+	if len(h.cookies) > 0 {
+		for _,v := range h.cookies {
+			req.AddCookie(v)
 		}
 	}
 
@@ -102,6 +129,7 @@ func (h *HttpClient) Request(method string,url_str string,content io.Reader) (*H
 	res.Status = resp.Status
 	res.StatusCode = resp.StatusCode
 	res.Headers = resp.Header
+	res.Cookie = NewHttpCookies(resp.Cookies()...)
 	h.lastRequest = res
 	return res,nil
 }
@@ -112,6 +140,13 @@ func (h *HttpClient) SetHeader(key, val string) {
 
 func (h *HttpClient) SetTimeout(sc time.Duration) {
 	h.client.Timeout = sc
+}
+
+func (h *HttpClient) SetCookie(cookie *http.Cookie) {
+	if cookie == nil {
+		return
+	}
+	h.cookies = append(h.cookies,cookie)
 }
 
 func (h *HttpClient) GetLastResponse() *HttpRequestData {

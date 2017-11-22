@@ -21,9 +21,19 @@ func TestHttpClient_Get(t *testing.T) {
 	//res,_ := HttpPostJson("http://localhost:7908/serv/car/query_car", data)
 	//fmt.Println(res.ToJsonString())
 
-	content, err := HttpGet("http://m.cqtcxx.com/parkslist.aspx?areaid=522")
+	//content, err := HttpGet("http://m.cqtcxx.com/parkslist.aspx?areaid=522")
+	//if err != nil {
+	//	panic(err)
+	//}
+	//fmt.Println(content)
+
+	client := NewHttpClient()
+	_,err := client.Get("https://www.baidu.com")
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(content)
+
+	//fmt.Println(string(res))
+	resp := client.GetLastResponse()
+	fmt.Printf("%+v",resp.Cookie.Cookies[0].Value)
 }

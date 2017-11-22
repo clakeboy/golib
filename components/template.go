@@ -9,22 +9,35 @@ import (
 	"reflect"
 	"strconv"
 	"net/http"
+	"os"
 )
 
 type Template struct {
 	templateDir string //模板文件目录
 	ext string //默认文件后缀
 	assigns utils.M //模板变量
+	cache *MemCache
+}
+
+type TemplateCon struct{
+	Content []byte
+	ModTime int64
 }
 
 func NewTemplate(tempDir string) *Template {
-	return &Template{templateDir:tempDir,ext:"html",assigns:utils.M{}}
+	return &Template{
+		templateDir:tempDir,
+		ext:"html",
+		assigns:utils.M{},
+		cache:NewMemCache(),
+	}
 }
 //编辑输出模块内容
 func (t *Template) Parse(tempName string) (string,error) {
 	arr := strings.Split(tempName,".")
 	allPath := fmt.Sprintf("%s/%s.%s",t.templateDir,strings.Join(arr,"/"),t.ext)
-	res,err := ioutil.ReadFile(allPath)
+
+	res,err := t.checkAndGetFile(allPath)
 	if err != nil {
 		return "",err
 	}
@@ -32,6 +45,33 @@ func (t *Template) Parse(tempName string) (string,error) {
 
 	return content,nil
 }
+//检查模板文件是否被修改
+func (t *Template) checkAndGetFile(filePath string) ([]byte,error) {
+	fi,err := os.Stat(filePath)
+	if err != nil {
+		return nil,err
+	}
+	mt := fi.ModTime().Unix()
+	fcon,err := t.cache.Get(filePath)
+
+	if err == nil && fcon.(*TemplateCon).ModTime == mt {
+		return fcon.(*TemplateCon).Content,nil
+	}
+
+	res,err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return nil,err
+	}
+
+	fcon = &TemplateCon{
+		Content:res,
+		ModTime:mt,
+	}
+
+	t.cache.Set(filePath,fcon,-1)
+	return res,nil
+}
+
 //设置模板变量
 func (t *Template) Assign(key string,val interface{}) {
 	t.assigns[key] = val

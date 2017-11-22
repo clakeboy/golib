@@ -183,7 +183,7 @@ func (t *DBATable) Find() (map[string]interface{},error) {
 	return t.db.QueryOne(t.sql_str,t.values...)
 }
 
-func (t *DBATable) FindStruct() {
+func (t *DBATable) FindStruct(i interface{}) {
 
 }
 
@@ -218,6 +218,7 @@ func (t *DBATable) Clear() {
 	t.limit_str = ""
 	t.sql_str = ""
 	t.where = nil
+	t.db.SetQueryInterface(nil)
 }
 
 //插入数据
