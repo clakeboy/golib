@@ -47,7 +47,7 @@ func (hc *HttpCookies) GetCookieString() string {
 func NewHttpClient() *HttpClient {
 	client := &http.Client{}
 	client.Timeout = time.Second * 30
-	return &HttpClient{client: client, headers: HD{}}
+	return &HttpClient{client: client, headers: M{},cookies:[]*http.Cookie{}}
 }
 
 func (h *HttpClient) Post(url_str string, data M) ([]byte, error) {
@@ -147,6 +147,11 @@ func (h *HttpClient) SetCookie(cookie *http.Cookie) {
 		return
 	}
 	h.cookies = append(h.cookies,cookie)
+}
+
+func (h *HttpClient) Clear() {
+	h.cookies = []*http.Cookie{}
+	h.headers = M{}
 }
 
 func (h *HttpClient) GetLastResponse() *HttpRequestData {
