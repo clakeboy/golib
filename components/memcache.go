@@ -60,12 +60,12 @@ func (m *MemCache) Set(key string, v interface{}, expire int64) bool {
 	m.lock.RUnlock()
 	if ok {
 		cache.data = v
-		cache.expire = utils.YN(expire == -1, -1, time.Now().Unix()+expire).(int64)
+		cache.expire = utils.YN(expire == -1, int64(-1), time.Now().Unix()+expire).(int64)
 		return true
 	} else {
 		cache = &MemCacheData{
 			data:   v,
-			expire: utils.YN(expire == -1, -1, time.Now().Unix()+expire).(int64),
+			expire: utils.YN(expire == -1, int64(-1), time.Now().Unix()+expire).(int64),
 		}
 		m.lock.Lock()
 		m.content[key] = cache
