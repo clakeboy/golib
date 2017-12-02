@@ -440,6 +440,7 @@ func BuildTableStruct(table_name ,db_name string,dbconf *DBConfig) {
 		"varchar":"string",
 		"char":"string",
 		"text":"string",
+		"tinytext":"string",
 		"double":"float64",
 	}
 

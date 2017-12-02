@@ -26,6 +26,7 @@ func InitDB(db_dsn string,pool_size int) error {
 		return err
 	}
 	globalSession.SetPoolLimit(pool_size)
+	globalSession.SelectServers()
 	return nil
 }
 
@@ -56,7 +57,11 @@ func (this *DBMongo) Table(tab_name string) *mgo.Collection {
 }
 
 func (this *DBMongo) ChangeDB(db_name string) {
+	if !this.is_open {
+		this.Open(this.db_name)
+	}
 	this.db_name = db_name
+	this.database = this.session.DB(db_name)
 }
 
 func (this *DBMongo) Close() {
@@ -68,4 +73,7 @@ func (this *DBMongo) Close() {
 
 func (this *DBMongo) Collection(collection_name string) *CKCollection {
 	return NewCollection(this,collection_name)
+}
+
+func (this *DBMongo) RunCmd() {
 }

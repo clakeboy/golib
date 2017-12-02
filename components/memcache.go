@@ -92,4 +92,5 @@ func (m *MemCache) Dump() {
 
 func (m *MemCache) Stat() {
 	fmt.Println("Numbers: ", len(m.content))
+	fmt.Println()
 }

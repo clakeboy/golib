@@ -259,6 +259,10 @@ func (m *CKRedis) Do(command string,args ...interface{}) (interface{},error) {
 	return m.rd.Do(command,args...)
 }
 
+func (m *CKRedis) Lock() {
+	
+}
+
 //关闭连接
 func (m *CKRedis) Close() {
 	m.rd.Close()
