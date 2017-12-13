@@ -39,6 +39,18 @@ type DBATable struct {
 func NewDBATable(db *DBA, table string) *DBATable {
 	return &DBATable{table:table,db:db,field_str:"*"}
 }
+//开始事务
+func (t *DBATable) BeginTrans() error {
+	return t.db.BeginTrans()
+}
+//提交事务
+func (t *DBATable) Commit() error {
+	return t.db.Commit()
+}
+//回滚事务
+func (t *DBATable) Rollback() error {
+	return t.db.Rollback()
+}
 
 //设置要显示的字段
 func (t *DBATable) Select(fields utils.M) *DBATable {
@@ -178,13 +190,15 @@ func (t *DBATable) ResultStruct(i interface{}) ([]interface{},error) {
 }
 
 //只得到一条记录
-func (t *DBATable) Find() (map[string]interface{},error) {
+func (t *DBATable) Find() (utils.M,error) {
 	defer t.Clear()
 	return t.db.QueryOne(t.sql_str,t.values...)
 }
 
-func (t *DBATable) FindStruct(i interface{}) {
-
+func (t *DBATable) FindStruct(i interface{}) (interface{},error) {
+	defer t.Clear()
+	t.db.SetQueryInterface(i)
+	return t.db.QueryOneStruct(t.sql_str,t.values...)
 }
 
 func (t *DBATable) Rows() int {

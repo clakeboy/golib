@@ -12,13 +12,16 @@ import (
 )
 
 type DBA struct {
-	db       *sql.DB
-	table    string
-	debug    bool
-	LastSql  string
-	LastArgs []interface{}
+	db             *sql.DB
+	table          string
+	debug          bool
+	LastSql        string
+	LastArgs       []interface{}
 	queryInterface interface{}
+	tx             *sql.Tx
 }
+
+var MysqlDrivers = make(map[string]*sql.DB)
 
 //数据库配置
 type DBConfig struct {
@@ -40,28 +43,46 @@ type DBColumn struct {
 //DBA专用数据
 type DM map[string]interface{}
 
-//新创建DBA操作库
-func NewDBA(db_conf *DBConfig) (*DBA, error) {
+func InitMysqlDb(conf *DBConfig) (*sql.DB, error) {
 	dsn := fmt.Sprintf(
 		"%s:%s@tcp(%s:%s)/%s",
-		db_conf.DBUser,
-		db_conf.DBPassword,
-		db_conf.DBServer,
-		db_conf.DBPort,
-		db_conf.DBName,
+		conf.DBUser,
+		conf.DBPassword,
+		conf.DBServer,
+		conf.DBPort,
+		conf.DBName,
 	)
 
-	db_driver, err := sql.Open("mysql", dsn)
+	if db, ok := MysqlDrivers[dsn]; ok {
+		return db, nil
+	}
+
+	MysqlDb, err := sql.Open("mysql", dsn)
 	if err != nil {
 		return nil, err
 	}
-	db_driver.SetMaxOpenConns(db_conf.DBPoolSize)
-	db_driver.SetMaxIdleConns(db_conf.DBIdleSize)
-	err = db_driver.Ping()
+
+	MysqlDb.SetMaxOpenConns(conf.DBPoolSize)
+	MysqlDb.SetMaxIdleConns(conf.DBIdleSize)
+
+	err = MysqlDb.Ping()
 	if err != nil {
 		return nil, err
 	}
-	dba := &DBA{db: db_driver, debug: db_conf.DBDebug}
+
+	MysqlDrivers[dsn] = MysqlDb
+
+	return MysqlDb, nil
+}
+
+//新创建DBA操作库
+func NewDBA(db_conf *DBConfig) (*DBA, error) {
+	MysqlDriver, err := InitMysqlDb(db_conf)
+	if err != nil {
+		return nil, err
+	}
+
+	dba := &DBA{db: MysqlDriver, debug: db_conf.DBDebug}
 
 	return dba, nil
 }
@@ -69,6 +90,36 @@ func NewDBA(db_conf *DBConfig) (*DBA, error) {
 //设置操作的表名
 func (d *DBA) Table(table_name string) *DBATable {
 	return NewDBATable(d, table_name)
+}
+
+//开始事务
+func (d *DBA) BeginTrans() error {
+	var err error
+	d.tx, err = d.db.Begin()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+//提交事务
+func (d *DBA) Commit() error {
+	err := d.tx.Commit()
+	if err != nil {
+		return err
+	}
+	d.tx = nil
+	return nil
+}
+
+//回滚事务
+func (d *DBA) Rollback() error {
+	err := d.tx.Rollback()
+	if err != nil {
+		return err
+	}
+	d.tx = nil
+	return nil
 }
 
 //插入记录到数据库
@@ -178,12 +229,18 @@ func (d *DBA) QueryStruct(sql_str string, args ...interface{}) ([]interface{}, e
 	}
 	defer rows.Close()
 
-	return d.FetchAllOfStruct(rows,d.queryInterface)
+	return d.FetchAllOfStruct(rows, d.queryInterface)
 }
 
 //执行SQL语句
 func (d *DBA) Exec(sql_str string, args ...interface{}) (sql.Result, error) {
-	res, err := d.db.Exec(sql_str, args...)
+	var res sql.Result
+	var err error
+	if d.tx != nil {
+		res, err = d.tx.Exec(sql_str, args...)
+	} else {
+		res, err = d.db.Exec(sql_str, args...)
+	}
 
 	d.LastSql = sql_str
 	d.LastArgs = args
@@ -196,22 +253,39 @@ func (d *DBA) Exec(sql_str string, args ...interface{}) (sql.Result, error) {
 	}
 	return res, err
 }
-
+//查询一条记录
 func (d *DBA) QueryOne(sql_str string, args ...interface{}) (utils.M, error) {
-	rows, err := d.db.Query(sql_str, args...)
-	d.LastSql = sql_str
-	d.LastArgs = args
+	list ,err := d.Query(sql_str,args...)
 	if err != nil {
-		if d.debug {
-			d.HaltError(err)
-		}
-		return nil, err
+		return nil,err
 	}
-	defer rows.Close()
+	//rows, err := d.db.Query(sql_str, args...)
+	//d.LastSql = sql_str
+	//d.LastArgs = args
+	//if err != nil {
+	//	if d.debug {
+	//		d.HaltError(err)
+	//	}
+	//	return nil, err
+	//}
+	//defer rows.Close()
+	//
+	//list, err := d.FetchAll(rows)
+	//if err != nil {
+	//	return nil, err
+	//}
 
-	list, err := d.FetchAll(rows)
+	if len(list) == 0 {
+		return nil, nil
+	}
+
+	return list[0], nil
+}
+//查询一条记录返回结构体
+func (d *DBA) QueryOneStruct(sql_str string, args ...interface{}) (interface{}, error) {
+	list ,err := d.QueryStruct(sql_str,args...)
 	if err != nil {
-		return nil, err
+		return nil,err
 	}
 
 	if len(list) == 0 {
@@ -224,22 +298,23 @@ func (d *DBA) QueryOne(sql_str string, args ...interface{}) (utils.M, error) {
 func (d *DBA) QueryRow(sql_str string, args ...interface{}) *sql.Row {
 	return d.db.QueryRow(sql_str, args...)
 }
+
 //取得所有数据到结构体,没传结构体为默认 utils.M
-func (d *DBA) FetchAllOfStruct(query *sql.Rows, i interface{}) ([]interface{},error) {
+func (d *DBA) FetchAllOfStruct(query *sql.Rows, i interface{}) ([]interface{}, error) {
 	columns, _ := query.Columns()
 	scans := make([]interface{}, len(columns))
 
 	resultList := []interface{}{}
 
 	for query.Next() {
-		result := d.scanType(scans,columns,i)
+		result := d.scanType(scans, columns, i)
 		if err := query.Scan(scans...); err != nil {
 			return nil, err
 		}
-		resultList = append(resultList,result)
+		resultList = append(resultList, result)
 	}
 
-	return resultList,nil
+	return resultList, nil
 }
 
 //取得所有数据
@@ -274,40 +349,43 @@ func (d *DBA) FetchAll(query *sql.Rows) ([]utils.M, error) {
 
 	return results, nil
 }
+
 //扫描数据到传入的类型
-func (d *DBA) scanType(scans []interface{},columns []string,i interface{}) interface{} {
+func (d *DBA) scanType(scans []interface{}, columns []string, i interface{}) interface{} {
 	if i == nil {
-		return d.scanMap(scans,columns)
+		return d.scanMap(scans, columns)
 	}
 	t := reflect.TypeOf(i)
 	switch t.Kind() {
 	case reflect.Ptr:
-		return d.scanStruct(t.Elem(),scans,columns)
+		return d.scanStruct(t.Elem(), scans, columns)
 	case reflect.Struct:
-		return d.scanStruct(t,scans,columns)
+		return d.scanStruct(t, scans, columns)
 	case reflect.Map:
 		fallthrough
 	default:
-		return d.scanMap(scans,columns)
+		return d.scanMap(scans, columns)
 	}
 }
+
 //扫描数据到结构体
-func (d *DBA) scanStruct(t reflect.Type,scans []interface{},columns []string) interface{} {
+func (d *DBA) scanStruct(t reflect.Type, scans []interface{}, columns []string) interface{} {
 	obj := reflect.New(t).Interface()
 	objV := reflect.ValueOf(obj).Elem()
-	for i,colName := range columns {
+	for i, colName := range columns {
 		fmt.Println(colName)
-		idx := d.findTagOfStruct(t,colName)
+		idx := d.findTagOfStruct(t, colName)
 		if idx != -1 {
 			scans[i] = objV.Field(idx).Addr().Interface()
 		}
 	}
 	return obj
 }
+
 //在结构体查找TAG值是否存在
-func (d *DBA) findTagOfStruct(t reflect.Type,colName string) int {
-	for i:=0;i<t.NumField();i++ {
-		val,ok := t.Field(i).Tag.Lookup("json")
+func (d *DBA) findTagOfStruct(t reflect.Type, colName string) int {
+	for i := 0; i < t.NumField(); i++ {
+		val, ok := t.Field(i).Tag.Lookup("json")
 		if ok && val == colName {
 			fmt.Println(val)
 			return i
@@ -315,10 +393,11 @@ func (d *DBA) findTagOfStruct(t reflect.Type,colName string) int {
 	}
 	return -1
 }
+
 //扫描数据到MAP 默认 utils.M
-func (d *DBA) scanMap(scans []interface{},columns []string) interface{} {
+func (d *DBA) scanMap(scans []interface{}, columns []string) interface{} {
 	obj := utils.M{}
-	for i,v := range columns {
+	for i, v := range columns {
 		var val interface{}
 		obj[v] = val
 		scans[i] = &val
@@ -431,43 +510,42 @@ func (d *DBA) SetQueryInterface(i interface{}) {
 	d.queryInterface = i
 }
 
-
 //输出表结构为GO struct
-func BuildTableStruct(table_name ,db_name string,dbconf *DBConfig) {
+func BuildTableStruct(table_name, db_name string, dbconf *DBConfig) {
 	types := map[string]string{
-		"int":"int",
-		"tinyint":"int",
-		"varchar":"string",
-		"char":"string",
-		"text":"string",
-		"tinytext":"string",
-		"double":"float64",
+		"int":      "int",
+		"tinyint":  "int",
+		"varchar":  "string",
+		"char":     "string",
+		"text":     "string",
+		"tinytext": "string",
+		"double":   "float64",
 	}
 
-	dba,err := NewDBA(dbconf)
+	dba, err := NewDBA(dbconf)
 	if err != nil {
 		panic(err)
 	}
 
-	res,err := dba.Table("COLUMNS").Where(utils.M{"TABLE_NAME":table_name,"TABLE_SCHEMA":db_name},"").Order(utils.M{"ORDINAL_POSITION":"ASC"}).Query().Result()
+	res, err := dba.Table("COLUMNS").Where(utils.M{"TABLE_NAME": table_name, "TABLE_SCHEMA": db_name}, "").Order(utils.M{"ORDINAL_POSITION": "ASC"}).Query().Result()
 	if err != nil {
 		panic(err)
 	}
 	var tmp []string
 	var (
-		column_name string
-		column_type string
+		column_name    string
+		column_type    string
 		column_comment string
 	)
-	for _,row := range res {
+	for _, row := range res {
 		column_name = row["COLUMN_NAME"].(string)
 		column_type = row["DATA_TYPE"].(string)
 		column_comment = row["COLUMN_COMMENT"].(string)
-		tmp = append(tmp,fmt.Sprintf("\t%v %v `json:\"%v\" bson:\"%v\"` //%v",utils.Under2Hump(column_name),types[column_type],column_name,column_name,column_comment))
+		tmp = append(tmp, fmt.Sprintf("\t%v %v `json:\"%v\" bson:\"%v\"` //%v", utils.Under2Hump(column_name), types[column_type], column_name, column_name, column_comment))
 	}
 
-	fmt.Println(fmt.Sprintf("type %s struct {",table_name))
-	for _,v := range tmp {
+	fmt.Println(fmt.Sprintf("type %s struct {", table_name))
+	for _, v := range tmp {
 		fmt.Println(v)
 	}
 	fmt.Println("}")
