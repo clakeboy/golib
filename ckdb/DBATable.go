@@ -232,6 +232,7 @@ func (t *DBATable) Clear() {
 	t.limit_str = ""
 	t.sql_str = ""
 	t.where = nil
+	t.values = []interface{}{}
 	t.db.SetQueryInterface(nil)
 }
 
