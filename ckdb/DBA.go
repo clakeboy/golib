@@ -373,7 +373,6 @@ func (d *DBA) scanStruct(t reflect.Type, scans []interface{}, columns []string) 
 	obj := reflect.New(t).Interface()
 	objV := reflect.ValueOf(obj).Elem()
 	for i, colName := range columns {
-		fmt.Println(colName)
 		idx := d.findTagOfStruct(t, colName)
 		if idx != -1 {
 			scans[i] = objV.Field(idx).Addr().Interface()
@@ -387,7 +386,6 @@ func (d *DBA) findTagOfStruct(t reflect.Type, colName string) int {
 	for i := 0; i < t.NumField(); i++ {
 		val, ok := t.Field(i).Tag.Lookup("json")
 		if ok && val == colName {
-			fmt.Println(val)
 			return i
 		}
 	}
