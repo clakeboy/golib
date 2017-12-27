@@ -243,6 +243,7 @@ func (t *DBATable) Insert(data interface{}) (int,bool) {
 
 //更新数据
 func (t *DBATable) Update(data utils.M) bool {
+	defer t.Clear()
 	err := t.db.Update(data,t.where,t.table)
 	if err != nil {
 		return false
@@ -258,6 +259,7 @@ func (t *DBATable) One(row_struct interface{}) error {
 
 //删除数据
 func (t *DBATable) Delete() bool {
+	defer t.Clear()
 	_,err := t.db.Delete(t.where,t.table)
 	if err != nil {
 		return false

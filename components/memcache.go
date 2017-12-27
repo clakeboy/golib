@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 )
-
+//GO本地内存数据缓存
 type MemCache struct {
 	CacheIn
 	lock    sync.RWMutex
