@@ -40,10 +40,15 @@ func CallAction(i interface{}, c *gin.Context) {
 		}
 		v := reflect.ValueOf(i)
 		list := v.MethodByName(method.Name).Call(params)
-		rnflag := true
-		msg := "ok"
 
 		args_len := len(list)
+
+		if args_len <= 0 {
+			return
+		}
+
+		rnflag := true
+		msg := "ok"
 
 		buildOutput(list[args_len-1],&rnflag,&msg)
 

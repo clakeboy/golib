@@ -65,12 +65,12 @@ func (l *SysLog) checkFileIsExist(filename string) (bool) {
 //记录错误
 func (l *SysLog) Error(err interface{}) {
 	stack_str := stack(3)
-	msg := fmt.Sprintf("[ERROR][%s] panic recovered:\n%s\n%s",time.Now().Format("2006-01-02 15:04:05"),err, stack_str)
+	msg := fmt.Sprintf("[ERROR][%s] panic recovered:\n%s\n%s\n",time.Now().Format("2006-01-02 15:04:05"),err, stack_str)
 	l.Write([]byte(msg))
 }
 
 func (l *SysLog) Info(msg string) {
-	msg_str := fmt.Sprintf("[INFO][%s] panic recovered:\n%s",time.Now().Format("2006-01-02 15:04:05"),msg)
+	msg_str := fmt.Sprintf("[INFO][%s]:\n%s\n",time.Now().Format("2006-01-02 15:04:05"),msg)
 	l.Write([]byte(msg_str))
 }
 
