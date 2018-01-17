@@ -24,12 +24,13 @@ const (
 
 //TCP连接
 type TCPConnect struct {
-	conn      net.Conn
-	status    int
-	event     IEventTCP
-	writeChan chan []byte
-	closeChan chan bool
-	debug     bool
+	conn      net.Conn    //TCP连接
+	status    int         //TCP状态
+	event     IEventTCP   //TCP事件接口
+	writeChan chan []byte //写入队列
+	closeChan chan bool   //关闭队列
+	debug     bool        //是否DEUBG模式
+	readTimeout time.Duration       //读取超时时间,单位秒
 }
 
 //新建TCP服务连接
@@ -40,7 +41,12 @@ func NewTCPConnect(c net.Conn, evt IEventTCP) *TCPConnect {
 		event:     evt,
 		writeChan: make(chan []byte,10),
 		closeChan: make(chan bool),
+		readTimeout: time.Second*30,
 	}
+}
+//设置读取超时
+func (tp *TCPConnect) SetReadTimeout(ss int64) {
+	tp.readTimeout = time.Second * time.Duration(ss)
 }
 
 //运行
@@ -68,7 +74,9 @@ func (tp *TCPConnect) read() {
 		tp.Close()
 	}()
 	for {
-		tp.conn.SetReadDeadline(time.Now().Add(time.Second*30))
+		if tp.readTimeout != 0 {
+			tp.conn.SetReadDeadline(time.Now().Add(tp.readTimeout))
+		}
 		buf := make([]byte, 256)
 		msg_len, err := tp.conn.Read(buf)
 		if err != nil {
