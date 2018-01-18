@@ -217,7 +217,7 @@ func (d *DBA) Query(sql_str string, args ...interface{}) ([]utils.M, error) {
 }
 
 //查询数据库并返回结果 (传入结构体)
-func (d *DBA) QueryStruct(sql_str string, args ...interface{}) ([]interface{}, error) {
+func (d *DBA) QueryStruct(structInterFace interface{},sql_str string, args ...interface{}) ([]interface{}, error) {
 	rows, err := d.db.Query(sql_str, args...)
 	d.LastSql = sql_str
 	d.LastArgs = args
@@ -229,7 +229,7 @@ func (d *DBA) QueryStruct(sql_str string, args ...interface{}) ([]interface{}, e
 	}
 	defer rows.Close()
 
-	return d.FetchAllOfStruct(rows, d.queryInterface)
+	return d.FetchAllOfStruct(rows, structInterFace)
 }
 
 //执行SQL语句
@@ -282,8 +282,8 @@ func (d *DBA) QueryOne(sql_str string, args ...interface{}) (utils.M, error) {
 	return list[0], nil
 }
 //查询一条记录返回结构体
-func (d *DBA) QueryOneStruct(sql_str string, args ...interface{}) (interface{}, error) {
-	list ,err := d.QueryStruct(sql_str,args...)
+func (d *DBA) QueryOneStruct(structInterFace interface{},sql_str string, args ...interface{}) (interface{}, error) {
+	list ,err := d.QueryStruct(structInterFace,sql_str,args...)
 	if err != nil {
 		return nil,err
 	}
@@ -304,7 +304,7 @@ func (d *DBA) FetchAllOfStruct(query *sql.Rows, i interface{}) ([]interface{}, e
 	columns, _ := query.Columns()
 	scans := make([]interface{}, len(columns))
 
-	resultList := []interface{}{}
+	var resultList []interface{}
 
 	for query.Next() {
 		result := d.scanType(scans, columns, i)
