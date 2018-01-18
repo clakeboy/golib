@@ -185,8 +185,7 @@ func (t *DBATable) Result() ([]utils.M,error) {
 
 func (t *DBATable) ResultStruct(i interface{}) ([]interface{},error) {
 	defer t.Clear()
-	t.db.SetQueryInterface(i)
-	return t.db.QueryStruct(t.sql_str,t.values...)
+	return t.db.QueryStruct(i,t.sql_str,t.values...)
 }
 
 //只得到一条记录
@@ -197,8 +196,7 @@ func (t *DBATable) Find() (utils.M,error) {
 
 func (t *DBATable) FindStruct(i interface{}) (interface{},error) {
 	defer t.Clear()
-	t.db.SetQueryInterface(i)
-	return t.db.QueryOneStruct(t.sql_str,t.values...)
+	return t.db.QueryOneStruct(i,t.sql_str,t.values...)
 }
 
 func (t *DBATable) Rows() int {
@@ -233,7 +231,6 @@ func (t *DBATable) Clear() {
 	t.sql_str = ""
 	t.where = nil
 	t.values = []interface{}{}
-	t.db.SetQueryInterface(nil)
 }
 
 //插入数据
