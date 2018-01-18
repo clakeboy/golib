@@ -1,14 +1,15 @@
 package components
 
+import "sync"
+
 //协程池
 type GoroutinePool struct {
 	Queue chan interface{} //队列池
 	Number int //并发协程数
 	Total int  //处理数据量
 	Worker func(obj... interface{}) bool
-
-	result chan bool
 	finishCallback func()
+	wait *sync.WaitGroup
 }
 
 //新建一个协程池
@@ -16,36 +17,29 @@ func NewPoll(number int,worker func(obj... interface{}) bool) *GoroutinePool{
 	p := &GoroutinePool{
 		Number:number,
 		Worker:worker,
+		wait:&sync.WaitGroup{},
 	}
 	return p
 }
 
 func (this *GoroutinePool) Start() {
-
 	for i := 0; i < this.Number; i++ {
-		go func() {
-			for {
-				task, ok := <-this.Queue
-				if !ok {
-					break
+		go func(idx int) {
+			isDone := true
+			for isDone {
+				select {
+				case task := <-this.Queue:
+					this.Worker(task,idx)
+				default:
+					isDone = false
 				}
-
-				flag := this.Worker(task,i)
-				this.result <- flag
 			}
-		}()
+			this.wait.Done()
+		}(i)
+		this.wait.Add(1)
 	}
 
-	for j:=0;j<this.Total;j++ {
-		res, ok := <-this.result
-		if !ok {
-			break
-		}
-
-		if !res {
-
-		}
-	}
+	this.wait.Wait()
 
 	if this.finishCallback != nil {
 		this.finishCallback()
@@ -56,7 +50,6 @@ func (this *GoroutinePool) AddTaskStrings(tasks []string) {
 	total := len(tasks)
 	this.Total = total
 	this.Queue = make(chan interface{},total)
-	this.result = make(chan bool,total)
 	for _,obj := range tasks {
 		this.Queue <- obj
 	}
@@ -66,7 +59,6 @@ func (this *GoroutinePool) AddTaskInterface(tasks []interface{}) {
 	total := len(tasks)
 	this.Total = total
 	this.Queue = make(chan interface{},total)
-	this.result = make(chan bool,total)
 	for _,obj := range tasks {
 		this.Queue <- obj
 	}
@@ -78,7 +70,6 @@ func (this *GoroutinePool) AddTask(task interface{}) {
 
 func (this *GoroutinePool) Stop() {
 	close(this.Queue)
-	close(this.result)
 }
 
 func (this *GoroutinePool) SetFinishCallback(callback func()) {
