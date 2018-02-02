@@ -5,6 +5,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"strings"
+	"log"
 )
 
 func TestXMLMap_UnmarshalXML(t *testing.T) {
@@ -103,4 +104,41 @@ func parse_token(decoder *xml.Decoder, current_token xml.Token, parent_token xml
 		}
 	}
 	return xml_map
+}
+
+func TestXMLMap_UnmarshalXML2(t *testing.T) {
+	str := `<xml><return_code><![CDATA[SUCCESS]]></return_code>
+<return_msg><![CDATA[OK]]></return_msg>
+<appid><![CDATA[wx6b1dafd90d1e2db1]]></appid>
+<mch_id><![CDATA[1486942202]]></mch_id>
+<device_info><![CDATA[WEB]]></device_info>
+<nonce_str><![CDATA[HMYC5hq2yDYSelOi]]></nonce_str>
+<sign><![CDATA[3B090F9A60FDD4F6187A72C5A18BC4D1]]></sign>
+<result_code><![CDATA[SUCCESS]]></result_code>
+<openid><![CDATA[owS5q0n3sxQc4l_oV5D9cxfbqGWo]]></openid>
+<is_subscribe><![CDATA[N]]></is_subscribe>
+<trade_type><![CDATA[JSAPI]]></trade_type>
+<bank_type><![CDATA[ICBC_DEBIT]]></bank_type>
+<total_fee>232601</total_fee>
+<coupon_fee>37</coupon_fee>
+<fee_type><![CDATA[CNY]]></fee_type>
+<transaction_id><![CDATA[4200000060201801292945278230]]></transaction_id>
+<out_trade_no><![CDATA[PC150E37D7F95E0C4C6C0EE8]]></out_trade_no>
+<attach><![CDATA[]]></attach>
+<time_end><![CDATA[20180129153858]]></time_end>
+<trade_state><![CDATA[SUCCESS]]></trade_state>
+<coupon_id_0><![CDATA[2000000006103513115]]></coupon_id_0>
+<coupon_fee_0>37</coupon_fee_0>
+<coupon_count>1</coupon_count>
+<cash_fee>232564</cash_fee>
+</xml>`
+
+	data := XMLMap{}
+	err := xml.Unmarshal([]byte(str),&data)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	fmt.Println(data)
 }

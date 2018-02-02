@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-type XMLMap map[string]string
+type XMLMap map[string]interface{}
 
 type xmlMapEntry struct {
 	XMLName xml.Name
@@ -26,7 +26,7 @@ func (m XMLMap) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	}
 
 	for k, v := range m {
-		e.Encode(xmlMapEntry{XMLName: xml.Name{Local: k}, Value: v})
+		e.Encode(xmlMapEntry{XMLName: xml.Name{Local: k}, Value: fmt.Sprintf("%v",v)})
 	}
 
 	return e.EncodeToken(start.End())
@@ -51,7 +51,6 @@ func (m *XMLMap) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 		} else if err != nil {
 			return err
 		}
-		fmt.Println(e.XMLName.Local)
 		(*m)[e.XMLName.Local] = e.Value
 	}
 	return nil

@@ -456,7 +456,7 @@ func (d *DBA) formatWhere(column string, table string, length int) string {
 
 //解释字段名
 func (d *DBA) explainColumn(column string) *DBColumn {
-	reg := regexp.MustCompile(`(.+?)\[(\+|-|!|>|<|like)\]`)
+	reg := regexp.MustCompile(`(.+?)\[(\+|-|!|>|<|<=|>=|like)\]`)
 	match := reg.FindStringSubmatch(column)
 	field := &DBColumn{}
 	if len(match) > 0 {

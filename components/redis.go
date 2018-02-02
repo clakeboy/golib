@@ -254,6 +254,27 @@ func (m *CKRedis) HLen(key string) (int,error) {
 	return redis.Int(m.rd.Do("HLEN",key))
 }
 
+//--- LIST 列表 ---
+//插入一条记录,或多条记录
+func (m *CKRedis) LPush(key string,value string) (int,error) {
+	return redis.Int(m.rd.Do("LPUSH",key,value))
+}
+//得到LIST长度
+func (m *CKRedis) LLen(key string) (int,error) {
+	return redis.Int(m.rd.Do("LLEN",key))
+}
+//得到一个区间的LIST值列表
+func (m *CKRedis) LRange(key string,start int,stop int) ([]interface{},error) {
+	return redis.Values(m.rd.Do("LRANGE",key,start,stop))
+}
+//更新一个下标值
+func (m *CKRedis) LSet(key string,index int,value string) (int,error) {
+	return redis.Int(m.rd.Do("LSET",key,index,value))
+}
+//删除列表尾记录并返回
+func (m *CKRedis) RPop(key string) (string,error) {
+	return redis.String(m.rd.Do("RPOP",key))
+}
 //执行命令
 func (m *CKRedis) Do(command string,args ...interface{}) (interface{},error) {
 	return m.rd.Do(command,args...)
