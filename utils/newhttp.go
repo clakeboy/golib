@@ -9,6 +9,7 @@ import (
 	"io"
 	"fmt"
 	"net/http/cookiejar"
+	"crypto/tls"
 )
 //http 请求返回数据
 type HttpRequestData struct {
@@ -51,6 +52,18 @@ func NewHttpClient() *HttpClient {
 	client.Timeout = time.Second * 30
 	client.Jar = jar
 	return &HttpClient{client: client, headers: M{},cookies:[]*http.Cookie{}}
+}
+//创建一个安全连接的HTTP客户端
+func NewTLSHttpClient(tlsCfg *tls.Config) *HttpClient {
+	tr := &http.Transport{TLSClientConfig:tlsCfg}
+	jar, _ := cookiejar.New(nil)
+	client := &http.Client{Transport:tr,Jar:jar}
+	client.Timeout = time.Second * 30
+	return &HttpClient{
+		client: client,
+		headers: M{},
+		cookies:[]*http.Cookie{},
+	}
 }
 //发起一个POST请求
 func (h *HttpClient) Post(url_str string, data M) ([]byte, error) {

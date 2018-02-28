@@ -9,15 +9,25 @@ import (
 	"strings"
 )
 
+const (
+	AES_CBC = "cbc"
+	AES_ECB = "ecb"
+)
+
 type AesEncrypt struct {
 	key string
 	stringType string
+	aesType string
 }
 //创建加密
 func NewAes(k string) *AesEncrypt{
-	enc := &AesEncrypt{}
+	enc := &AesEncrypt{aesType:AES_CBC}
 	enc.SetKey(k)
 	return enc
+}
+//设置加密类型
+func (a *AesEncrypt) SetType(t string) {
+	a.aesType = t
 }
 //设置加密KEY
 func (a *AesEncrypt) SetKey(k string) {
@@ -54,7 +64,14 @@ func (a *AesEncrypt) Encrypt(plantText []byte) ([]byte, error) {
 	}
 	plantText = a.PKCS7Padding(plantText, block.BlockSize())
 
-	blockModel := cipher.NewCBCEncrypter(block, key[:block.BlockSize()])
+	var blockModel cipher.BlockMode
+
+	switch a.aesType {
+	case AES_CBC:
+		blockModel = cipher.NewCBCEncrypter(block, key[:block.BlockSize()])
+	case AES_ECB:
+		blockModel = NewECBEncrypter(block)
+	}
 
 	ciphertext := make([]byte, len(plantText))
 
@@ -87,7 +104,15 @@ func (a *AesEncrypt) Decrypt(deStr []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	blockModel := cipher.NewCBCDecrypter(block, key[:block.BlockSize()])
+	var blockModel cipher.BlockMode
+
+	switch a.aesType {
+	case AES_ECB:
+		blockModel = NewECBDecrypter(block)
+	case AES_CBC:
+		blockModel = cipher.NewCBCDecrypter(block, key[:block.BlockSize()])
+	}
+
 	plantText := make([]byte, len(ciphertext[:n]))
 	blockModel.CryptBlocks(plantText, ciphertext[:n])
 	plantText = a.PKCS7UnPadding(plantText)
@@ -122,4 +147,47 @@ func (a *AesEncrypt) convert( b []byte ) string {
 		s[i] = strconv.Itoa(int(b[i]))
 	}
 	return strings.Join(s,"")
+}
+
+
+/**
+ * ECB 加密算法
+ */
+type ecb struct {
+	b cipher.Block
+	blockSize int
+}
+
+type ecbDecrypter ecb
+
+func NewECBEncrypter(b cipher.Block) cipher.BlockMode {
+	return &ecb{
+		b:b,
+		blockSize:b.BlockSize(),
+	}
+}
+
+func (e *ecb) BlockSize() int {return e.blockSize}
+
+func (e *ecb) CryptBlocks(dst,src []byte) {
+	//分组分块加密
+	for index := 0; index < len(src); index += e.blockSize {
+		e.b.Encrypt(dst[index:index+e.blockSize], src[index:index+e.blockSize])
+	}
+}
+
+func NewECBDecrypter(b cipher.Block) cipher.BlockMode {
+	return &ecbDecrypter{
+		b:b,
+		blockSize:b.BlockSize(),
+	}
+}
+
+func (e *ecbDecrypter) BlockSize() int {return e.blockSize}
+
+func (e *ecbDecrypter) CryptBlocks(dst,src []byte) {
+	//分组分块加密
+	for index := 0; index < len(src); index += e.blockSize {
+		e.b.Decrypt(dst[index:index+e.blockSize], src[index:index+e.blockSize])
+	}
 }
