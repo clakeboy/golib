@@ -63,7 +63,7 @@ func ReadDirRecursion(dir_path string) ([]string,error) {
 }
 
 func ReadDir(path string) (files []string, dirs []string, err error){
-	path = fixDirPath(path);
+	path = fixDirPath(path)
 	dir,err := ioutil.ReadDir(path)
 	if err != nil {
 		files = nil

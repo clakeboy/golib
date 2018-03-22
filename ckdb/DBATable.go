@@ -149,7 +149,7 @@ func (t *DBATable) Limit(number int, page int) *DBATable {
 	} else {
 		curnum := 0
 		if page > 1 {
-			curnum = page-1*number
+			curnum = (page-1)*number
 		}
 
 		t.limit_str = fmt.Sprintf("LIMIT %d,%d",curnum,number)
