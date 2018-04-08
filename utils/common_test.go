@@ -4,6 +4,7 @@ import (
 	"testing"
 	"fmt"
 	"time"
+	"ck_go_lib/utils/uuid"
 )
 
 func TestM_ToJson(t *testing.T) {
@@ -27,4 +28,10 @@ func TestInet_ntoa(t *testing.T) {
 func TestBinaryStringToBytes(t *testing.T) {
 	a := byte(1)
 	fmt.Println(ByteToBinaryString(a))
+}
+
+func TestCreateUUID(t *testing.T) {
+	ui := uuid.Must(uuid.NewV4())
+	fmt.Println(ui.String())
+	fmt.Printf("%x",ui.Bytes())
 }

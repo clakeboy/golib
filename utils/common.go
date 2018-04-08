@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"encoding/json"
 	"strconv"
+	"runtime"
+	"ck_go_lib/utils/uuid"
 )
 
 type M map[string]interface{}
@@ -124,18 +126,28 @@ func Map2Struct(obj interface{},stu interface{}) error {
 }
 //创建UUID
 func CreateUUID(step bool) string {
-	f, _ := os.OpenFile("/dev/urandom", os.O_RDONLY, 0)
-	b := make([]byte, 16)
-	f.Read(b)
-	f.Close()
-	var uuid string
-	if step {
-		uuid = fmt.Sprintf("%x-%x-%x-%x-%x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
-	} else {
-		uuid = fmt.Sprintf("%x", b[:])
-	}
+	if runtime.GOOS == "windows" {
+		ui := uuid.Must(uuid.NewV4())
+		if step {
+			return ui.String()
+		} else {
+			return fmt.Sprintf("%x",ui.Bytes())
+		}
 
-	return uuid
+	} else {
+		f, _ := os.OpenFile("/dev/urandom", os.O_RDONLY, 0)
+		b := make([]byte, 16)
+		f.Read(b)
+		f.Close()
+		var ui string
+		if step {
+			ui = fmt.Sprintf("%x-%x-%x-%x-%x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
+		} else {
+			ui = fmt.Sprintf("%x", b[:])
+		}
+
+		return ui
+	}
 }
 
 
