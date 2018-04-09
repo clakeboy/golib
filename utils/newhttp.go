@@ -67,7 +67,7 @@ func NewTLSHttpClient(tlsCfg *tls.Config) *HttpClient {
 }
 //发起一个POST请求
 func (h *HttpClient) Post(url_str string, data M) ([]byte, error) {
-	h.SetHeader("Content-Type","application/x-www-form-urlencoded")
+	h.SetHeader("Content-Type","application/x-www-form-urlencoded;charset=utf-8")
 	post_data := &url.Values{}
 
 	for k, v := range data {
@@ -84,7 +84,7 @@ func (h *HttpClient) Post(url_str string, data M) ([]byte, error) {
 }
 //发起一个POST JSON请求
 func (h *HttpClient) PostJson(url_str string,data M) ([]byte,error) {
-	h.SetHeader("Content-Type","application/json")
+	h.SetHeader("Content-Type","application/json;charset=utf-8")
 	req, err := h.Request("POST",url_str,strings.NewReader(data.ToJsonString()))
 	if err != nil {
 		return nil, err
