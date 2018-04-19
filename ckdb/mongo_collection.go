@@ -152,6 +152,18 @@ func (ck *CKCollection) List(where bson.M, page int, number int, sort_list []str
 
 	return list, err
 }
+//执行聚合操作
+func (ck *CKCollection) Aggregate(pipe ...bson.M) (bson.M,error) {
+	c := ck.db.Table(ck.tab)
+	p := c.Pipe(pipe)
+	resp := bson.M{}
+	err := p.One(&resp)
+	if err != nil {
+		return nil,err
+	}
+
+	return resp,nil
+}
 
 func (ck *CKCollection) getQueryType(i interface{}) interface{} {
 	if i == nil {

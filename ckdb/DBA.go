@@ -217,7 +217,7 @@ func (d *DBA) Query(sql_str string, args ...interface{}) ([]utils.M, error) {
 }
 
 //查询数据库并返回结果 (传入结构体)
-func (d *DBA) QueryStruct(structInterFace interface{},sql_str string, args ...interface{}) ([]interface{}, error) {
+func (d *DBA) QueryStruct(structInterFace interface{}, sql_str string, args ...interface{}) ([]interface{}, error) {
 	rows, err := d.db.Query(sql_str, args...)
 	d.LastSql = sql_str
 	d.LastArgs = args
@@ -253,11 +253,12 @@ func (d *DBA) Exec(sql_str string, args ...interface{}) (sql.Result, error) {
 	}
 	return res, err
 }
+
 //查询一条记录
 func (d *DBA) QueryOne(sql_str string, args ...interface{}) (utils.M, error) {
-	list ,err := d.Query(sql_str,args...)
+	list, err := d.Query(sql_str, args...)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	//rows, err := d.db.Query(sql_str, args...)
 	//d.LastSql = sql_str
@@ -281,11 +282,12 @@ func (d *DBA) QueryOne(sql_str string, args ...interface{}) (utils.M, error) {
 
 	return list[0], nil
 }
+
 //查询一条记录返回结构体
-func (d *DBA) QueryOneStruct(structInterFace interface{},sql_str string, args ...interface{}) (interface{}, error) {
-	list ,err := d.QueryStruct(structInterFace,sql_str,args...)
+func (d *DBA) QueryOneStruct(structInterFace interface{}, sql_str string, args ...interface{}) (interface{}, error) {
+	list, err := d.QueryStruct(structInterFace, sql_str, args...)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	if len(list) == 0 {
@@ -518,6 +520,8 @@ func BuildTableStruct(table_name, db_name string, dbconf *DBConfig) {
 		"text":     "string",
 		"tinytext": "string",
 		"double":   "float64",
+		"float":    "float64",
+		"smallint": "int",
 	}
 
 	dba, err := NewDBA(dbconf)
