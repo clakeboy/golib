@@ -44,6 +44,7 @@ func (this *GoroutinePool) Start() {
 	if this.finishCallback != nil {
 		this.finishCallback()
 	}
+	this.Stop()
 }
 
 func (this *GoroutinePool) AddTaskStrings(tasks []string) {

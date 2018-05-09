@@ -319,6 +319,29 @@ func (d *DBA) FetchAllOfStruct(query *sql.Rows, i interface{}) ([]interface{}, e
 	return resultList, nil
 }
 
+//取得所有数据到结构体,没传结构体为默认 utils.M
+func (d *DBA) FetchAllOfStructV2(query *sql.Rows, i interface{}) ([]interface{}, error) {
+	columns, _ := query.Columns()
+	scans := make([]interface{}, len(columns))
+
+	var resultList []interface{}
+
+	for query.Next() {
+		result := d.scanMap(scans, columns)
+		if err := query.Scan(scans...); err != nil {
+			return nil, err
+		}
+
+		obj := reflect.New(reflect.TypeOf(i)).Interface()
+
+		utils.Map2Struct(result,obj)
+
+		resultList = append(resultList, obj)
+	}
+
+	return resultList, nil
+}
+
 //取得所有数据
 func (d *DBA) FetchAll(query *sql.Rows) ([]utils.M, error) {
 	column, _ := query.Columns()
