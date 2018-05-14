@@ -84,6 +84,9 @@ func (m *Management) AddTask(
 //使用选项字符串添加一个任务项
 func (m *Management) AddTaskString(taskStr string,exec func(item *Item) bool, callback func(item *Item)) {
 	typeList := strings.Split(taskStr," ")
+	if len(typeList) < 6 {
+		return
+	}
 	m.AddTask(
 		typeList[0],
 		typeList[1],
@@ -153,7 +156,6 @@ func (m *Management) execute(currentDate time.Time) {
 
 //执行任务项
 func (m *Management) executeTask(item *Item,currentDate time.Time) {
-	item.LastExecDate = currentDate
 	if item.ExecFunc == nil {
 		return
 	}
@@ -164,6 +166,7 @@ func (m *Management) executeTask(item *Item,currentDate time.Time) {
 		}
 	}
 	ok := item.ExecFunc(item)
+	item.LastExecDate = currentDate
 	if ok && item.CallbackFunc != nil {
 		item.CallbackFunc(item)
 	}
