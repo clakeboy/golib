@@ -105,11 +105,18 @@ func (m *Management) explainString2Type(str string,timeType TimeType) *Rule {
 		Type:timeType,
 	}
 	val := strings.Split(str,"/")
+	var err error
 	if len(val) > 1 {
 		rule.IsLoop = true
-		rule.Value,_ = strconv.Atoi(val[1])
+		rule.Value,err = strconv.Atoi(val[1])
+		if err != nil {
+			return nil
+		}
 	} else {
-		rule.Value,_ = strconv.Atoi(val[0])
+		rule.Value,err = strconv.Atoi(val[0])
+		if err != nil {
+			return nil
+		}
 	}
 
 	return rule
