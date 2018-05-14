@@ -9,7 +9,7 @@ type GoroutinePool struct {
 	Total int  //处理数据量
 	Worker func(obj... interface{}) bool
 	finishCallback func()
-	wait *sync.WaitGroup
+	wait sync.WaitGroup
 }
 
 //新建一个协程池
@@ -17,13 +17,14 @@ func NewPoll(number int,worker func(obj... interface{}) bool) *GoroutinePool{
 	p := &GoroutinePool{
 		Number:number,
 		Worker:worker,
-		wait:&sync.WaitGroup{},
+		wait:sync.WaitGroup{},
 	}
 	return p
 }
 
 func (this *GoroutinePool) Start() {
 	for i := 0; i < this.Number; i++ {
+		this.wait.Add(1)
 		go func(idx int) {
 			isDone := true
 			for isDone {
@@ -36,7 +37,6 @@ func (this *GoroutinePool) Start() {
 			}
 			this.wait.Done()
 		}(i)
-		this.wait.Add(1)
 	}
 
 	this.wait.Wait()

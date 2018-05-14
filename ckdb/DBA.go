@@ -401,6 +401,9 @@ func (d *DBA) scanStruct(t reflect.Type, scans []interface{}, columns []string) 
 		idx := d.findTagOfStruct(t, colName)
 		if idx != -1 {
 			scans[i] = objV.Field(idx).Addr().Interface()
+		} else {
+			var empty interface{}
+			scans[i] = &empty
 		}
 	}
 	return obj
