@@ -157,9 +157,9 @@ func (d *DBA) Update(data utils.M, where utils.M, table string) error {
 	for i, v := range data {
 		field := d.explainColumn(i)
 		if field.Icon == "+" || field.Icon == "-" {
-			tmp = append(tmp, fmt.Sprintf("%s = %s %s ?", field.Field, field.Field, field.Icon))
+			tmp = append(tmp, fmt.Sprintf("%s = %s %s ?", d.FormatColumn(field.Field), d.FormatColumn(field.Field), field.Icon))
 		} else {
-			tmp = append(tmp, fmt.Sprintf("%s %s ?", field.Field, field.Icon))
+			tmp = append(tmp, fmt.Sprintf("%s %s ?", d.FormatColumn(field.Field), field.Icon))
 		}
 
 		values = append(values, v)

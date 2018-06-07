@@ -12,11 +12,8 @@ type Test struct {
 }
 
 func TestJsonParse_ParseJson(t *testing.T) {
-	ts := &Test{
-		Name:"clake",
-		Age:11,
-		JsonParse:&JsonParse{},
-	}
+	f := 2.3482922
 
-	fmt.Println(ts.ToJsonString())
+	d := Round(f,4)
+	fmt.Println(d)
 }

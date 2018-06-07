@@ -1,3 +1,6 @@
+/*
+数据库处理
+ */
 package ckdb
 
 import (
@@ -23,19 +26,19 @@ func NewBoltDB(filepath string) *BoltDB {
 
 	return &BoltDB{db}
 }
-
+//bolt DB 数据库处理
 type BoltDB struct {
 	db *bolt.DB
 }
-
+//返回当前 bolt DB 位置
 func (b *BoltDB) Path() string {
 	return b.db.Path()
 }
-
+//关闭数据库
 func (b *BoltDB) Close() {
 	b.db.Close()
 }
-
+//从 bucket 传入 KEY 得到一个值
 func (b *BoltDB) Get(bucket_name string, key string) ([]byte, error) {
 	var v []byte
 	err := b.db.View(func(tx *bolt.Tx) error {
@@ -52,7 +55,7 @@ func (b *BoltDB) Get(bucket_name string, key string) ([]byte, error) {
 	}
 	return v, nil
 }
-
+//插一个新的 key value 值到 bucket
 func (b *BoltDB) Put(bucket_name string, key string, val interface{}) error {
 	err := b.db.Update(func(tx *bolt.Tx) error {
 		bu,err := tx.CreateBucketIfNotExists([]byte(bucket_name))

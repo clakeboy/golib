@@ -2,26 +2,51 @@ package ckdb
 
 import (
 	"gopkg.in/mgo.v2"
+	"fmt"
 )
 
+//dsn mongodb://root:WiaQ82n7B3L5Cz*2#10m@172.18.76.150:27017?authSource=admin
 type MongoDBConfig struct {
-	DBDsn string `json:"db_dsn"`
-	DBName string `json:"db_name"`
-	DBPoolSize int `json:"db_pool_size"`
+	DBHost     string `json:"db_host" yaml:"db_host"`
+	DBPort     string `json:"db_port" yaml:"db_port"`
+	DBUser     string `json:"db_user" yaml:"db_user"`
+	DBPasswd   string `json:"db_passwd" yaml:"db_passwd"`
+	DBAuth     string `json:"db_auth" yaml:"db_auth"`
+	DBName     string `json:"db_name" yaml:"db_name"`
+	DBPoolSize int    `json:"db_pool_size" yaml:"db_pool_size"`
+}
+//build dsn string
+func (mc *MongoDBConfig) BuildDsn() string {
+	if mc.DBAuth == "" {
+		return fmt.Sprintf("mongodb://%s:%s",mc.DBHost,mc.DBPort)
+	}
+	return fmt.Sprintf("mongodb://%s:%s@%s:%s?authSource=%s",mc.DBUser,mc.DBPasswd,mc.DBHost,mc.DBPort,mc.DBAuth)
 }
 
 type DBMongo struct {
-	is_open bool
-	db_name string
-	session *mgo.Session
+	is_open  bool
+	db_name  string
+	session  *mgo.Session
 	database *mgo.Database
 }
 
 var globalSession *mgo.Session
-
-func InitDB(db_dsn string,pool_size int) error {
+//new init mongodb
+func InitMongo(conf *MongoDBConfig) error {
 	var err error
-	globalSession,err = mgo.Dial(db_dsn)
+	globalSession, err = mgo.Dial(conf.BuildDsn())
+	if err != nil {
+		return err
+	}
+	globalSession.SetPoolLimit(conf.DBPoolSize)
+	globalSession.SelectServers()
+	return nil
+}
+
+//old init
+func InitDB(db_dsn string, pool_size int) error {
+	var err error
+	globalSession, err = mgo.Dial(db_dsn)
 	if err != nil {
 		return err
 	}
@@ -30,13 +55,13 @@ func InitDB(db_dsn string,pool_size int) error {
 	return nil
 }
 
-func NewDB(db_name string) *DBMongo{
+func NewDB(db_name string) *DBMongo {
 	db := new(DBMongo)
 	db.db_name = db_name
 	return db
 }
 
-func (this *DBMongo) Open(db_name string) *DBMongo{
+func (this *DBMongo) Open(db_name string) *DBMongo {
 	if !this.is_open {
 		this.session = globalSession.Clone()
 		this.is_open = true
@@ -72,7 +97,7 @@ func (this *DBMongo) Close() {
 }
 
 func (this *DBMongo) Collection(collection_name string) *CKCollection {
-	return NewCollection(this,collection_name)
+	return NewCollection(this, collection_name)
 }
 
 func (this *DBMongo) RunCmd() {
