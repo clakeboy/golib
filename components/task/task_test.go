@@ -39,6 +39,10 @@ func TestManagement_Start(t *testing.T) {
 		fmt.Println(time.Now().Format("2006-01-02 15:04:05"),"Every one minute execute")
 		return true
 	},nil)
+	taskService.AddTaskString("1 18 11 * * *", func(item *Item) bool {
+		fmt.Println(time.Now().Format("2006-01-02 15:04:05"),"11:18:01 execute")
+		return true
+	},nil)
 	taskService.Start()
 	fmt.Println("start")
 	out := make(chan bool,1)

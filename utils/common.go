@@ -213,4 +213,11 @@ func ConvertFloat(c interface{}) float64 {
 	}
 	return 0
 }
+//设置时间回调
+func SetTimeout(step time.Duration,callback func()) {
+	go func() {
+		time.Sleep(step)
+		callback()
+	}()
+}
 

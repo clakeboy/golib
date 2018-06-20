@@ -16,4 +16,6 @@ func TestJsonParse_ParseJson(t *testing.T) {
 
 	d := Round(f,4)
 	fmt.Println(d)
+
+	fmt.Println(1<<30)
 }

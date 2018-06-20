@@ -177,7 +177,7 @@ func BytesToInt(b []byte) int {
 		tmp := int32(0)
 		binary.Read(bytesBuffer, binary.BigEndian, &tmp)
 		return int(tmp)
-	case 16:
+	case 8:
 		tmp := int64(0)
 		binary.Read(bytesBuffer, binary.BigEndian, &tmp)
 		return int(tmp)

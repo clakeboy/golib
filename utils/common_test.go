@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 	"ck_go_lib/utils/uuid"
+	"sync"
 )
 
 func TestM_ToJson(t *testing.T) {
@@ -34,4 +35,15 @@ func TestCreateUUID(t *testing.T) {
 	ui := uuid.Must(uuid.NewV4())
 	fmt.Println(ui.String())
 	fmt.Printf("%x",ui.Bytes())
+}
+
+func TestSetTimeout(t *testing.T) {
+	group := sync.WaitGroup{}
+	group.Add(1)
+	ss := "this timeout string"
+	SetTimeout(time.Second*3, func() {
+		fmt.Println(ss)
+		group.Done()
+	})
+	group.Wait()
 }

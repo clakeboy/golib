@@ -17,6 +17,7 @@ type DBA struct {
 	debug          bool
 	LastSql        string
 	LastArgs       []interface{}
+	LastError      error
 	queryInterface interface{}
 	tx             *sql.Tx
 }
@@ -502,6 +503,12 @@ func (d *DBA) HaltError(err error) {
 	fmt.Println(d.LastSql)
 	fmt.Println(d.LastArgs)
 	fmt.Println(err)
+	d.LastError = err
+}
+
+//得到最后一条错误
+func (d *DBA) GetLastError() error {
+	return d.LastError
 }
 
 //格式化字段名
