@@ -115,7 +115,6 @@ func (ck *CKCollection) Query(where bson.M, page int, number int, sort_list []st
 		list = append(list, result)
 		result = ck.getQueryType(struct_type)
 	}
-
 	res := &QueryResult{
 		List:  list,
 		Count: count,
@@ -149,7 +148,6 @@ func (ck *CKCollection) List(where bson.M, page int, number int, sort_list []str
 		list = append(list, result)
 		result = ck.getQueryType(struct_type)
 	}
-
 	return list, err
 }
 //执行聚合操作

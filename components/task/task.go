@@ -1,11 +1,11 @@
 package task
 
 import (
+	"ck_go_lib/components"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
-	"ck_go_lib/components"
-	"strings"
-	"strconv"
 )
 
 //时间类型
@@ -30,27 +30,62 @@ type Rule struct {
 
 //任务项
 type Item struct {
-	RuleList     []*Rule //规则列表
-	ExecFunc     func(item *Item) bool  //任务执行方法
-	CallbackFunc func(item *Item)  //任务回调方法
-	LastExecDate time.Time //最后执行任务的时间
+	RuleList     []*Rule               //规则列表
+	ExecFunc     func(item *Item) bool //任务执行方法
+	CallbackFunc func(item *Item)      //任务回调方法
+	LastExecDate time.Time             //最后执行任务的时间
+	Args         []interface{}           //任务数据
 }
 
 //任务管理
 type Management struct {
+	stop bool //是否停止
 	list     []*Item //任务列表
 	listLock sync.Mutex
 }
 
 //创建管理任务工厂方法
 func NewManagement() *Management {
-	return &Management{}
+	return &Management{
+		stop:true,
+		listLock:sync.Mutex{},
+	}
 }
 
 //添加一个任务项
 func (m *Management) Add(item *Item) {
 	m.listLock.Lock()
 	m.list = append(m.list, item)
+	m.listLock.Unlock()
+}
+
+//删除列表中一个任务
+func (m *Management) RemoveTask(item *Item) {
+	m.listLock.Lock()
+	for i, v := range m.list {
+		if v == item {
+			m.list = append(m.list[:i], m.list[i+1:]...)
+			break
+		}
+	}
+	m.listLock.Unlock()
+}
+//foreach 回调方法删除一个任务
+func (m *Management) RemoveForeach(f func(*Item) bool) {
+	m.listLock.Lock()
+	for i,v := range m.list {
+		ok := f(v)
+		if ok {
+			m.list = append(m.list[:i], m.list[i+1:]...)
+			break
+		}
+	}
+	m.listLock.Unlock()
+}
+//清空任务列表
+func (m *Management) ClearTask() {
+	m.listLock.Lock()
+	m.list = nil
 	m.listLock.Unlock()
 }
 
@@ -63,27 +98,30 @@ func (m *Management) AddTask(
 	month string,
 	dayOfWeek string,
 	exec func(item *Item) bool,
-	callback func(item *Item)) {
+	callback func(item *Item),
+	args... interface{}) {
 
 	var rules []*Rule
-	rules = append(rules, m.explainString2Type(second,Second))
-	rules = append(rules, m.explainString2Type(minute,Minute))
-	rules = append(rules, m.explainString2Type(hour,Hour))
-	rules = append(rules, m.explainString2Type(dayOfMonth,DayOfMonth))
-	rules = append(rules, m.explainString2Type(month,Month))
-	rules = append(rules, m.explainString2Type(dayOfWeek,DayOfWeek))
+	rules = append(rules, m.explainString2Type(second, Second))
+	rules = append(rules, m.explainString2Type(minute, Minute))
+	rules = append(rules, m.explainString2Type(hour, Hour))
+	rules = append(rules, m.explainString2Type(dayOfMonth, DayOfMonth))
+	rules = append(rules, m.explainString2Type(month, Month))
+	rules = append(rules, m.explainString2Type(dayOfWeek, DayOfWeek))
 
 	item := &Item{
-		RuleList:rules,
-		ExecFunc:exec,
-		CallbackFunc:callback,
+		RuleList:     rules,
+		ExecFunc:     exec,
+		CallbackFunc: callback,
+		Args: args,
 	}
 
 	m.Add(item)
 }
+
 //使用选项字符串添加一个任务项
-func (m *Management) AddTaskString(taskStr string,exec func(item *Item) bool, callback func(item *Item)) {
-	typeList := strings.Split(taskStr," ")
+func (m *Management) AddTaskString(taskStr string, exec func(item *Item) bool, callback func(item *Item),args... interface{}) {
+	typeList := strings.Split(taskStr, " ")
 	if len(typeList) < 6 {
 		return
 	}
@@ -96,27 +134,29 @@ func (m *Management) AddTaskString(taskStr string,exec func(item *Item) bool, ca
 		typeList[5],
 		exec,
 		callback,
+		args...,
 	)
 }
+
 //把原始时间值转为任务规则
-func (m *Management) explainString2Type(str string,timeType TimeType) *Rule {
+func (m *Management) explainString2Type(str string, timeType TimeType) *Rule {
 	if str == "*" {
 		return nil
 	}
 	rule := &Rule{
-		Raw:str,
-		Type:timeType,
+		Raw:  str,
+		Type: timeType,
 	}
-	val := strings.Split(str,"/")
+	val := strings.Split(str, "/")
 	var err error
 	if len(val) > 1 {
 		rule.IsLoop = true
-		rule.Value,err = strconv.Atoi(val[1])
+		rule.Value, err = strconv.Atoi(val[1])
 		if err != nil {
 			return nil
 		}
 	} else {
-		rule.Value,err = strconv.Atoi(val[0])
+		rule.Value, err = strconv.Atoi(val[0])
 		if err != nil {
 			return nil
 		}
@@ -127,12 +167,28 @@ func (m *Management) explainString2Type(str string,timeType TimeType) *Rule {
 
 //开始
 func (m *Management) Start() {
+	m.stop = false
 	go m.run()
+}
+
+func (m *Management) Stop() {
+	m.stop = true
+}
+
+func (m *Management) Status() string {
+	if m.stop {
+		return "Stop"
+	} else {
+		return "Running"
+	}
 }
 
 //运行
 func (m *Management) run() {
 	for {
+		if m.stop {
+			break
+		}
 		go m.execute(time.Now())
 		time.Sleep(time.Second)
 	}
@@ -141,13 +197,13 @@ func (m *Management) run() {
 //执行任务
 func (m *Management) execute(currentDate time.Time) {
 	poll := components.NewPoll(8, func(obj ...interface{}) bool {
-		m.executeTask(obj[0].(*Item),currentDate)
+		m.executeTask(obj[0].(*Item), currentDate)
 		return true
 	})
 
 	var taskList []interface{}
-	for _,v := range m.list {
-		taskList = append(taskList,v)
+	for _, v := range m.list {
+		taskList = append(taskList, v)
 	}
 
 	poll.AddTaskInterface(taskList)
@@ -155,13 +211,13 @@ func (m *Management) execute(currentDate time.Time) {
 }
 
 //执行任务项
-func (m *Management) executeTask(item *Item,currentDate time.Time) {
+func (m *Management) executeTask(item *Item, currentDate time.Time) {
 	if item.ExecFunc == nil {
 		return
 	}
 	//解释时间是否已可执行
-	for _,rule := range item.RuleList {
-		if !m.explainType(rule,currentDate,item.LastExecDate) {
+	for _, rule := range item.RuleList {
+		if !m.explainType(rule, currentDate, item.LastExecDate) {
 			return
 		}
 	}
@@ -204,7 +260,7 @@ func (m *Management) explainType(rule *Rule, currentDate time.Time, lastDate tim
 		}
 	case DayOfMonth:
 		if rule.IsLoop {
-			timeValue = int(currentDate.Sub(lastDate).Hours()/24)
+			timeValue = int(currentDate.Sub(lastDate).Hours() / 24)
 		} else {
 			timeValue = currentDate.Day()
 		}

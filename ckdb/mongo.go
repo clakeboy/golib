@@ -33,14 +33,7 @@ type DBMongo struct {
 var globalSession *mgo.Session
 //new init mongodb
 func InitMongo(conf *MongoDBConfig) error {
-	var err error
-	globalSession, err = mgo.Dial(conf.BuildDsn())
-	if err != nil {
-		return err
-	}
-	globalSession.SetPoolLimit(conf.DBPoolSize)
-	globalSession.SelectServers()
-	return nil
+	return InitDB(conf.BuildDsn(),conf.DBPoolSize)
 }
 
 //old init

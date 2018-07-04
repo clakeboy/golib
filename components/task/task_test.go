@@ -48,3 +48,11 @@ func TestManagement_Start(t *testing.T) {
 	out := make(chan bool,1)
 	<-out
 }
+
+func TestManagement_RemoveTask(t *testing.T) {
+	ss := &Item{}
+
+	bb := ss
+
+	fmt.Println(bb == ss)
+}

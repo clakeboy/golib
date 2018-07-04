@@ -71,7 +71,7 @@ func (h *HttpClient) Post(url_str string, data M) ([]byte, error) {
 	post_data := &url.Values{}
 
 	for k, v := range data {
-		post_data.Add(k, v.(string))
+		post_data.Add(k, fmt.Sprintf("%v",v))
 	}
 
 	req, err := h.Request("POST",url_str,strings.NewReader(post_data.Encode()))
@@ -82,10 +82,14 @@ func (h *HttpClient) Post(url_str string, data M) ([]byte, error) {
 
 	return req.Content, nil
 }
-//发起一个POST JSON请求
+//发起一个POST JSON请求 接收utils.M
 func (h *HttpClient) PostJson(url_str string,data M) ([]byte,error) {
+	return h.PostJsonString(url_str,data.ToJsonString())
+}
+//发起一个POST JSON请求 接收JSON字符串
+func (h *HttpClient) PostJsonString(urlStr string,data string) ([]byte,error) {
 	h.SetHeader("Content-Type","application/json;charset=utf-8")
-	req, err := h.Request("POST",url_str,strings.NewReader(data.ToJsonString()))
+	req, err := h.Request("POST",urlStr,strings.NewReader(data))
 	if err != nil {
 		return nil, err
 	}

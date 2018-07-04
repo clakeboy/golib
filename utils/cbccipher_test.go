@@ -6,7 +6,7 @@ import (
 )
 
 func TestAesEncrypt_Encrypt(t *testing.T) {
-	cbc := NewAes("ck_core")
+	cbc := NewAes("ck-cookie")
 	cipher_text,err := cbc.Encrypt([]byte("2"))
 	if err != nil {
 		panic(err)
