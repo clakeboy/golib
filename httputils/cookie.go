@@ -1,4 +1,4 @@
-package components
+package httputils
 
 import (
 	"net/http"
@@ -67,7 +67,7 @@ func (c *HttpCookie) Delete(name string) {
 	http.SetCookie(c.writer,&http.Cookie{
 		Name:     name,
 		Value:    "",
-		MaxAge:   0,
+		MaxAge:   -1,
 		Path:     c.options.Path,
 		Domain:   c.options.Domain,
 		Secure:   c.options.Secure,

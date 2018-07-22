@@ -18,6 +18,7 @@ type AesEncrypt struct {
 	key string
 	stringType string
 	aesType string
+	iv []byte
 }
 //创建加密
 func NewAes(k string) *AesEncrypt{
@@ -36,6 +37,10 @@ func (a *AesEncrypt) SetKey(k string) {
 		k = StrPad(k,"c",16,STR_PAD_RIGHT)
 	}
 	a.key = k
+}
+//设置向量IV
+func (a *AesEncrypt) SetIV(iv []byte) {
+	a.iv = iv
 }
 //得到加密KEY
 func (a *AesEncrypt) GetKey() []byte {
@@ -62,13 +67,15 @@ func (a *AesEncrypt) Encrypt(plantText []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	plantText = a.PKCS7Padding(plantText, block.BlockSize())
 
 	var blockModel cipher.BlockMode
 
 	switch a.aesType {
 	case AES_CBC:
-		blockModel = cipher.NewCBCEncrypter(block, key[:block.BlockSize()])
+		iv := YN(a.iv == nil,key[:block.BlockSize()],a.iv).([]byte)
+		blockModel = cipher.NewCBCEncrypter(block, iv)
 	case AES_ECB:
 		blockModel = NewECBEncrypter(block)
 	}
@@ -104,13 +111,15 @@ func (a *AesEncrypt) Decrypt(deStr []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	var blockModel cipher.BlockMode
 
 	switch a.aesType {
 	case AES_ECB:
 		blockModel = NewECBDecrypter(block)
 	case AES_CBC:
-		blockModel = cipher.NewCBCDecrypter(block, key[:block.BlockSize()])
+		iv := YN(a.iv == nil,key[:block.BlockSize()],a.iv).([]byte)
+		blockModel = cipher.NewCBCDecrypter(block, iv)
 	}
 
 	plantText := make([]byte, len(ciphertext[:n]))

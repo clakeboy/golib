@@ -77,13 +77,34 @@ func (b *BoltDB) Put(bucket_name string, key string, val interface{}) error {
 	return err
 }
 //删除一个值
-func (b *BoltDB) Delete(bucket_name string, key string) error {
+func (b *BoltDB) Delete(bucket_name string, key ...string) error {
 	err := b.db.Update(func(tx *bolt.Tx) error {
 		bu,err := tx.CreateBucketIfNotExists([]byte(bucket_name))
 		if err != nil {
 			return err
 		}
-		return bu.Delete([]byte(key))
+
+		for _,v := range key {
+			err = bu.Delete([]byte(v))
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
 	})
+	return err
+}
+//迭代一个bucket里所有的数据
+func (b *BoltDB) ForEach(bucketName string,callback func([]byte,[]byte) error) error {
+	err := b.db.View(func(tx *bolt.Tx) error {
+		bu := tx.Bucket([]byte(bucketName))
+		if bu == nil {
+			return nil
+		}
+
+		return bu.ForEach(callback)
+	})
+
 	return err
 }

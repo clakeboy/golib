@@ -1,10 +1,13 @@
-package components
+package httputils
 
 import (
 	"encoding/json"
 	"ck_go_lib/ckdb"
 	"time"
+	"ck_go_lib/components"
+	"ck_go_lib/components/task"
 	"ck_go_lib/utils"
+	"fmt"
 )
 
 type SessionType int
@@ -15,13 +18,13 @@ const(
 )
 
 var (
-	memDriver *MemCache
-	redisDriver *CKRedis
+	memDriver *components.MemCache
+	redisDriver *components.CKRedis
 	boltDriver *ckdb.BoltDB
 )
 
 var sessionInit = false
-
+var sessiongc *task.Management
 //session 数据
 type SessionData struct {
 	Key   string `json:"key"`  //session key
@@ -80,13 +83,14 @@ func NewHttpSession(cookie *HttpCookie,options *SessionOptions) *HttpSession {
 		}
 	}
 	if (!sessionInit) {
+		fmt.Println(sessionInit)
 		switch options.StorageType {
 		case SessionMem:
-			memDriver = NewMemCache()
+			memDriver = components.NewMemCache()
 		case SessionFile:
 			boltDriver = ckdb.NewBoltDB("./session/")
 		case SessionRedis:
-			redisDriver,_ = NewCKRedis()
+			redisDriver,_ = components.NewCKRedis()
 		}
 		sessionInit = true
 	}
@@ -104,6 +108,8 @@ func NewHttpSession(cookie *HttpCookie,options *SessionOptions) *HttpSession {
 }
 //开始Session
 func (s *HttpSession) Start() {
+	s.InitGc()
+
 	sData := &SessionData{}
 
 	var data interface{}
@@ -117,7 +123,11 @@ func (s *HttpSession) Start() {
 	case SessionFile:
 		data ,err = boltDriver.Get("session",s.sessionKey)
 		if err == nil {
-			sData.ParseJson(data.([]byte))
+			jserr := sData.ParseJson(data.([]byte))
+			if jserr != nil {
+				err = jserr
+				break
+			}
 			if int64(sData.Expire) < time.Now().Unix() {
 				boltDriver.Delete("session",s.sessionKey)
 				sData.Value = utils.M{}
@@ -147,7 +157,11 @@ func (s *HttpSession) Set(name string,val string) {
 }
 //设置一个Session 值
 func (s *HttpSession) Get(name string) string {
-	return s.data.Value[name].(string)
+	val,ok := s.data.Value[name].(string)
+	if ok {
+		return val
+	}
+	return ""
 }
 
 //将SESSION 回写
@@ -159,8 +173,39 @@ func (s *HttpSession) Flush() {
 	case SessionMem:
 		memDriver.Set(s.sessionKey,s.data.ToJsonString(),int64(s.options.SurvivalTime.Seconds()))
 	case SessionFile:
-		boltDriver.Put("session",s.sessionKey,s.data.ToJsonString())
+		boltDriver.Put("session",s.sessionKey,s.data)
 	case SessionRedis:
 		redisDriver.Set(s.sessionKey,s.data.ToJsonString(),int(s.options.SurvivalTime.Seconds()))
 	}
+}
+//初始化GC
+func (s *HttpSession) InitGc() {
+	if s.options.StorageType != SessionFile || sessiongc != nil {
+		return
+	}
+
+	sessiongc = task.NewManagement()
+	sessiongc.AddTaskString("* */1 * * * *", func(item *task.Item) bool {
+		if boltDriver != nil {
+			var keys []string
+			sessionData := &SessionData{}
+			currentUnix := int(time.Now().Unix())
+			boltDriver.ForEach("session", func(key []byte, value []byte) error {
+				err := sessionData.ParseJson(value)
+				if err == nil {
+					if currentUnix > sessionData.Expire {
+						keys = append(keys,string(key))
+					}
+				}
+				fmt.Println(sessionData)
+				return nil
+			})
+			if len(keys) > 0 {
+				boltDriver.Delete("session",keys...)
+			}
+			fmt.Println("session has been gc")
+		}
+		return false
+	},nil)
+	sessiongc.Start()
 }
