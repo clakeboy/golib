@@ -186,11 +186,13 @@ func (m *Management) Status() string {
 //运行
 func (m *Management) run() {
 	for {
+		//fmt.Println(time.Now().Format("15:04:05"),time.Now().Nanosecond() % 1000000,time.Now().Nanosecond()/1000000)
 		if m.stop {
 			break
 		}
-		go m.execute(time.Now())
-		time.Sleep(time.Second)
+		go m.execute(time.Unix(time.Now().Unix(),0))
+		//fmt.Println(time.Second - time.Duration(time.Now().Nanosecond()))
+		time.Sleep(time.Second - time.Duration(time.Now().Nanosecond()))
 	}
 }
 
