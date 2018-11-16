@@ -8,6 +8,36 @@ import (
 	"net/url"
 )
 
+type ResData struct {
+	Status bool `json:"status"`
+	Msg   string `json:"msg"`
+	Data  interface{} `json:"data"`
+}
+
+func (r *ResData) ToJson() []byte {
+	data,err := json.Marshal(r)
+	if err != nil {
+		return nil
+	}
+	return data
+}
+
+func (r *ResData) ToJsonString() string {
+	data := r.ToJson()
+	if data == nil {
+		return ""
+	}
+	return string(data)
+}
+
+func (r *ResData) ParseJson(data []byte) error {
+	return json.Unmarshal(data,r)
+}
+
+func (r *ResData) ParseJsonString(str string) error {
+	return r.ParseJson([]byte(str))
+}
+
 type HD map[string]interface{}
 
 func (h *HD) ToJson() string {

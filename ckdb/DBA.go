@@ -41,6 +41,10 @@ type DBColumn struct {
 	Icon  string
 }
 
+//reg
+
+var columnReg = regexp.MustCompile(`(.+?)\[(\+|-|!|>|<|<=|>=|like)\]`)
+
 //DBA专用数据
 type DM map[string]interface{}
 
@@ -485,8 +489,8 @@ func (d *DBA) formatWhere(column string, table string, length int) string {
 
 //解释字段名
 func (d *DBA) explainColumn(column string) *DBColumn {
-	reg := regexp.MustCompile(`(.+?)\[(\+|-|!|>|<|<=|>=|like)\]`)
-	match := reg.FindStringSubmatch(column)
+	//reg := regexp.MustCompile(`(.+?)\[(\+|-|!|>|<|<=|>=|like)\]`)
+	match := columnReg.FindStringSubmatch(column)
 	field := &DBColumn{}
 	if len(match) > 0 {
 		field.Field = match[1]

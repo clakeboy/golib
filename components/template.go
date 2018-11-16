@@ -24,6 +24,9 @@ type TemplateCon struct{
 	ModTime int64
 }
 
+//变量 regexp
+var regVar = regexp.MustCompile(`\{%([0-9_a-zA-Z\[\]'"$\.\x7f-\xff]+)\}`)
+
 func NewTemplate(tempDir string) *Template {
 	return &Template{
 		templateDir:tempDir,
@@ -79,7 +82,7 @@ func (t *Template) Assign(key string,val interface{}) {
 //替换模板内变量
 func (t *Template) replaceVariable(rawByte []byte) string {
 	content := string(rawByte)
-	regVar := regexp.MustCompile(`\{%([0-9_a-zA-Z\[\]'"$\.\x7f-\xff]+)\}`)
+	//regVar := regexp.MustCompile(`\{%([0-9_a-zA-Z\[\]'"$\.\x7f-\xff]+)\}`)
 	list := regVar.FindAllStringSubmatch(content,-1)
 	for _,v := range list {
 		arr := strings.Split(v[1],".")

@@ -70,6 +70,9 @@ type WxUserInfo struct {
 	Tagid_list     []int  `json:"tagid_list"`
 }
 
+//文件名
+var fileReg = regexp.MustCompile(`filename="(.+)"`)
+
 func NewWeixin(app_id, app_secret string) *Weixin {
 	return &Weixin{
 		appId:     app_id,
@@ -286,8 +289,8 @@ func (w *Weixin) GetMedia(access_token string, media_id string) (*MediaData, err
 
 	if res.Headers.Get("Content-Type") != "text/plain" || res.Headers.Get("Content-Type") != "application/json" {
 		dis := res.Headers.Get("Content-disposition")
-		reg := regexp.MustCompile(`filename="(.+)"`)
-		list := reg.FindStringSubmatch(dis)
+		//reg := regexp.MustCompile(`filename="(.+)"`)
+		list := fileReg.FindStringSubmatch(dis)
 		media := &MediaData{
 			FileType: res.Headers.Get("Content-Type"),
 			FileName: list[1],

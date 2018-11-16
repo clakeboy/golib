@@ -51,8 +51,8 @@ func Hump2Under(str string) {
 func Under2Hump(str string) string {
 	list := strings.Split(str, "_")
 
-	for i, cap := range list {
-		list[i] = UcFirst(cap)
+	for i, caps := range list {
+		list[i] = UcFirst(caps)
 	}
 
 	return strings.Join(list,"")

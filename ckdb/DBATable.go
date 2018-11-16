@@ -37,6 +37,9 @@ type DBATable struct {
 	columnType interface{}
 }
 
+// field regexp
+var fieldReg = regexp.MustCompile(`(.+?)\[(.+)\]`)
+
 //新建一个table处理类
 func NewDBATable(db *DBA, table string) *DBATable {
 	return &DBATable{table: table, db: db, field_str: "*"}
@@ -88,8 +91,8 @@ func (t *DBATable) Select(fields utils.M) *DBATable {
 
 //解释字段内是否有别名
 func (t *DBATable) explainField(field string) *TBField {
-	reg := regexp.MustCompile(`(.+?)\[(.+)\]`)
-	match := reg.FindStringSubmatch(field)
+	//reg := regexp.MustCompile(`(.+?)\[(.+)\]`)
+	match := fieldReg.FindStringSubmatch(field)
 	var (
 		fieldStr string
 		funcStr  string
