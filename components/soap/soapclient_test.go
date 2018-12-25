@@ -1,12 +1,12 @@
 package soap
 
 import (
-	"ck_go_lib/utils"
+	"../../utils"
 	"fmt"
-	"regexp"
-	"testing"
 	"log"
+	"regexp"
 	"strings"
+	"testing"
 )
 
 func TestNewSoapClient(t *testing.T) {
@@ -41,7 +41,7 @@ func TestNewSoapClient(t *testing.T) {
 	fmt.Println(args...)
 	soap_client.SetAddress("http://123.147.190.130:28081/vchl-channel/services/accessService")
 	str, err := soap_client.Call("vchlRequest", args...)
-	fmt.Println(str,err)
+	fmt.Println(str, err)
 }
 
 func TestSoapClient_Call(t *testing.T) {
@@ -457,18 +457,18 @@ func TestNewSoapClient2(t *testing.T) {
 	}
 	fmt.Println(soap_client.requestUrl)
 
-	res,err := soap_client.Call("carQuery",utils.M{
-		"policySort":"CQ0",
-		"licenseNo":"渝B6S919",
-		"licenseType":"02",
-		"cityAreaCode":"03",
-		"txInsuranceRequestEhm":utils.M{
-			"transExeDate":"",
-			"transExeTime":"",
+	res, err := soap_client.Call("carQuery", utils.M{
+		"policySort":   "CQ0",
+		"licenseNo":    "渝B6S919",
+		"licenseType":  "02",
+		"cityAreaCode": "03",
+		"txInsuranceRequestEhm": utils.M{
+			"transExeDate": "",
+			"transExeTime": "",
 		},
-		"txInsuranceRequestExtensionEhm":utils.M{
-			"operator":"CQ0_Test",
-			"operatorKey":"123456",
+		"txInsuranceRequestExtensionEhm": utils.M{
+			"operator":    "CQ0_Test",
+			"operatorKey": "123456",
 		},
 	})
 	if err != nil {
@@ -485,7 +485,7 @@ func TestNewSoapClient4(t *testing.T) {
 	}
 	fmt.Println(soap_client.requestUrl)
 
-	res,err := soap_client.Call("premiumCaculate",getSoapData())
+	res, err := soap_client.Call("premiumCaculate", getSoapData())
 	if err != nil {
 		log.Println(err)
 	}
@@ -504,9 +504,9 @@ func TestNewSoapClient3(t *testing.T) {
 
 	url_str := "http://114.255.29.204:8010/frontServiceCenter/services/CarQueryService.CarQueryServiceHttpSoap12Endpoint/"
 	client := utils.NewHttpClient()
-	client.SetHeader("Content-Type","application/soap+xml; charset=utf-8")
-	client.SetHeader("Content-Length",fmt.Sprintf("%v",len(content)))
-	req,err := client.Request("POST",url_str,strings.NewReader(content))
+	client.SetHeader("Content-Type", "application/soap+xml; charset=utf-8")
+	client.SetHeader("Content-Length", fmt.Sprintf("%v", len(content)))
+	req, err := client.Request("POST", url_str, strings.NewReader(content))
 	if err != nil {
 		log.Println(err)
 	}

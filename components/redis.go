@@ -70,7 +70,12 @@ func NewCKRedis() (*CKRedis, error) {
 
 //设置一个缓存值
 func (m *CKRedis) Set(key string, val interface{}, exp int) error {
-	_, err := m.rd.Do("SET", key, val,"EX", exp)
+	var err error
+	if exp == -1 {
+		_, err = m.rd.Do("SET", key, val)
+	} else {
+		_, err = m.rd.Do("SET", key, val,"EX", exp)
+	}
 	if err != nil {
 		return err
 	}

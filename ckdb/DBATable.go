@@ -1,7 +1,7 @@
 package ckdb
 
 import (
-	"ck_go_lib/utils"
+	"../utils"
 	"fmt"
 	"regexp"
 	"strings"

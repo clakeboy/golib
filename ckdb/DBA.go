@@ -1,7 +1,7 @@
 package ckdb
 
 import (
-	"ck_go_lib/utils"
+	"../utils"
 	"database/sql"
 	"errors"
 	"fmt"

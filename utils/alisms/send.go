@@ -1,16 +1,16 @@
 package alisms
 
 import (
-	"ck_go_lib/utils"
+	"../../utils"
 	"crypto/hmac"
 	"crypto/sha1"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"sort"
 	"strings"
 	"time"
-	"encoding/json"
 )
 
 //短信配置
@@ -87,7 +87,7 @@ func (a *AliSms) send(url_str string) (*AliSmsRes, error) {
 	}
 
 	res_data := AliSmsRes{}
-	err = json.Unmarshal([]byte(res_str),&res_data)
+	err = json.Unmarshal([]byte(res_str), &res_data)
 	if err != nil {
 		return nil, err
 	}

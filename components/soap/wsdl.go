@@ -1,9 +1,9 @@
 package soap
 
 import (
+	"../../utils"
 	"encoding/xml"
 	"strings"
-	"ck_go_lib/utils"
 )
 
 type WsdlElement struct {
@@ -64,7 +64,7 @@ type WsdlTypeElement struct {
 	XMLName   xml.Name `xml:"element"`
 	Name      string   `xml:"name,attr"`
 	MinOccurs int      `xml:"minOccurs,attr"`
-	MaxOccurs string      `xml:"maxOccurs,attr"`
+	MaxOccurs string   `xml:"maxOccurs,attr"`
 	Nillable  bool     `xml:"nillable,attr"`
 	Type      string   `xml:"type,attr"`
 }
@@ -174,11 +174,11 @@ type Wsdl struct {
 //新建一个WSDL解释器
 func NewWsdl() *Wsdl {
 	return &Wsdl{
-		messages: make(map[string]*WsdlMessage),
-		portTypes:make(map[string]*WsdlPortType),
-		buildings:make(map[string]*WsdlBinding),
-		elements:make(map[string]*WsdlSchemaElement),
-		complexTypes:make(map[string]*WsdlComplexType),
+		messages:     make(map[string]*WsdlMessage),
+		portTypes:    make(map[string]*WsdlPortType),
+		buildings:    make(map[string]*WsdlBinding),
+		elements:     make(map[string]*WsdlSchemaElement),
+		complexTypes: make(map[string]*WsdlComplexType),
 	}
 }
 
@@ -233,7 +233,7 @@ func (w *Wsdl) explainComplexType() {
 		return
 	}
 	for _, v := range w.ws.Types.Schema {
-		namespace := utils.YN(v.TargetNamespace=="",w.ws.TargetNamespace,v.TargetNamespace).(string)
+		namespace := utils.YN(v.TargetNamespace == "", w.ws.TargetNamespace, v.TargetNamespace).(string)
 
 		for _, t := range v.ComplexType {
 			t.TargetNamespace = namespace
@@ -280,8 +280,8 @@ func (w *Wsdl) GetFunction(build_name, func_name string) *WsdlFunction {
 
 	wsdl_fun.Name = func_name
 	wsdl_fun.RequestArgs = &WsdlFunctionArgs{
-		Name:fun.Name,
-		Namespace:w.ws.TargetNamespace,
+		Name:      fun.Name,
+		Namespace: w.ws.TargetNamespace,
 	}
 	for _, part := range reqmsg.Parts {
 		if part.Name == "parameters" && part.Element != "" {
@@ -295,13 +295,13 @@ func (w *Wsdl) GetFunction(build_name, func_name string) *WsdlFunction {
 			args.Name = part.Name
 			args.Type = formatPrefixNs(part.Type)
 			args.Namespace = w.ws.TargetNamespace
-			wsdl_fun.RequestArgs.Elements = append(wsdl_fun.RequestArgs.Elements,args)
+			wsdl_fun.RequestArgs.Elements = append(wsdl_fun.RequestArgs.Elements, args)
 		}
 	}
 	wsdl_fun.ResponseName = resmsg.Name
 	wsdl_fun.ResponseArgs = &WsdlFunctionArgs{
-		Name:resmsg.Name,
-		Namespace:w.ws.TargetNamespace,
+		Name:      resmsg.Name,
+		Namespace: w.ws.TargetNamespace,
 	}
 	for _, part := range resmsg.Parts {
 		if part.Name == "parameters" && part.Element != "" {
@@ -313,7 +313,7 @@ func (w *Wsdl) GetFunction(build_name, func_name string) *WsdlFunction {
 		} else {
 			args := &WsdlFunctionArgs{}
 			args.Name = part.Name
-			wsdl_fun.ResponseArgs.Elements = append(wsdl_fun.ResponseArgs.Elements,args)
+			wsdl_fun.ResponseArgs.Elements = append(wsdl_fun.ResponseArgs.Elements, args)
 		}
 	}
 
@@ -325,7 +325,7 @@ func (w *Wsdl) getWsdlArgs(ct *WsdlComplexType) ArgsMap {
 	args_map := ArgsMap{}
 	var seq []*WsdlTypeElement
 	if ct.ComplexContent != nil {
-		args_map = append(args_map,w.getWsdlArgs(w.complexTypes[formatPrefixNs(ct.ComplexContent.Extension.Base)])...)
+		args_map = append(args_map, w.getWsdlArgs(w.complexTypes[formatPrefixNs(ct.ComplexContent.Extension.Base)])...)
 
 		seq = ct.ComplexContent.Extension.Sequence.Element
 	} else {
@@ -345,7 +345,7 @@ func (w *Wsdl) getWsdlArgs(ct *WsdlComplexType) ArgsMap {
 		if ok {
 			args.Elements = w.getWsdlArgs(child)
 		}
-		args_map = append(args_map,args)
+		args_map = append(args_map, args)
 	}
 	return args_map
 }

@@ -1,21 +1,22 @@
 package utils
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 )
 
-type Test struct {
+type TestUser struct {
 	Name string `json:"name"`
 	Age int `json:"age"`
-	*JsonParse
+	JsonParse
 }
 
 func TestJsonParse_ParseJson(t *testing.T) {
-	f := 2.3482922
+	u := &TestUser{
+		Name:"clake",
+		Age:18,
+	}
 
-	d := Round(f,4)
-	fmt.Println(d)
-
-	fmt.Println(1<<30)
+	fmt.Println(u.ToJsonString())
+	fmt.Println(u.Name,u.Age)
 }

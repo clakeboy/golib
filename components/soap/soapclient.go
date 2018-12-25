@@ -1,7 +1,7 @@
 package soap
 
 import (
-	"ck_go_lib/utils"
+	"../../utils"
 	"encoding/xml"
 	"errors"
 	"fmt"

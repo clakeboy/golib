@@ -1,14 +1,14 @@
 package components
 
 import (
-	"os"
-	"ck_go_lib/utils"
-	"time"
+	"../utils"
+	"bytes"
 	"fmt"
 	"io"
 	"io/ioutil"
-	"bytes"
+	"os"
 	"runtime"
+	"time"
 )
 
 type SysLog struct {
@@ -23,24 +23,24 @@ var (
 )
 
 func NewSysLog(prefix string) *SysLog {
-	return &SysLog{Prefix:prefix}
+	return &SysLog{Prefix: prefix}
 }
 
 func (l *SysLog) Write(p []byte) (n int, err error) {
-	err = os.MkdirAll("./logs/",0755)
+	err = os.MkdirAll("./logs/", 0755)
 	if err != nil {
 		panic(err)
 	}
-	file_name := fmt.Sprintf("%s%v.log",l.Prefix,utils.FormatTime("YY-MM-DD",time.Now().Unix()))
+	file_name := fmt.Sprintf("%s%v.log", l.Prefix, utils.FormatTime("YY-MM-DD", time.Now().Unix()))
 
-	err = l.WriteFile("./logs/"+file_name,p,0755)
+	err = l.WriteFile("./logs/"+file_name, p, 0755)
 	if err != nil {
-		return 0,err
+		return 0, err
 	}
-	return len(p),nil
+	return len(p), nil
 }
 
-func (l *SysLog) WriteFile(filename string,data []byte,perm os.FileMode) error {
+func (l *SysLog) WriteFile(filename string, data []byte, perm os.FileMode) error {
 	f, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_APPEND, perm)
 	if err != nil {
 		return err
@@ -55,22 +55,23 @@ func (l *SysLog) WriteFile(filename string,data []byte,perm os.FileMode) error {
 	return err
 }
 
-func (l *SysLog) checkFileIsExist(filename string) (bool) {
+func (l *SysLog) checkFileIsExist(filename string) bool {
 	var exist = true
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
 		exist = false
 	}
 	return exist
 }
+
 //记录错误
 func (l *SysLog) Error(err interface{}) {
 	stack_str := stack(3)
-	msg := fmt.Sprintf("[ERROR][%s] panic recovered:\n%s\n%s\n",time.Now().Format("2006-01-02 15:04:05"),err, stack_str)
+	msg := fmt.Sprintf("[ERROR][%s] panic recovered:\n%s\n%s\n", time.Now().Format("2006-01-02 15:04:05"), err, stack_str)
 	l.Write([]byte(msg))
 }
 
 func (l *SysLog) Info(msg string) {
-	msg_str := fmt.Sprintf("[INFO][%s]:\n%s\n",time.Now().Format("2006-01-02 15:04:05"),msg)
+	msg_str := fmt.Sprintf("[INFO][%s]:\n%s\n", time.Now().Format("2006-01-02 15:04:05"), msg)
 	l.Write([]byte(msg_str))
 }
 

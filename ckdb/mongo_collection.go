@@ -1,7 +1,7 @@
 package ckdb
 
 import (
-	"ck_go_lib/utils"
+	"../utils"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"reflect"

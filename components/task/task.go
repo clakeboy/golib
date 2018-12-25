@@ -1,7 +1,7 @@
 package task
 
 import (
-	"ck_go_lib/components"
+	"../../components"
 	"strconv"
 	"strings"
 	"sync"

@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 	"reflect"
-	"ck_go_lib/utils"
+	"../utils"
 )
 
 var cfg = &DBConfig{

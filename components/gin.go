@@ -1,14 +1,15 @@
 package components
 
 import (
+	"../utils"
+	"fmt"
+	"github.com/DeanThompson/ginpprof"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
-	"fmt"
-	"reflect"
-	"ck_go_lib/utils"
-	"github.com/DeanThompson/ginpprof"
 	"net/http"
+	"reflect"
 )
+
 //得到POST原始数据
 func GetProperty(c *gin.Context) []byte {
 	data, err := ioutil.ReadAll(c.Request.Body)
@@ -34,7 +35,7 @@ func CallAction(i interface{}, c *gin.Context) {
 	if ok {
 		var params []reflect.Value
 		if method.Type.NumIn() == 2 {
-			params = make([]reflect.Value,1)
+			params = make([]reflect.Value, 1)
 			res := GetProperty(c)
 			params[0] = reflect.ValueOf(res)
 		}
@@ -50,7 +51,7 @@ func CallAction(i interface{}, c *gin.Context) {
 		rnflag := true
 		msg := "ok"
 
-		buildOutput(list[args_len-1],&rnflag,&msg)
+		buildOutput(list[args_len-1], &rnflag, &msg)
 
 		c.JSON(200, utils.ApiResult(rnflag, msg, list[0].Interface()))
 	} else {
@@ -71,7 +72,7 @@ func CallActionGet(i interface{}, c *gin.Context) {
 	}
 }
 
-func buildOutput(v reflect.Value,rnflag *bool, msg *string) {
+func buildOutput(v reflect.Value, rnflag *bool, msg *string) {
 	switch v.Type().String() {
 	case "bool":
 		if !v.Interface().(bool) {
@@ -89,8 +90,9 @@ func buildOutput(v reflect.Value,rnflag *bool, msg *string) {
 func InitPprof(server *gin.Engine) {
 	ginpprof.Wrapper(server)
 }
+
 //是否可以跨域调用
-func Cross(c *gin.Context,is_cross bool,org string) {
+func Cross(c *gin.Context, is_cross bool, org string) {
 	if is_cross {
 		c.Header("Access-Control-Allow-Origin", org)
 		c.Header("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
@@ -98,7 +100,8 @@ func Cross(c *gin.Context,is_cross bool,org string) {
 		c.Header("Access-Control-Allow-Credentials", "true")
 	}
 }
+
 //显示HTML数据
-func Display(c *gin.Context,html []byte) {
-	c.Data(http.StatusOK,"text/html;charset=utf-8",html)
+func Display(c *gin.Context, html []byte) {
+	c.Data(http.StatusOK, "text/html;charset=utf-8", html)
 }

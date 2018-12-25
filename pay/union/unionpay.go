@@ -1,7 +1,7 @@
 package union
 
 import (
-	"ck_go_lib/utils"
+	"../../utils"
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"

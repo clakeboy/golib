@@ -1,12 +1,12 @@
 package statistics
 
 import (
+	"../../utils"
 	"fmt"
 	"reflect"
 	"regexp"
-	"time"
 	"strconv"
-	"ck_go_lib/utils"
+	"time"
 )
 
 type Stat interface {
@@ -41,13 +41,13 @@ func NewStatDate(unix_time interface{}) *StatDate {
 	v := reflect.ValueOf(unix_time)
 	switch v.Kind() {
 	case reflect.String:
-		i,err := strconv.ParseInt(v.String(),10,64)
+		i, err := strconv.ParseInt(v.String(), 10, 64)
 		if err != nil {
 			date = time.Now()
 		}
-		date = time.Unix(i,0)
-	case reflect.Int,reflect.Int16,reflect.Int32,reflect.Int64:
-		date = time.Unix(v.Int(),0)
+		date = time.Unix(i, 0)
+	case reflect.Int, reflect.Int16, reflect.Int32, reflect.Int64:
+		date = time.Unix(v.Int(), 0)
 	}
 
 	year, week := date.ISOWeek()
@@ -249,8 +249,8 @@ func (u *MapReduce) Map(key string, data utils.M, conditions []*MapCond) {
 				list = []*MapValue{}
 			}
 			map_item := &MapValue{
-				Value:data[key],
-				Datetime:NewStatDate(data[u.timeColumn]),
+				Value:    data[key],
+				Datetime: NewStatDate(data[u.timeColumn]),
 			}
 			list = append(list, map_item)
 			map_data[key] = list
@@ -282,6 +282,7 @@ func (u *MapReduce) Reduce() CondReduceResult {
 	}
 	return condReduceResult
 }
+
 //返回带时间周期的计算结果集 以年,月,周,日的统计结果
 func (u *MapReduce) ReduceDate() CondDateReduceResult {
 	condReduceResult := CondDateReduceResult{}
@@ -291,7 +292,7 @@ func (u *MapReduce) ReduceDate() CondDateReduceResult {
 		//循环当前条件数据的数据汇总字段,并累计结果
 		for key, v := range mapData {
 			for _, c := range v {
-				u.reduceDateValue(key,c,reduce)
+				u.reduceDateValue(key, c, reduce)
 			}
 		}
 		condReduceResult[cond.Name] = reduce
@@ -300,86 +301,86 @@ func (u *MapReduce) ReduceDate() CondDateReduceResult {
 }
 
 //计算所有时间段数据
-func (u *MapReduce) reduceDateValue(key string,val *MapValue,dateVal DateReduceResult) {
-	dataColl,ok := dateVal[val.Datetime.Year]
+func (u *MapReduce) reduceDateValue(key string, val *MapValue, dateVal DateReduceResult) {
+	dataColl, ok := dateVal[val.Datetime.Year]
 	if !ok {
 		dataColl = map[string]map[int]ReduceResult{}
 		dateVal[val.Datetime.Year] = dataColl
 	}
 	//年汇总
-	yearly,ok := dataColl["Yearly"]
+	yearly, ok := dataColl["Yearly"]
 	if !ok {
 		yearly = map[int]ReduceResult{}
 		dataColl["Yearly"] = yearly
 	}
 
-	yearlyResult,ok := yearly[val.Datetime.Year]
+	yearlyResult, ok := yearly[val.Datetime.Year]
 	if !ok {
 		yearlyResult = ReduceResult{}
 		yearly[val.Datetime.Year] = yearlyResult
 	}
 
-	if k,ok := yearlyResult[key];ok {
-		k.Add(&ReduceValue{1,utils.ConvertFloat(val.Value)})
+	if k, ok := yearlyResult[key]; ok {
+		k.Add(&ReduceValue{1, utils.ConvertFloat(val.Value)})
 	} else {
-		yearlyResult[key] = &ReduceValue{1,utils.ConvertFloat(val.Value)}
+		yearlyResult[key] = &ReduceValue{1, utils.ConvertFloat(val.Value)}
 	}
 
 	//月汇总
-	monthly,ok := dataColl["monthly"]
+	monthly, ok := dataColl["monthly"]
 	if !ok {
 		monthly = map[int]ReduceResult{}
 		dataColl["monthly"] = monthly
 	}
 
-	monthlyResult,ok := monthly[val.Datetime.Month]
+	monthlyResult, ok := monthly[val.Datetime.Month]
 	if !ok {
 		monthlyResult = ReduceResult{}
 		monthly[val.Datetime.Month] = monthlyResult
 	}
 
-	if k,ok := monthlyResult[key];ok {
-		k.Add(&ReduceValue{1,utils.ConvertFloat(val.Value)})
+	if k, ok := monthlyResult[key]; ok {
+		k.Add(&ReduceValue{1, utils.ConvertFloat(val.Value)})
 	} else {
-		monthlyResult[key] = &ReduceValue{1,utils.ConvertFloat(val.Value)}
+		monthlyResult[key] = &ReduceValue{1, utils.ConvertFloat(val.Value)}
 	}
 
 	//周汇总
-	weekly,ok := dataColl["weekly"]
+	weekly, ok := dataColl["weekly"]
 	if !ok {
 		weekly = map[int]ReduceResult{}
 		dataColl["weekly"] = weekly
 	}
 
-	weeklyResult,ok := weekly[val.Datetime.Week]
+	weeklyResult, ok := weekly[val.Datetime.Week]
 	if !ok {
 		weeklyResult = ReduceResult{}
 		weekly[val.Datetime.Week] = weeklyResult
 	}
 
-	if k,ok := weeklyResult[key];ok {
-		k.Add(&ReduceValue{1,utils.ConvertFloat(val.Value)})
+	if k, ok := weeklyResult[key]; ok {
+		k.Add(&ReduceValue{1, utils.ConvertFloat(val.Value)})
 	} else {
-		weeklyResult[key] = &ReduceValue{1,utils.ConvertFloat(val.Value)}
+		weeklyResult[key] = &ReduceValue{1, utils.ConvertFloat(val.Value)}
 	}
 
 	//年份天数汇总
 
-	daily,ok := dataColl["daily"]
+	daily, ok := dataColl["daily"]
 	if !ok {
 		daily = map[int]ReduceResult{}
 		dataColl["daily"] = daily
 	}
 
-	dailyResult,ok := daily[val.Datetime.YearDay]
+	dailyResult, ok := daily[val.Datetime.YearDay]
 	if !ok {
 		dailyResult = ReduceResult{}
 		daily[val.Datetime.YearDay] = dailyResult
 	}
 
-	if k,ok := dailyResult[key];ok {
-		k.Add(&ReduceValue{1,utils.ConvertFloat(val.Value)})
+	if k, ok := dailyResult[key]; ok {
+		k.Add(&ReduceValue{1, utils.ConvertFloat(val.Value)})
 	} else {
-		dailyResult[key] = &ReduceValue{1,utils.ConvertFloat(val.Value)}
+		dailyResult[key] = &ReduceValue{1, utils.ConvertFloat(val.Value)}
 	}
 }

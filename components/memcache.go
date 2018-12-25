@@ -1,7 +1,7 @@
 package components
 
 import (
-	"ck_go_lib/utils"
+	"../utils"
 	"errors"
 	"fmt"
 	"sync"

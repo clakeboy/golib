@@ -1,23 +1,23 @@
 package utils
 
 import (
-	"strings"
-	"math/rand"
-	"time"
-	"reflect"
-	"os"
-	"fmt"
+	"../utils/uuid"
 	"encoding/json"
-	"strconv"
-	"runtime"
-	"ck_go_lib/utils/uuid"
+	"fmt"
+	"math/rand"
+	"os"
 	"os/exec"
+	"reflect"
+	"runtime"
+	"strconv"
+	"strings"
+	"time"
 )
 
 type M map[string]interface{}
 
 func (m *M) ToJson() []byte {
-	data ,err := json.Marshal(m)
+	data, err := json.Marshal(m)
 	if err != nil {
 		return nil
 	}
@@ -33,8 +33,8 @@ func (m *M) ToJsonString() string {
 }
 
 func (m *M) ParseJson(data []byte) error {
-	err := json.Unmarshal(data,m)
-	if err != nil{
+	err := json.Unmarshal(data, m)
+	if err != nil {
 		return err
 	}
 	return nil
@@ -47,6 +47,7 @@ func (m *M) ParseJsonString(data string) error {
 func Hump2Under(str string) {
 
 }
+
 //下划线转驼峰
 func Under2Hump(str string) string {
 	list := strings.Split(str, "_")
@@ -55,18 +56,20 @@ func Under2Hump(str string) string {
 		list[i] = UcFirst(caps)
 	}
 
-	return strings.Join(list,"")
+	return strings.Join(list, "")
 }
+
 //首字母大写
-func UcFirst(str string) string{
+func UcFirst(str string) string {
 	first := str[0:1]
 	long := str[1:]
 	return strings.ToUpper(first) + long
 }
 
 const randTable = "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890"
+
 //生成随机字符串
-func RandStr(number int,r_table interface{}) string {
+func RandStr(number int, r_table interface{}) string {
 	var table string
 	if r_table != nil {
 		table = r_table.(string)
@@ -78,14 +81,15 @@ func RandStr(number int,r_table interface{}) string {
 	rand.Seed(time.Now().UnixNano())
 	str := []string{}
 	rand_len := len(table)
-	for i:=0;i<number;i++ {
-		str = append(str,string(table[rand.Intn(rand_len)]))
+	for i := 0; i < number; i++ {
+		str = append(str, string(table[rand.Intn(rand_len)]))
 	}
 
-	return strings.Join(str,"")
+	return strings.Join(str, "")
 }
+
 //结构转map
-func Struct2Map(obj interface{},fields []string) map[string]interface{} {
+func Struct2Map(obj interface{}, fields []string) map[string]interface{} {
 	var t reflect.Type
 	var v reflect.Value
 
@@ -99,9 +103,9 @@ func Struct2Map(obj interface{},fields []string) map[string]interface{} {
 
 	var data = make(map[string]interface{})
 
-	for i:=0;i<t.NumField();i++ {
+	for i := 0; i < t.NumField(); i++ {
 		if fields != nil {
-			flag := StringIndexOf(fields,t.Field(i).Tag.Get("json"))
+			flag := StringIndexOf(fields, t.Field(i).Tag.Get("json"))
 			if flag != -1 {
 				data[t.Field(i).Tag.Get("json")] = v.Field(i).Interface()
 			}
@@ -112,19 +116,21 @@ func Struct2Map(obj interface{},fields []string) map[string]interface{} {
 
 	return data
 }
+
 //map 转结构
-func Map2Struct(obj interface{},stu interface{}) error {
-	json_data,err := json.Marshal(obj)
+func Map2Struct(obj interface{}, stu interface{}) error {
+	json_data, err := json.Marshal(obj)
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(json_data,stu)
+	err = json.Unmarshal(json_data, stu)
 	if err != nil {
 		return err
 	}
 	return nil
 }
+
 //创建UUID
 func CreateUUID(step bool) string {
 	if runtime.GOOS == "windows" {
@@ -132,7 +138,7 @@ func CreateUUID(step bool) string {
 		if step {
 			return ui.String()
 		} else {
-			return fmt.Sprintf("%x",ui.Bytes())
+			return fmt.Sprintf("%x", ui.Bytes())
 		}
 
 	} else {
@@ -151,7 +157,6 @@ func CreateUUID(step bool) string {
 	}
 }
 
-
 //API输出
 func ApiResult(status bool, msg string, i interface{}) *map[string]interface{} {
 	res := &map[string]interface{}{"status": status, "msg": msg, "data": i}
@@ -168,7 +173,7 @@ func Inet_ntoa(ipnr int64) string {
 
 	return fmt.Sprintf(
 		"%v.%v.%v.%v",
-		bytes[3],bytes[2],bytes[1],bytes[0])
+		bytes[3], bytes[2], bytes[1], bytes[0])
 }
 
 // Convert net.IP to int64 ,  http://www.outofmemory.cn
@@ -188,13 +193,15 @@ func Inet_aton(ipnr string) int64 {
 
 	return sum
 }
+
 //模拟二元操作符功能
-func YN(condition bool,yes interface{},no interface{}) interface{} {
+func YN(condition bool, yes interface{}, no interface{}) interface{} {
 	if condition {
 		return yes
 	}
 	return no
 }
+
 //转换任意数据为 float64
 func ConvertFloat(c interface{}) float64 {
 	rv := reflect.ValueOf(c)
@@ -206,7 +213,7 @@ func ConvertFloat(c interface{}) float64 {
 	case reflect.Float32, reflect.Float64:
 		return rv.Float()
 	case reflect.String:
-		fl,err := strconv.ParseFloat(rv.String(),64)
+		fl, err := strconv.ParseFloat(rv.String(), 64)
 		if err != nil {
 			return 0
 		}
@@ -214,8 +221,9 @@ func ConvertFloat(c interface{}) float64 {
 	}
 	return 0
 }
+
 //设置时间回调
-func SetTimeout(step time.Duration,callback func()) {
+func SetTimeout(step time.Duration, callback func()) {
 	go func() {
 		time.Sleep(step)
 		callback()
@@ -237,4 +245,3 @@ func OpenBrowse(uri string) error {
 	cmd := exec.Command(run, uri)
 	return cmd.Start()
 }
-
