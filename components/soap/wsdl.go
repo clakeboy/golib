@@ -1,8 +1,8 @@
 package soap
 
 import (
-	"../../utils"
 	"encoding/xml"
+	"github.com/clakeboy/golib/utils"
 	"strings"
 )
 

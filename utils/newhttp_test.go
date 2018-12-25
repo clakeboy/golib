@@ -9,7 +9,7 @@ func TestHttpClient_Post(t *testing.T) {
 	data := M{
 		"license_no": "渝B6S919",
 	}
-	res,_ := HttpPostJson("http://localhost:7908/serv/car/push_car_license", data)
+	res, _ := HttpPostJson("http://localhost:7908/serv/car/push_car_license", data)
 	fmt.Println(res)
 }
 
@@ -28,12 +28,12 @@ func TestHttpClient_Get(t *testing.T) {
 	//fmt.Println(content)
 
 	client := NewHttpClient()
-	_,err := client.Get("https://www.baidu.com")
+	_, err := client.Get("https://www.baidu.com")
 	if err != nil {
 		panic(err)
 	}
 
 	//fmt.Println(string(res))
 	resp := client.GetLastResponse()
-	fmt.Printf("%+v",resp.Cookie.Cookies[0].Value)
+	fmt.Printf("%+v", resp.Cookie.Cookies[0].Value)
 }

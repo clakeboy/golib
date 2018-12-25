@@ -2,8 +2,8 @@ package phpserialize
 
 import (
 	"bytes"
-	"strconv"
 	"fmt"
+	"strconv"
 )
 
 func Serialize(v PhpValue) (string, error) {

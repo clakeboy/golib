@@ -1,12 +1,12 @@
 package utils
 
 import (
-	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"fmt"
+	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 )
 
 //Get bucket
-func GetBucket(bucketName string,endpoint string, accessID string, accessKey string) (*oss.Bucket, error) {
+func GetBucket(bucketName string, endpoint string, accessID string, accessKey string) (*oss.Bucket, error) {
 	// New Client
 	client, err := oss.New(endpoint, accessID, accessKey)
 	if err != nil {
@@ -14,11 +14,11 @@ func GetBucket(bucketName string,endpoint string, accessID string, accessKey str
 		return nil, err
 	}
 	// check bucket exist
-	flag,err := client.IsBucketExist(bucketName)
+	flag, err := client.IsBucketExist(bucketName)
 
 	if err != nil {
 		fmt.Println("check bucket field")
-		return nil,err
+		return nil, err
 	}
 
 	// if not exist bucket then Create Bucket
@@ -29,7 +29,6 @@ func GetBucket(bucketName string,endpoint string, accessID string, accessKey str
 			return nil, err
 		}
 	}
-
 
 	// Get Bucket
 	bucket, err := client.Bucket(bucketName)

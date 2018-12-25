@@ -1,9 +1,9 @@
 package components
 
 import (
-	"../utils"
 	"encoding/json"
 	"errors"
+	"github.com/clakeboy/golib/utils"
 	"io/ioutil"
 	"os"
 	"sync"

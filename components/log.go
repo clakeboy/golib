@@ -1,9 +1,9 @@
 package components
 
 import (
-	"../utils"
 	"bytes"
 	"fmt"
+	"github.com/clakeboy/golib/utils"
 	"io"
 	"io/ioutil"
 	"os"

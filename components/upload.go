@@ -1,9 +1,9 @@
 package components
 
 import (
-	"../utils"
 	"encoding/base64"
 	"errors"
+	"github.com/clakeboy/golib/utils"
 	"io/ioutil"
 	"os"
 	"path/filepath"

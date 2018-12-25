@@ -1,15 +1,15 @@
 package snowflake
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 	"time"
 )
 
 func TestNewShowFlake(t *testing.T) {
-	fmt.Println(^(-1<<41))
+	fmt.Println(^(-1 << 41))
 
-	fmt.Println(time.Now().UnixNano()/1e6)
+	fmt.Println(time.Now().UnixNano() / 1e6)
 
 	fmt.Println()
 
@@ -20,14 +20,14 @@ func TestNewShowFlake(t *testing.T) {
 }
 
 func TestSnowFlake_NextId(t *testing.T) {
-	snow,err := NewShowFlake(1514739661000,1,2)
+	snow, err := NewShowFlake(1514739661000, 1, 2)
 	if err != nil {
 		panic(err)
 	}
-	for i:=0;i<1e3;i++ {
-		id,err := snow.NextId()
+	for i := 0; i < 1e3; i++ {
+		id, err := snow.NextId()
 		if err != nil {
-			fmt.Println("generate id error:",err)
+			fmt.Println("generate id error:", err)
 			break
 		}
 		fmt.Println(id.RawId)

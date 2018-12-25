@@ -7,16 +7,16 @@ import (
 
 type TestUser struct {
 	Name string `json:"name"`
-	Age int `json:"age"`
+	Age  int    `json:"age"`
 	JsonParse
 }
 
 func TestJsonParse_ParseJson(t *testing.T) {
 	u := &TestUser{
-		Name:"clake",
-		Age:18,
+		Name: "clake",
+		Age:  18,
 	}
 
 	fmt.Println(u.ToJsonString())
-	fmt.Println(u.Name,u.Age)
+	fmt.Println(u.Name, u.Age)
 }

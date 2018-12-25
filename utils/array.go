@@ -1,13 +1,13 @@
 package utils
 
 import (
-	"reflect"
 	"errors"
 	"fmt"
+	"reflect"
 )
 
 func StringIndexOf(arr []string, search string) int {
-	for i,v := range arr {
+	for i, v := range arr {
 		if search == v {
 			return i
 		}
@@ -16,10 +16,10 @@ func StringIndexOf(arr []string, search string) int {
 	return -1
 }
 
-func MapKeys(m map[string]interface{}) []string{
+func MapKeys(m map[string]interface{}) []string {
 	var keys []string
-	for i,_ := range m {
-		keys = append(keys,i)
+	for i, _ := range m {
+		keys = append(keys, i)
 	}
 
 	return keys
@@ -42,16 +42,16 @@ func Contains(obj interface{}, target interface{}) (bool, error) {
 	return false, errors.New("not in")
 }
 
-func PrintMap(obj map[string]interface{},step string) {
-	fmt.Println(step,"{")
-	for k,v := range obj{
+func PrintMap(obj map[string]interface{}, step string) {
+	fmt.Println(step, "{")
+	for k, v := range obj {
 		switch v.(type) {
-		case map[string]interface{},map[string]string:
-			fmt.Print(step,k,": ")
-			PrintMap(v.(map[string]interface{}),step+"     ")
+		case map[string]interface{}, map[string]string:
+			fmt.Print(step, k, ": ")
+			PrintMap(v.(map[string]interface{}), step+"     ")
 		default:
-			fmt.Println(step,k,": ",v)
+			fmt.Println(step, k, ": ", v)
 		}
 	}
-	fmt.Println(step,"}")
+	fmt.Println(step, "}")
 }

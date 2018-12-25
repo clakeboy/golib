@@ -19,7 +19,7 @@ func WritePid(pidName string) {
 }
 
 //收到退出信号时处理程序关闭
-func ExitApp(out chan os.Signal,callback func(os.Signal)) {
+func ExitApp(out chan os.Signal, callback func(os.Signal)) {
 	signal.Notify(out, os.Interrupt, os.Kill, syscall.SIGQUIT, syscall.SIGTERM)
 	select {
 	case s := <-out:

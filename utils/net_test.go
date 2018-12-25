@@ -1,9 +1,9 @@
 package utils
 
 import (
-	"testing"
-	"os"
 	"net"
+	"os"
+	"testing"
 )
 
 func TestGetLocationAddress(t *testing.T) {

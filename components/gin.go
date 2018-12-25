@@ -1,9 +1,9 @@
 package components
 
 import (
-	"../utils"
 	"fmt"
 	"github.com/DeanThompson/ginpprof"
+	"github.com/clakeboy/golib/utils"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"net/http"

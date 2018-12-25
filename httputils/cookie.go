@@ -1,7 +1,7 @@
 package httputils
 
 import (
-	"../utils"
+	"github.com/clakeboy/golib/utils"
 	"net/http"
 )
 

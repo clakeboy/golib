@@ -1,8 +1,8 @@
 package components
 
 import (
-	"../utils"
 	"fmt"
+	"github.com/clakeboy/golib/utils"
 	"log"
 	"regexp"
 	"testing"

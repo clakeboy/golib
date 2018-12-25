@@ -1,7 +1,7 @@
 package task
 
 import (
-	"../../components"
+	"github.com/clakeboy/golib/components"
 	"strconv"
 	"strings"
 	"sync"
@@ -34,12 +34,12 @@ type Item struct {
 	ExecFunc     func(item *Item) bool //任务执行方法
 	CallbackFunc func(item *Item)      //任务回调方法
 	LastExecDate time.Time             //最后执行任务的时间
-	Args         []interface{}           //任务数据
+	Args         []interface{}         //任务数据
 }
 
 //任务管理
 type Management struct {
-	stop bool //是否停止
+	stop     bool    //是否停止
 	list     []*Item //任务列表
 	listLock sync.Mutex
 }
@@ -47,8 +47,8 @@ type Management struct {
 //创建管理任务工厂方法
 func NewManagement() *Management {
 	return &Management{
-		stop:true,
-		listLock:sync.Mutex{},
+		stop:     true,
+		listLock: sync.Mutex{},
 	}
 }
 
@@ -70,10 +70,11 @@ func (m *Management) RemoveTask(item *Item) {
 	}
 	m.listLock.Unlock()
 }
+
 //foreach 回调方法删除一个任务
 func (m *Management) RemoveForeach(f func(*Item) bool) {
 	m.listLock.Lock()
-	for i,v := range m.list {
+	for i, v := range m.list {
 		ok := f(v)
 		if ok {
 			m.list = append(m.list[:i], m.list[i+1:]...)
@@ -82,6 +83,7 @@ func (m *Management) RemoveForeach(f func(*Item) bool) {
 	}
 	m.listLock.Unlock()
 }
+
 //清空任务列表
 func (m *Management) ClearTask() {
 	m.listLock.Lock()
@@ -99,7 +101,7 @@ func (m *Management) AddTask(
 	dayOfWeek string,
 	exec func(item *Item) bool,
 	callback func(item *Item),
-	args... interface{}) {
+	args ...interface{}) {
 
 	var rules []*Rule
 	rules = append(rules, m.explainString2Type(second, Second))
@@ -113,14 +115,14 @@ func (m *Management) AddTask(
 		RuleList:     rules,
 		ExecFunc:     exec,
 		CallbackFunc: callback,
-		Args: args,
+		Args:         args,
 	}
 
 	m.Add(item)
 }
 
 //使用选项字符串添加一个任务项
-func (m *Management) AddTaskString(taskStr string, exec func(item *Item) bool, callback func(item *Item),args... interface{}) {
+func (m *Management) AddTaskString(taskStr string, exec func(item *Item) bool, callback func(item *Item), args ...interface{}) {
 	typeList := strings.Split(taskStr, " ")
 	if len(typeList) < 6 {
 		return
@@ -190,7 +192,7 @@ func (m *Management) run() {
 		if m.stop {
 			break
 		}
-		go m.execute(time.Unix(time.Now().Unix(),0))
+		go m.execute(time.Unix(time.Now().Unix(), 0))
 		//fmt.Println(time.Second - time.Duration(time.Now().Nanosecond()))
 		time.Sleep(time.Second - time.Duration(time.Now().Nanosecond()))
 	}

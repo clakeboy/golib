@@ -1,9 +1,9 @@
 package union
 
 import (
+	"fmt"
 	"testing"
 	"time"
-	"fmt"
 )
 
 var cfg = &Config{
@@ -42,7 +42,7 @@ func TestUnionPay_BackBind(t *testing.T) {
 		MerId:   "777290058147175",
 		OrderId: "TEST000000002",
 		//TxnTime: time.Now().Format("20060102150405"),
-		TxnTime:"20170615190823",
+		TxnTime: "20170615190823",
 		AccNo:   "6221558812340000",
 		BindId:  "UN000000002",
 	}
@@ -73,7 +73,7 @@ func TestPay_BackPay(t *testing.T) {
 		BindId:  "UN000000001",
 	}
 
-	_,err := union_pay.BackPay(user,dk)
+	_, err := union_pay.BackPay(user, dk)
 	if err != nil {
 		panic(err)
 	}
@@ -82,16 +82,15 @@ func TestPay_BackPay(t *testing.T) {
 func TestPay_QueryPay(t *testing.T) {
 	union_pay := NewPay(cfg, urls)
 
-
 	order := &QueryOrder{
-		MerId   :"",
-		OrderId :"",
-		TxnTime :"",
+		MerId:   "",
+		OrderId: "",
+		TxnTime: "",
 	}
 
-	res,err := union_pay.QueryPay(order)
+	res, err := union_pay.QueryPay(order)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("%+v",res)
+	fmt.Printf("%+v", res)
 }

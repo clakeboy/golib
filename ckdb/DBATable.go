@@ -1,8 +1,8 @@
 package ckdb
 
 import (
-	"../utils"
 	"fmt"
+	"github.com/clakeboy/golib/utils"
 	"regexp"
 	"strings"
 )

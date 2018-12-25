@@ -1,9 +1,9 @@
 package explain
 
 import (
-	"../../utils"
 	"bytes"
 	"fmt"
+	"github.com/clakeboy/golib/utils"
 	"io"
 	"regexp"
 	"strings"

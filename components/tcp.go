@@ -24,26 +24,27 @@ const (
 
 //TCP连接
 type TCPConnect struct {
-	conn      net.Conn    //TCP连接
-	status    int         //TCP状态
-	event     IEventTCP   //TCP事件接口
-	writeChan chan []byte //写入队列
-	closeChan chan bool   //关闭队列
-	debug     bool        //是否DEUBG模式
-	readTimeout time.Duration       //读取超时时间,单位秒
+	conn        net.Conn      //TCP连接
+	status      int           //TCP状态
+	event       IEventTCP     //TCP事件接口
+	writeChan   chan []byte   //写入队列
+	closeChan   chan bool     //关闭队列
+	debug       bool          //是否DEUBG模式
+	readTimeout time.Duration //读取超时时间,单位秒
 }
 
 //新建TCP服务连接
 func NewTCPConnect(c net.Conn, evt IEventTCP) *TCPConnect {
 	return &TCPConnect{
-		conn:      c,
-		status:    TCPStatusNone,
-		event:     evt,
-		writeChan: make(chan []byte,10),
-		closeChan: make(chan bool),
-		readTimeout: time.Second*30,
+		conn:        c,
+		status:      TCPStatusNone,
+		event:       evt,
+		writeChan:   make(chan []byte, 10),
+		closeChan:   make(chan bool),
+		readTimeout: time.Second * 30,
 	}
 }
+
 //设置读取超时
 func (tp *TCPConnect) SetReadTimeout(ss int64) {
 	tp.readTimeout = time.Second * time.Duration(ss)
@@ -60,7 +61,7 @@ func (tp *TCPConnect) mainRun() {
 	if tp.debug {
 		fmt.Println(time.Now().String(), "TCP connected, with remoto ip:", tp.conn.RemoteAddr().String())
 	}
-	tp.emit(TCPEventConnected,nil)
+	tp.emit(TCPEventConnected, nil)
 	go tp.write()
 	tp.read()
 }
@@ -84,7 +85,7 @@ func (tp *TCPConnect) read() {
 			break
 		}
 		if tp.debug {
-			fmt.Printf("[DEBUG] Read: %x,%d\n",buf[:msg_len],msg_len)
+			fmt.Printf("[DEBUG] Read: %x,%d\n", buf[:msg_len], msg_len)
 		}
 		tp.emit(TCPEventRecv, buf[:msg_len])
 	}
@@ -102,14 +103,14 @@ func (tp *TCPConnect) write() {
 	for {
 		select {
 		case data := <-tp.writeChan:
-			tp.conn.SetWriteDeadline(time.Now().Add(time.Second*30))
+			tp.conn.SetWriteDeadline(time.Now().Add(time.Second * 30))
 			msg_len, err := tp.conn.Write(data)
 			if err != nil {
 				log.Println(time.Now().String(), "Conn write error:", err)
 				return
 			}
 			if tp.debug {
-				fmt.Printf("[DEBUG] Write: %x %d\n",data,msg_len)
+				fmt.Printf("[DEBUG] Write: %x %d\n", data, msg_len)
 			}
 			tp.emit(TCPEventWritten, data)
 		case <-tp.closeChan:
@@ -119,6 +120,7 @@ func (tp *TCPConnect) write() {
 		}
 	}
 }
+
 //写入数据到TCP
 func (tp *TCPConnect) WriteData(data []byte) {
 	tp.writeChan <- data
@@ -129,7 +131,7 @@ func (tp *TCPConnect) Close() {
 	if tp.status == TCPStatusDisconnected {
 		return
 	}
-	tp.emit(TCPEventDisconnected,nil)
+	tp.emit(TCPEventDisconnected, nil)
 	tp.status = TCPStatusDisconnected
 	tp.conn.Close()
 	tp.closeChan <- true

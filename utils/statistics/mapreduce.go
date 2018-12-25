@@ -1,8 +1,8 @@
 package statistics
 
 import (
-	"../../utils"
 	"fmt"
+	"github.com/clakeboy/golib/utils"
 	"reflect"
 	"regexp"
 	"strconv"

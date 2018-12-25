@@ -1,7 +1,6 @@
 package union
 
 import (
-	"../../utils"
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
@@ -11,6 +10,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"github.com/clakeboy/golib/utils"
 	"golang.org/x/crypto/pkcs12"
 	"io/ioutil"
 	"net/http"
@@ -29,9 +29,9 @@ type Pay struct {
 
 func NewPay(cfg *Config, urls *UrlConfig) *Pay {
 	return &Pay{
-		conf: cfg,
-		urls: urls,
-		callbackUrl:urls.CallbackUrl,
+		conf:        cfg,
+		urls:        urls,
+		callbackUrl: urls.CallbackUrl,
 	}
 }
 

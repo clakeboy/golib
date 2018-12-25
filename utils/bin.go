@@ -1,11 +1,11 @@
 package utils
 
 import (
-	"regexp"
+	"bytes"
+	"encoding/binary"
 	"errors"
 	"math"
-	"encoding/binary"
-	"bytes"
+	"regexp"
 )
 
 const (
@@ -23,7 +23,6 @@ var ErrBadStringFormat = errors.New("bad string format")
 
 // ErrEmptyString represents a error of empty input string.
 var ErrEmptyString = errors.New("empty string")
-
 
 func init() {
 	uint8arr[0] = 128
@@ -53,7 +52,6 @@ func appendBinaryString(bs []byte, b byte) []byte {
 	}
 	return bs
 }
-
 
 // ByteToBinaryString get the string in binary format of a byte or uint8.
 func ByteToBinaryString(b byte) string {
@@ -143,7 +141,7 @@ func ByteToFloat64(bytes []byte) float64 {
 }
 
 //整形转换成字节
-func IntToBytes(n int,bit int) []byte {
+func IntToBytes(n int, bit int) []byte {
 	var tmp interface{}
 	switch bit {
 	case 8:

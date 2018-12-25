@@ -1,12 +1,12 @@
 package alisms
 
 import (
-	"../../utils"
 	"crypto/hmac"
 	"crypto/sha1"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/clakeboy/golib/utils"
 	"net/url"
 	"sort"
 	"strings"

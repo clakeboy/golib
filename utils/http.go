@@ -9,13 +9,13 @@ import (
 )
 
 type ResData struct {
-	Status bool `json:"status"`
-	Msg   string `json:"msg"`
-	Data  interface{} `json:"data"`
+	Status bool        `json:"status"`
+	Msg    string      `json:"msg"`
+	Data   interface{} `json:"data"`
 }
 
 func (r *ResData) ToJson() []byte {
-	data,err := json.Marshal(r)
+	data, err := json.Marshal(r)
 	if err != nil {
 		return nil
 	}
@@ -31,7 +31,7 @@ func (r *ResData) ToJsonString() string {
 }
 
 func (r *ResData) ParseJson(data []byte) error {
-	return json.Unmarshal(data,r)
+	return json.Unmarshal(data, r)
 }
 
 func (r *ResData) ParseJsonString(str string) error {
@@ -106,7 +106,7 @@ func HttpGet(url_str string) (string, error) {
 }
 
 //http get 请求
-func HttpGetBytes(urlStr string) ([]byte,error) {
+func HttpGetBytes(urlStr string) ([]byte, error) {
 	req, err := http.Get(urlStr)
 	if err != nil {
 		return nil, err

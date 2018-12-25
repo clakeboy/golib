@@ -1,10 +1,10 @@
 package soap
 
 import (
-	"../../utils"
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"github.com/clakeboy/golib/utils"
 	"regexp"
 	"strings"
 )
@@ -82,6 +82,7 @@ func newDefaultSoap() *SoapClient {
 
 	return soap
 }
+
 //设置接口返回时是否返回全格式
 func (s *SoapClient) SetReturnAll(yes bool) {
 	s.returnAll = yes
@@ -198,7 +199,7 @@ func (s *SoapClient) explain(content []byte) error {
 func (s *SoapClient) buildSoapXML(fun *WsdlFunction, params interface{}) string {
 	ns := map[string]string{}
 	xml_con := "<?xml version='1.0' encoding='UTF-8'?>"
-	xml_body := s.buildSoapBody(ArgsMap{fun.RequestArgs}, params, ns,false)
+	xml_body := s.buildSoapBody(ArgsMap{fun.RequestArgs}, params, ns, false)
 	body_ns := ""
 	for k, v := range ns {
 		body_ns += fmt.Sprintf(` xmlns:%s="%s"`, v, k)
@@ -217,7 +218,7 @@ func (s *SoapClient) buildSoapXML(fun *WsdlFunction, params interface{}) string 
 }
 
 //构建SOAP BODY XML 文件
-func (s *SoapClient) buildSoapBody(elms ArgsMap, params interface{}, ns map[string]string,no_max bool) string {
+func (s *SoapClient) buildSoapBody(elms ArgsMap, params interface{}, ns map[string]string, no_max bool) string {
 	var xml_con string
 
 	for idx, v := range elms {
@@ -230,21 +231,21 @@ func (s *SoapClient) buildSoapBody(elms ArgsMap, params interface{}, ns map[stri
 		if v.MaxOccurs == "unbounded" && !no_max {
 			switch params.(type) {
 			case []interface{}:
-				for _,p := range params.([]interface{}) {
-					xml_con += s.buildSoapBody(ArgsMap{v},p,ns,true)
+				for _, p := range params.([]interface{}) {
+					xml_con += s.buildSoapBody(ArgsMap{v}, p, ns, true)
 				}
 			case utils.M:
 				child_params, ok := params.(utils.M)[v.Name]
 				if ok {
-					xml_con += s.buildSoapBody(ArgsMap{v}, child_params, ns,false)
+					xml_con += s.buildSoapBody(ArgsMap{v}, child_params, ns, false)
 				}
 			case map[string]interface{}:
 				child_params, ok := params.(map[string]interface{})[v.Name]
 				if ok {
-					xml_con += s.buildSoapBody(ArgsMap{v}, child_params, ns,false)
+					xml_con += s.buildSoapBody(ArgsMap{v}, child_params, ns, false)
 				}
 			default:
-				xml_con += s.buildSoapBody(ArgsMap{v},map[string]interface{}{},ns,true)
+				xml_con += s.buildSoapBody(ArgsMap{v}, map[string]interface{}{}, ns, true)
 			}
 		} else {
 			if len(v.Elements) > 0 {
@@ -259,7 +260,7 @@ func (s *SoapClient) buildSoapBody(elms ArgsMap, params interface{}, ns map[stri
 					xml_con += fmt.Sprintf("</%s:%s>", ns_el, v.Name)
 				case utils.M:
 					child_params, ok := params.(utils.M)[v.Name]
-					child_con := s.buildSoapBody(v.Elements, utils.YN(ok, child_params, params), ns,false)
+					child_con := s.buildSoapBody(v.Elements, utils.YN(ok, child_params, params), ns, false)
 					if child_con == "" {
 
 					} else {
@@ -269,7 +270,7 @@ func (s *SoapClient) buildSoapBody(elms ArgsMap, params interface{}, ns map[stri
 					}
 				case map[string]interface{}:
 					child_params, ok := params.(map[string]interface{})[v.Name]
-					child_con := s.buildSoapBody(v.Elements, utils.YN(ok, child_params, params), ns,false)
+					child_con := s.buildSoapBody(v.Elements, utils.YN(ok, child_params, params), ns, false)
 					if child_con == "" {
 
 					} else {
@@ -287,9 +288,9 @@ func (s *SoapClient) buildSoapBody(elms ArgsMap, params interface{}, ns map[stri
 					//fmt.Println(v.Name,v.Type,v.MaxOccurs,params.([]interface{})[idx],idx)
 					val = params.([]interface{})[idx]
 				case utils.M:
-					val,ok = params.(utils.M)[v.Name]
+					val, ok = params.(utils.M)[v.Name]
 				case map[string]interface{}:
-					val,ok = params.(map[string]interface{})[v.Name]
+					val, ok = params.(map[string]interface{})[v.Name]
 				}
 
 				if !ok {
@@ -298,9 +299,9 @@ func (s *SoapClient) buildSoapBody(elms ArgsMap, params interface{}, ns map[stri
 				}
 				xml_con += fmt.Sprintf("<%s:%s>", ns_el, v.Name)
 				switch v.Type {
-				case "string" :
+				case "string":
 					xml_con += fmt.Sprintf("<![CDATA[%v]]>", utils.YN(val == nil, "", val))
-				case "int","double":
+				case "int", "double":
 					xml_con += fmt.Sprintf("%v", utils.YN(val == nil, "0", val))
 				default:
 					xml_con += fmt.Sprintf("%v", utils.YN(val == nil, "", val))

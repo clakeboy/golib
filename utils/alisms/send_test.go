@@ -1,8 +1,8 @@
 package alisms
 
 import (
-	"../../utils"
 	"fmt"
+	"github.com/clakeboy/golib/utils"
 	"log"
 	"net/url"
 	"testing"

@@ -1,13 +1,13 @@
 package utils
 
 import (
-	"time"
 	"fmt"
+	"time"
 )
 
 type ExecTime struct {
 	start time.Time
-	end time.Time
+	end   time.Time
 }
 
 func NewExecTime() *ExecTime {
@@ -22,7 +22,7 @@ func (this *ExecTime) End(print bool) time.Duration {
 	this.end = time.Now()
 	diff := this.end.Sub(this.start)
 	if print {
-		fmt.Println("exec time：",diff)
+		fmt.Println("exec time：", diff)
 	}
 	return diff
 }

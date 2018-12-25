@@ -4,9 +4,9 @@
 package ckdb
 
 import (
-	"../utils"
 	"encoding/json"
 	"github.com/boltdb/bolt"
+	"github.com/clakeboy/golib/utils"
 	"log"
 	"os"
 )

@@ -1,11 +1,11 @@
 package phpserialize
 
 import (
-	"fmt"
-	"strings"
-	"strconv"
-	"log"
 	"bytes"
+	"fmt"
+	"log"
+	"strconv"
+	"strings"
 )
 
 const UNSERIALIZABLE_OBJECT_MAX_LEN = 10 * 1024 * 1024 * 1024

@@ -1,11 +1,11 @@
 package components
 
 import (
-	"../utils"
 	"crypto/sha1"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/clakeboy/golib/utils"
 	"regexp"
 	"sort"
 	"strings"
@@ -140,7 +140,7 @@ func (w *Weixin) GetAccessToken() (*WxAccessToken, error) {
 }
 
 //发起 WEB 验证受权
-func (w *Weixin) WebAuth(redirect_uri string, mpid string,base bool) string {
+func (w *Weixin) WebAuth(redirect_uri string, mpid string, base bool) string {
 	scope := "snsapi_userinfo"
 	if base {
 		scope = "snsapi_base"
@@ -360,11 +360,11 @@ func (w *Weixin) CreateQrCode(token, content string) (*WxQrCode, error) {
 }
 
 //创建微信小程序二维码
-func (w *Weixin) CreateWxAppQrCode(token, scene, page string, width int) (string,error) {
+func (w *Weixin) CreateWxAppQrCode(token, scene, page string, width int) (string, error) {
 	data := utils.M{
-		"scene":scene,
-		"page":page,
-		"width":width,
+		"scene": scene,
+		"page":  page,
+		"width": width,
 	}
 
 	url_str := fmt.Sprintf("https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=%s", token)
@@ -372,15 +372,15 @@ func (w *Weixin) CreateWxAppQrCode(token, scene, page string, width int) (string
 	if err != nil {
 		return "", err
 	}
-	return res,err
+	return res, err
 }
 
 //向用户发送客户消息
-func (w *Weixin) SendCustomMessage(token ,openid ,msg_type string,data utils.M) (string,error) {
+func (w *Weixin) SendCustomMessage(token, openid, msg_type string, data utils.M) (string, error) {
 	msg := utils.M{
-		"touser":openid,
-		"msgtype":msg_type,
-		msg_type:data,
+		"touser":  openid,
+		"msgtype": msg_type,
+		msg_type:  data,
 	}
 
 	url_str := fmt.Sprintf("https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token==%s", token)
@@ -388,5 +388,5 @@ func (w *Weixin) SendCustomMessage(token ,openid ,msg_type string,data utils.M) 
 	if err != nil {
 		return "", err
 	}
-	return res,err
+	return res, err
 }

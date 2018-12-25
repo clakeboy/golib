@@ -1,12 +1,13 @@
 package components
 
 import (
-	"../utils"
 	"errors"
 	"fmt"
+	"github.com/clakeboy/golib/utils"
 	"sync"
 	"time"
 )
+
 //GO本地内存数据缓存
 type MemCache struct {
 	CacheIn

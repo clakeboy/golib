@@ -1,11 +1,11 @@
 package utils
 
 import (
-	"testing"
 	"encoding/xml"
 	"fmt"
-	"strings"
 	"log"
+	"strings"
+	"testing"
 )
 
 func TestXMLMap_UnmarshalXML(t *testing.T) {
@@ -63,7 +63,7 @@ func TestXMLMap_UnmarshalXML(t *testing.T) {
 		fmt.Println(err)
 	}
 
-	xml_map := parse_token(decoder,nil,tt)
+	xml_map := parse_token(decoder, nil, tt)
 
 	fmt.Println(xml_map)
 }
@@ -77,13 +77,13 @@ func parse_token(decoder *xml.Decoder, current_token xml.Token, parent_token xml
 	for t, err = decoder.Token(); err == nil; t, err = decoder.Token() {
 		switch token := t.(type) {
 		case xml.StartElement:
-			fmt.Println("start ",token.Name.Local)
+			fmt.Println("start ", token.Name.Local)
 			if !end {
 				end = false
-				xml_map[root_token.Name.Local] = parse_token(decoder,token,token)
+				xml_map[root_token.Name.Local] = parse_token(decoder, token, token)
 			}
 		case xml.EndElement:
-			fmt.Println("end ",token.Name.Local)
+			fmt.Println("end ", token.Name.Local)
 			if token.Name.Local == root_token.Name.Local {
 				return xml_map
 			}
@@ -93,11 +93,11 @@ func parse_token(decoder *xml.Decoder, current_token xml.Token, parent_token xml
 			if end {
 				break
 			}
-			content := strings.Trim(string([]byte(token))," ")
-			content = strings.Trim(content,"\n")
+			content := strings.Trim(string([]byte(token)), " ")
+			content = strings.Trim(content, "\n")
 			if content != "" {
 				xml_map[root_token.Name.Local] = content
-				fmt.Println("content",content)
+				fmt.Println("content", content)
 			}
 		default:
 
@@ -134,7 +134,7 @@ func TestXMLMap_UnmarshalXML2(t *testing.T) {
 </xml>`
 
 	data := XMLMap{}
-	err := xml.Unmarshal([]byte(str),&data)
+	err := xml.Unmarshal([]byte(str), &data)
 	if err != nil {
 		log.Println(err)
 		return

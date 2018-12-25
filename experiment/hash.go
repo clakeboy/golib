@@ -28,12 +28,12 @@ func InitCryptTable() {
 	}
 }
 
-func HashString(lpszString string,dwHashType int) uint64 {
+func HashString(lpszString string, dwHashType int) uint64 {
 	var key uint8
-	var seed1,seed2 uint64 = 0x7FED7FED,0xEEEEEEEE
+	var seed1, seed2 uint64 = 0x7FED7FED, 0xEEEEEEEE
 	strLen := len(lpszString)
-	i,ch := 0,0
-	for i< strLen {
+	i, ch := 0, 0
+	for i < strLen {
 		key = lpszString[i]
 		ch = int(unicode.ToUpper(rune(key)))
 		seed1 = cryptTable[(dwHashType<<8)+ch] ^ (seed1 + seed2)
@@ -47,5 +47,3 @@ func HashString(lpszString string,dwHashType int) uint64 {
 func MPQHashTableInit(ppHashTable []*MPQHashTable, nTableLength int64) {
 	InitCryptTable()
 }
-
-

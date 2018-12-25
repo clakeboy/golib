@@ -1,12 +1,12 @@
 package httputils
 
 import (
-	"../ckdb"
-	"../components"
-	"../components/task"
-	"../utils"
 	"encoding/json"
 	"fmt"
+	"github.com/clakeboy/golib/ckdb"
+	"github.com/clakeboy/golib/components"
+	"github.com/clakeboy/golib/components/task"
+	"github.com/clakeboy/golib/utils"
 	"time"
 )
 

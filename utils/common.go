@@ -1,9 +1,9 @@
 package utils
 
 import (
-	"../utils/uuid"
 	"encoding/json"
 	"fmt"
+	"github.com/clakeboy/golib/utils/uuid"
 	"math/rand"
 	"os"
 	"os/exec"

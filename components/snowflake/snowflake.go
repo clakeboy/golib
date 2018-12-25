@@ -24,7 +24,7 @@ const (
 	//数据标识id所占的位数
 	dataCenterIdBits int64 = 5
 	//支持的最大机器ID，结果是31 (这个移位算法可以很快的计算出几位二进制数所能表示的最大十进制数)
-	maxWorkerId int64 = ^ (-1 << uint(workerIdBits))
+	maxWorkerId int64 = ^(-1 << uint(workerIdBits))
 	//最大数据标识ID
 	maxDataCenterId = maxWorkerId
 	//序列在id中占的位数
@@ -36,14 +36,14 @@ const (
 	//时间截向左移22位(5+5+12)
 	timestampLeftShift = sequenceBits + workerIdBits + dataCenterIdBits
 	//生成序列的掩码，这里为4095 (0b111111111111=0xfff=4095)
-	sequenceMask int64 = ^ (-1 << uint(sequenceBits))
+	sequenceMask int64 = ^(-1 << uint(sequenceBits))
 )
 
 type SnowFlake struct {
-	epoch int64     //开始的时间戳,毫秒级
-	workerId int64  //工作ID (0-31)
-	dataCenterId int64 //数据中心ID (0-31)
-	sequence int64   //毫秒内序列 (0-4095)
+	epoch         int64 //开始的时间戳,毫秒级
+	workerId      int64 //工作ID (0-31)
+	dataCenterId  int64 //数据中心ID (0-31)
+	sequence      int64 //毫秒内序列 (0-4095)
 	lastTimestamp int64 //上次生成ID的时间戳,毫秒级
 }
 
@@ -53,7 +53,7 @@ type SnowId struct {
 
 func SnowRaw(raw int64) *SnowId {
 	return &SnowId{
-		RawId:raw,
+		RawId: raw,
 	}
 }
 
@@ -61,33 +61,34 @@ func SnowRaw(raw int64) *SnowId {
 //epoch: 开始产生ID的纪元时间戳
 //workerId: 工作ID标识
 //dataCenterId: 数据ID标识
-func NewShowFlake(epoch,workerId,dataCenterId int64) (*SnowFlake,error) {
+func NewShowFlake(epoch, workerId, dataCenterId int64) (*SnowFlake, error) {
 	if workerId > maxWorkerId || workerId < 0 {
-		return nil,fmt.Errorf("worker Id can't be greater than %d or less than 0",maxWorkerId)
+		return nil, fmt.Errorf("worker Id can't be greater than %d or less than 0", maxWorkerId)
 	}
 
 	if dataCenterId > maxDataCenterId || dataCenterId < 0 {
-		return nil,fmt.Errorf("datacenter Id can't be greater than %d or less than 0",maxWorkerId)
+		return nil, fmt.Errorf("datacenter Id can't be greater than %d or less than 0", maxWorkerId)
 	}
 
 	return &SnowFlake{
-		epoch:epoch,
-		workerId:workerId,
-		dataCenterId:dataCenterId,
-		lastTimestamp:-1,
-	},nil
+		epoch:         epoch,
+		workerId:      workerId,
+		dataCenterId:  dataCenterId,
+		lastTimestamp: -1,
+	}, nil
 }
+
 //得到下一个ID
-func (s *SnowFlake) NextId() (*SnowId,error) {
+func (s *SnowFlake) NextId() (*SnowId, error) {
 	currentTimestamp := getTimeMilliSecond()
 	//如果当前时间小于上一次ID生成的时间戳，说明系统时钟回退过这个时候应当抛出异常
 	if currentTimestamp < s.lastTimestamp {
-		return nil,fmt.Errorf("Clock moved backwards.  Refusing to generate id for %d milliseconds",s.lastTimestamp-currentTimestamp)
+		return nil, fmt.Errorf("Clock moved backwards.  Refusing to generate id for %d milliseconds", s.lastTimestamp-currentTimestamp)
 	}
 
 	//如果是同一时间生成的，则进行毫秒内序列
 	if currentTimestamp == s.lastTimestamp {
-		s.sequence = (s.sequence+1) & sequenceMask
+		s.sequence = (s.sequence + 1) & sequenceMask
 		//毫秒内序列溢出
 		if s.sequence == 0 {
 			//阻塞到下一个毫秒,获得新的时间戳
@@ -103,7 +104,7 @@ func (s *SnowFlake) NextId() (*SnowId,error) {
 		(s.dataCenterId << uint(dataCenterIdShift)) |
 		(s.workerId << uint(workerIdShift)) |
 		s.sequence
-	return SnowRaw(rawId),nil
+	return SnowRaw(rawId), nil
 }
 
 func (s *SnowFlake) tilNextMillis() int64 {
@@ -113,5 +114,5 @@ func (s *SnowFlake) tilNextMillis() int64 {
 
 //得到毫秒时间戳
 func getTimeMilliSecond() int64 {
-	return time.Now().UnixNano()/1e6
+	return time.Now().UnixNano() / 1e6
 }

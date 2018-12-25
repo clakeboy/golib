@@ -90,13 +90,13 @@ func (r *ResData) ToJsonString() string {
 func TestJSX(t *testing.T) {
 	nodes := JSXString(content)
 	compileStr := content
-	for _,n := range nodes {
+	for _, n := range nodes {
 		if n.NodeName == "Button" && !n.EndNode {
 			n.properties = append(n.properties, &JSXNodeProperty{
-				Name:"field",
+				Name:  "field",
 				Value: "{'newbutton'}",
 			})
-			compileStr = strings.Replace(compileStr,string(n.Original),n.Compile(),1)
+			compileStr = strings.Replace(compileStr, string(n.Original), n.Compile(), 1)
 		}
 	}
 
@@ -105,7 +105,5 @@ func TestJSX(t *testing.T) {
 
 func TestJSXProperty(t *testing.T) {
 	str := []byte("calke")
-	fmt.Printf("%X",str)
+	fmt.Printf("%X", str)
 }
-
-

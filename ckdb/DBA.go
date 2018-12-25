@@ -1,10 +1,10 @@
 package ckdb
 
 import (
-	"../utils"
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/clakeboy/golib/utils"
 	_ "github.com/go-sql-driver/mysql"
 	"reflect"
 	"regexp"
@@ -339,7 +339,7 @@ func (d *DBA) FetchAllOfStructV2(query *sql.Rows, i interface{}) ([]interface{},
 
 		obj := reflect.New(reflect.TypeOf(i)).Interface()
 
-		utils.Map2Struct(result,obj)
+		utils.Map2Struct(result, obj)
 
 		resultList = append(resultList, obj)
 	}

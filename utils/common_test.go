@@ -1,8 +1,8 @@
 package utils
 
 import (
-	"../utils/uuid"
 	"fmt"
+	"github.com/clakeboy/golib/utils/uuid"
 	"sync"
 	"testing"
 	"time"

@@ -1,9 +1,9 @@
 package soap
 
 import (
-	"testing"
 	"encoding/xml"
 	"fmt"
+	"testing"
 )
 
 func TestWsdl_Explain(t *testing.T) {
@@ -52,17 +52,17 @@ func TestWsdl_Explain(t *testing.T) {
 }
 
 func TestWsdl_GetFunc(t *testing.T) {
-	var Envelope struct{
+	var Envelope struct {
 		XMLName xml.Name
-		Soap    xml.Attr  `xml:"soap,attr"`
-		Body struct{
+		Soap    xml.Attr `xml:"soap,attr"`
+		Body    struct {
 			XMLName xml.Name `xml:"body"`
 		} `xml:"body"`
 	}
 	xml_str := `
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Body><soap:Fault><faultcode>soap:Server</faultcode><faultstring>No binding operation info while invoking unknown method with params unknown.</faultstring></soap:Fault></soap:Body></soap:Envelope>`
-	xml.Unmarshal([]byte(xml_str),&Envelope)
-	fmt.Printf("%+v",Envelope.Soap)
-	xml_con,_ := xml.Marshal(&Envelope)
+	xml.Unmarshal([]byte(xml_str), &Envelope)
+	fmt.Printf("%+v", Envelope.Soap)
+	xml_con, _ := xml.Marshal(&Envelope)
 	fmt.Println(string(xml_con))
 }

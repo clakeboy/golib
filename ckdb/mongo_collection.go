@@ -1,7 +1,7 @@
 package ckdb
 
 import (
-	"../utils"
+	"github.com/clakeboy/golib/utils"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"reflect"
@@ -77,10 +77,11 @@ func (ck *CKCollection) Find(where bson.M, row interface{}) error {
 	}
 	return nil
 }
+
 //得到所给条件的数据量
 func (ck *CKCollection) Count(where bson.M) int {
 	c := ck.db.Table(ck.tab)
-	count,err := c.Find(where).Count()
+	count, err := c.Find(where).Count()
 	if err != nil {
 		return 0
 	}
@@ -150,17 +151,18 @@ func (ck *CKCollection) List(where bson.M, page int, number int, sort_list []str
 	}
 	return list, err
 }
+
 //执行聚合操作
-func (ck *CKCollection) Aggregate(pipe ...bson.M) (bson.M,error) {
+func (ck *CKCollection) Aggregate(pipe ...bson.M) (bson.M, error) {
 	c := ck.db.Table(ck.tab)
 	p := c.Pipe(pipe)
 	resp := bson.M{}
 	err := p.One(&resp)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
-	return resp,nil
+	return resp, nil
 }
 
 func (ck *CKCollection) getQueryType(i interface{}) interface{} {

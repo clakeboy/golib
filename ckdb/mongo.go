@@ -1,8 +1,8 @@
 package ckdb
 
 import (
-	"gopkg.in/mgo.v2"
 	"fmt"
+	"gopkg.in/mgo.v2"
 )
 
 //dsn mongodb://root:WiaQ82n7B3L5Cz*2#10m@172.18.76.150:27017?authSource=admin
@@ -15,12 +15,13 @@ type MongoDBConfig struct {
 	DBName     string `json:"db_name" yaml:"db_name"`
 	DBPoolSize int    `json:"db_pool_size" yaml:"db_pool_size"`
 }
+
 //build dsn string
 func (mc *MongoDBConfig) BuildDsn() string {
 	if mc.DBAuth == "" {
-		return fmt.Sprintf("mongodb://%s:%s",mc.DBHost,mc.DBPort)
+		return fmt.Sprintf("mongodb://%s:%s", mc.DBHost, mc.DBPort)
 	}
-	return fmt.Sprintf("mongodb://%s:%s@%s:%s?authSource=%s",mc.DBUser,mc.DBPasswd,mc.DBHost,mc.DBPort,mc.DBAuth)
+	return fmt.Sprintf("mongodb://%s:%s@%s:%s?authSource=%s", mc.DBUser, mc.DBPasswd, mc.DBHost, mc.DBPort, mc.DBAuth)
 }
 
 type DBMongo struct {
@@ -31,9 +32,10 @@ type DBMongo struct {
 }
 
 var globalSession *mgo.Session
+
 //new init mongodb
 func InitMongo(conf *MongoDBConfig) error {
-	return InitDB(conf.BuildDsn(),conf.DBPoolSize)
+	return InitDB(conf.BuildDsn(), conf.DBPoolSize)
 }
 
 //old init

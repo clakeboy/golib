@@ -1,8 +1,8 @@
 package task
 
 import (
-	"../../utils"
 	"fmt"
+	"github.com/clakeboy/golib/utils"
 	"testing"
 	"time"
 )

@@ -2,8 +2,8 @@ package utils
 
 import (
 	"encoding/xml"
-	"io"
 	"fmt"
+	"io"
 )
 
 type XMLMap map[string]interface{}
@@ -26,7 +26,7 @@ func (m XMLMap) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	}
 
 	for k, v := range m {
-		e.Encode(xmlMapEntry{XMLName: xml.Name{Local: k}, Value: fmt.Sprintf("%v",v)})
+		e.Encode(xmlMapEntry{XMLName: xml.Name{Local: k}, Value: fmt.Sprintf("%v", v)})
 	}
 
 	return e.EncodeToken(start.End())
