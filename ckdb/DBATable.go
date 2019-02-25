@@ -273,6 +273,11 @@ func (t *DBATable) Insert(data interface{}) (int, bool) {
 	return t.db.Insert(t.table, data)
 }
 
+//插入多条数据
+func (t *DBATable) InsertMulti(dataList []interface{}) (int, bool) {
+	return t.db.InsertMulti(t.table, dataList)
+}
+
 //更新数据
 func (t *DBATable) Update(data utils.M) bool {
 	defer t.Clear()

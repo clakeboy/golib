@@ -128,12 +128,12 @@ func (d *DBA) Rollback() error {
 }
 
 //插入记录到数据库
-func (d *DBA) Insert(table string, org_data interface{}) (int, bool) {
+func (d *DBA) Insert(table string, orgData interface{}) (int, bool) {
 	var columns []string
 	var values []interface{}
-	var valmask []string
+	var valMask []string
 
-	data, err := d.ConvertData(org_data)
+	data, err := d.ConvertData(orgData)
 	if err != nil {
 		return 0, false
 	}
@@ -141,11 +141,11 @@ func (d *DBA) Insert(table string, org_data interface{}) (int, bool) {
 	for i, v := range data {
 		columns = append(columns, d.FormatColumn(i))
 		values = append(values, v)
-		valmask = append(valmask, "?")
+		valMask = append(valMask, "?")
 	}
 
-	sql_str := fmt.Sprintf("INSERT INTO %s(%s) VALUES(%s)", table, strings.Join(columns, ","), strings.Join(valmask, ","))
-	res, err := d.Exec(sql_str, values...)
+	sqlStr := fmt.Sprintf("INSERT INTO %s(%s) VALUES(%s)", table, strings.Join(columns, ","), strings.Join(valMask, ","))
+	res, err := d.Exec(sqlStr, values...)
 	if err != nil {
 		return 0, false
 	}
@@ -153,6 +153,45 @@ func (d *DBA) Insert(table string, org_data interface{}) (int, bool) {
 	id, _ := res.LastInsertId()
 
 	return int(id), true
+}
+
+//插入多条记录
+func (d *DBA) InsertMulti(table string, dataList []interface{}) (int, bool) {
+	var columns []string
+	var values []interface{}
+	var valMask []string
+	var keys []string
+
+	for rowIdx, row := range dataList {
+		data, err := d.ConvertData(row)
+		if err != nil {
+			return 0, false
+		}
+		var mask []string
+
+		if rowIdx == 0 {
+			keys = utils.MapKeys(data)
+		}
+
+		for _, k := range keys {
+			if rowIdx == 0 {
+				columns = append(columns, d.FormatColumn(k))
+			}
+			values = append(values, data[k])
+			mask = append(mask, "?")
+		}
+
+		valMask = append(valMask, fmt.Sprintf("(%s)", strings.Join(mask, ",")))
+	}
+
+	sqlStr := fmt.Sprintf("INSERT INTO %s(%s) VALUES %s", table, strings.Join(columns, ","), strings.Join(valMask, ","))
+	res, err := d.Exec(sqlStr, values...)
+	if err != nil {
+		return 0, false
+	}
+
+	rows, _ := res.RowsAffected()
+	return int(rows), true
 }
 
 //更新数据库数据
