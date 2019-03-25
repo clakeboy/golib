@@ -245,3 +245,13 @@ func OpenBrowse(uri string) error {
 	cmd := exec.Command(run, uri)
 	return cmd.Start()
 }
+
+func PrintAny(any interface{}) {
+	data, err := json.MarshalIndent(any, "", "  ")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Printf("%s\n", data)
+}

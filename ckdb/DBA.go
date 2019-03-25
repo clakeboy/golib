@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/clakeboy/golib/utils"
-	_ "github.com/go-sql-driver/mysql"
 	"reflect"
 	"regexp"
 	"strings"
@@ -22,10 +21,14 @@ type DBA struct {
 	tx             *sql.Tx
 }
 
-var MysqlDrivers = make(map[string]*sql.DB)
+const (
+	DB_DRIVER_MYSQL  = "mysql"
+	DB_DRIVER_SQLITE = "sqlite"
+)
 
 //数据库配置
 type DBConfig struct {
+	DBDriver   string `json:"db_driver" yaml:"db_driver"`
 	DBServer   string `json:"db_server" yaml:"db_server"`
 	DBPort     string `json:"db_port" yaml:"db_port"`
 	DBName     string `json:"db_name" yaml:"db_name"`
@@ -48,46 +51,25 @@ var columnReg = regexp.MustCompile(`(.+?)\[(\+|-|!|>|<|<=|>=|like)\]`)
 //DBA专用数据
 type DM map[string]interface{}
 
-func InitMysqlDb(conf *DBConfig) (*sql.DB, error) {
-	dsn := fmt.Sprintf(
-		"%s:%s@tcp(%s:%s)/%s",
-		conf.DBUser,
-		conf.DBPassword,
-		conf.DBServer,
-		conf.DBPort,
-		conf.DBName,
-	)
-
-	if db, ok := MysqlDrivers[dsn]; ok {
-		return db, nil
+func InitDb(conf *DBConfig) (*sql.DB, error) {
+	switch conf.DBDriver {
+	case DB_DRIVER_MYSQL:
+		return InitMysqlDb(conf)
+	case DB_DRIVER_SQLITE:
+		return InitSqliteDb(conf)
+	default:
+		return InitMysqlDb(conf)
 	}
-
-	MysqlDb, err := sql.Open("mysql", dsn)
-	if err != nil {
-		return nil, err
-	}
-
-	MysqlDb.SetMaxOpenConns(conf.DBPoolSize)
-	MysqlDb.SetMaxIdleConns(conf.DBIdleSize)
-
-	err = MysqlDb.Ping()
-	if err != nil {
-		return nil, err
-	}
-
-	MysqlDrivers[dsn] = MysqlDb
-
-	return MysqlDb, nil
 }
 
 //新创建DBA操作库
 func NewDBA(db_conf *DBConfig) (*DBA, error) {
-	MysqlDriver, err := InitMysqlDb(db_conf)
+	driver, err := InitDb(db_conf)
 	if err != nil {
 		return nil, err
 	}
 
-	dba := &DBA{db: MysqlDriver, debug: db_conf.DBDebug}
+	dba := &DBA{db: driver, debug: db_conf.DBDebug}
 
 	return dba, nil
 }

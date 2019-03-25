@@ -9,11 +9,11 @@ import (
 )
 
 var cfg = &DBConfig{
-	DBServer:   "168.168.0.10",
+	DBServer:   "localhost",
 	DBPort:     "3306",
-	DBName:     "test_db",
+	DBName:     "wefc",
 	DBUser:     "root",
-	DBPassword: "kKie93jgUrn!k",
+	DBPassword: "123123",
 	DBPoolSize: 200,
 	DBIdleSize: 100,
 	DBDebug:    true,
@@ -24,13 +24,13 @@ func TestDBA_Insert(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	tab := db.Table("t_vehicle_info")
+	tab := db.Table("w_w04_view")
 	list, err := tab.Limit(10, 1).Query().Result()
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Printf("%+v", list[0])
+	utils.PrintAny(list[0])
 }
 
 func TestDBA_InsertMulti(t *testing.T) {
