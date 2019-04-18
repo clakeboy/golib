@@ -54,7 +54,7 @@ func (a *AliSms) SetSignName(sign_name string) {
 }
 
 //发送短信
-func (a *AliSms) SendSms(phone_num string, template_name string, params utils.M) (*AliSmsRes, error) {
+func (a *AliSms) SendSms(phoneNumber string, templateName string, params utils.M) (*AliSmsRes, error) {
 	data := utils.M{
 		"SignatureMethod":  "HMAC-SHA1",
 		"SignatureNonce":   utils.CreateUUID(true),
@@ -65,18 +65,59 @@ func (a *AliSms) SendSms(phone_num string, template_name string, params utils.M)
 		"Action":           "SendSms",
 		"Version":          "2017-05-25",
 		"RegionId":         a.regionID,
-		"PhoneNumbers":     phone_num,
+		"PhoneNumbers":     phoneNumber,
 		"SignName":         a.signName,
 		"TemplateParam":    params.ToJsonString(),
-		"TemplateCode":     template_name,
+		"TemplateCode":     templateName,
 		"OutId":            "123",
 	}
 
-	sign_str, query_str := a.Sign(data)
+	signStr, queryStr := a.Sign(data)
 
-	url_str := fmt.Sprintf("http://dysmsapi.aliyuncs.com/?Signature=%s&%s", a.specialUrlEncode(sign_str), query_str)
+	urlStr := fmt.Sprintf("http://dysmsapi.aliyuncs.com/?Signature=%s&%s", a.specialUrlEncode(signStr), queryStr)
 
-	return a.send(url_str)
+	return a.send(urlStr)
+}
+
+//群发短信
+func (a *AliSms) SendSmsMulti(phoneList []string, signList []string, templateName string, params []utils.M) (*AliSmsRes, error) {
+	paramsJson, err := json.Marshal(params)
+	if err != nil {
+		return nil, err
+	}
+
+	phoneJson, err := json.Marshal(phoneList)
+	if err != nil {
+		return nil, err
+	}
+
+	signJson, err := json.Marshal(signList)
+	if err != nil {
+		return nil, err
+	}
+
+	data := utils.M{
+		"SignatureMethod":   "HMAC-SHA1",
+		"SignatureNonce":    utils.CreateUUID(true),
+		"AccessKeyId":       a.accessID,
+		"SignatureVersion":  "1.0",
+		"Timestamp":         time.Now().UTC().Format("2006-01-02T15:04:05Z"),
+		"Format":            "JSON",
+		"Action":            "SendBatchSms",
+		"Version":           "2017-05-25",
+		"RegionId":          a.regionID,
+		"PhoneNumberJson":   string(phoneJson),
+		"SignNameJson":      string(signJson),
+		"TemplateParamJson": string(paramsJson),
+		"TemplateCode":      templateName,
+		"OutId":             "123",
+	}
+
+	signStr, queryStr := a.Sign(data)
+
+	urlStr := fmt.Sprintf("http://dysmsapi.aliyuncs.com/?Signature=%s&%s", a.specialUrlEncode(signStr), queryStr)
+
+	return a.send(urlStr)
 }
 
 //发送请求
