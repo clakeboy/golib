@@ -3,8 +3,10 @@ package mongo
 import (
 	"context"
 	"fmt"
-	"github.com/mongodb/mongo-go-driver/mongo"
-	"github.com/mongodb/mongo-go-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"gopkg.in/mgo.v2/bson"
 	"time"
 )
 
@@ -32,13 +34,15 @@ func NewDatabase(conf *Config) (*Database, error) {
 	opts.SetConnectTimeout(20 * time.Second)
 	if conf.Auth != "" {
 		opts.SetAuth(options.Credential{
-			Username:   conf.User,
-			Password:   conf.Password,
-			AuthSource: conf.Auth,
+			AuthMechanism: "SCRAM-SHA-1",
+			AuthSource:    conf.Auth,
+			Username:      conf.User,
+			Password:      conf.Password,
+			PasswordSet:   true,
 		})
 	}
 
-	client, err := mongo.NewClientWithOptions("", opts)
+	client, err := mongo.NewClient(opts)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +56,12 @@ func NewDatabase(conf *Config) (*Database, error) {
 //connect to mongodb
 func (d *Database) Open() error {
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*5)
-	return d.client.Connect(ctx)
+	err := d.client.Connect(ctx)
+	if err != nil {
+		return err
+	}
+
+	return d.Ping()
 }
 
 //disconnect mongodb
@@ -65,12 +74,24 @@ func (d *Database) SelectDatabase(dbName string) {
 	d.currentDBName = dbName
 }
 
-//get default database
-func (d *Database) DefaultDB() {
-	d.client.Database(d.currentDBName)
+func (d *Database) ListDatabase() (mongo.ListDatabasesResult, error) {
+	return d.client.ListDatabases(nil, bson.M{})
 }
 
-//get collection
-func (d *Database) Collection(collectionName string) {
-	d.client.Database(d.currentDBName).Collection(collectionName)
+func (d *Database) ListDatabaseNames() ([]string, error) {
+	return d.client.ListDatabaseNames(nil, bson.M{})
+}
+
+//get default database
+func (d *Database) Database(dbName ...string) *mongo.Database {
+	if len(dbName) > 0 {
+		return d.client.Database(dbName[0])
+	}
+	return d.client.Database(d.currentDBName)
+}
+
+//ping mongodb server
+func (d *Database) Ping() error {
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	return d.client.Ping(ctx, readpref.Primary())
 }

@@ -18,7 +18,6 @@ require (
 	github.com/mattn/go-isatty v0.0.4 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
-	github.com/mongodb/mongo-go-driver v0.3.0
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/stretchr/testify v1.2.2 // indirect
@@ -26,6 +25,7 @@ require (
 	github.com/ugorji/go/codec v0.0.0-20181209151446-772ced7fd4c2 // indirect
 	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect
 	github.com/xdg/stringprep v1.0.0 // indirect
+	go.mongodb.org/mongo-driver v1.0.1
 	golang.org/x/crypto v0.0.0-20181203042331-505ab145d0a9
 	golang.org/x/net v0.0.0-20181220203305-927f97764cc3 // indirect
 	golang.org/x/sync v0.0.0-20181221193216-37e7f081c4d4 // indirect

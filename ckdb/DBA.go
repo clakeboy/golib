@@ -46,7 +46,7 @@ type DBColumn struct {
 
 //reg
 
-var columnReg = regexp.MustCompile(`(.+?)\[(\+|-|!|>|<|<=|>=|like)\]`)
+var columnReg = regexp.MustCompile(`(.+?)\[(\+|-|!|>|<|<=|>=|like)]`)
 
 //DBA专用数据
 type DM map[string]interface{}
@@ -63,20 +63,20 @@ func InitDb(conf *DBConfig) (*sql.DB, error) {
 }
 
 //新创建DBA操作库
-func NewDBA(db_conf *DBConfig) (*DBA, error) {
-	driver, err := InitDb(db_conf)
+func NewDBA(dbConf *DBConfig) (*DBA, error) {
+	driver, err := InitDb(dbConf)
 	if err != nil {
 		return nil, err
 	}
 
-	dba := &DBA{db: driver, debug: db_conf.DBDebug}
+	dba := &DBA{db: driver, debug: dbConf.DBDebug}
 
 	return dba, nil
 }
 
 //设置操作的表名
-func (d *DBA) Table(table_name string) *DBATable {
-	return NewDBATable(d, table_name)
+func (d *DBA) Table(tableName string) *DBATable {
+	return NewDBATable(d, tableName)
 }
 
 //开始事务
@@ -191,15 +191,15 @@ func (d *DBA) Update(data utils.M, where utils.M, table string) error {
 		values = append(values, v)
 	}
 
-	sql_str := fmt.Sprintf("UPDATE %s SET %s", d.FormatColumn(table), strings.Join(tmp, ","))
+	sqlStr := fmt.Sprintf("UPDATE %s SET %s", d.FormatColumn(table), strings.Join(tmp, ","))
 
 	if where != nil {
-		where_str, where_val := d.WhereRecursion(where, "AND", table)
-		values = append(values, where_val...)
-		sql_str = fmt.Sprintf("%s WHERE %s", sql_str, where_str)
+		whereStr, whereVal := d.WhereRecursion(where, "AND", table)
+		values = append(values, whereVal...)
+		sqlStr = fmt.Sprintf("%s WHERE %s", sqlStr, whereStr)
 	}
 
-	_, err := d.Exec(sql_str, values...)
+	_, err := d.Exec(sqlStr, values...)
 	if err != nil {
 		return err
 	}
@@ -210,10 +210,10 @@ func (d *DBA) Update(data utils.M, where utils.M, table string) error {
 //条件删除数据
 func (d *DBA) Delete(where utils.M, table string) (int, error) {
 	var values []interface{}
-	where_str, where_val := d.WhereRecursion(where, "AND", table)
-	values = append(values, where_val...)
-	sql_str := fmt.Sprintf("DELETE FROM %s WHERE %s", table, where_str)
-	res, err := d.Exec(sql_str, values...)
+	whereStr, whereVal := d.WhereRecursion(where, "AND", table)
+	values = append(values, whereVal...)
+	sqlStr := fmt.Sprintf("DELETE FROM %s WHERE %s", table, whereStr)
+	res, err := d.Exec(sqlStr, values...)
 	if err != nil {
 		return 0, err
 	}
@@ -227,9 +227,9 @@ func (d *DBA) Delete(where utils.M, table string) (int, error) {
 }
 
 //查询数据库
-func (d *DBA) Query(sql_str string, args ...interface{}) ([]utils.M, error) {
-	rows, err := d.db.Query(sql_str, args...)
-	d.LastSql = sql_str
+func (d *DBA) Query(sqlStr string, args ...interface{}) ([]utils.M, error) {
+	rows, err := d.db.Query(sqlStr, args...)
+	d.LastSql = sqlStr
 	d.LastArgs = args
 	if err != nil {
 		if d.debug {
@@ -243,9 +243,9 @@ func (d *DBA) Query(sql_str string, args ...interface{}) ([]utils.M, error) {
 }
 
 //查询数据库并返回结果 (传入结构体)
-func (d *DBA) QueryStruct(structInterFace interface{}, sql_str string, args ...interface{}) ([]interface{}, error) {
-	rows, err := d.db.Query(sql_str, args...)
-	d.LastSql = sql_str
+func (d *DBA) QueryStruct(structInterFace interface{}, sqlStr string, args ...interface{}) ([]interface{}, error) {
+	rows, err := d.db.Query(sqlStr, args...)
+	d.LastSql = sqlStr
 	d.LastArgs = args
 	if err != nil {
 		if d.debug {
@@ -259,16 +259,16 @@ func (d *DBA) QueryStruct(structInterFace interface{}, sql_str string, args ...i
 }
 
 //执行SQL语句
-func (d *DBA) Exec(sql_str string, args ...interface{}) (sql.Result, error) {
+func (d *DBA) Exec(sqlStr string, args ...interface{}) (sql.Result, error) {
 	var res sql.Result
 	var err error
 	if d.tx != nil {
-		res, err = d.tx.Exec(sql_str, args...)
+		res, err = d.tx.Exec(sqlStr, args...)
 	} else {
-		res, err = d.db.Exec(sql_str, args...)
+		res, err = d.db.Exec(sqlStr, args...)
 	}
 
-	d.LastSql = sql_str
+	d.LastSql = sqlStr
 	d.LastArgs = args
 
 	if err != nil {
@@ -281,8 +281,8 @@ func (d *DBA) Exec(sql_str string, args ...interface{}) (sql.Result, error) {
 }
 
 //查询一条记录
-func (d *DBA) QueryOne(sql_str string, args ...interface{}) (utils.M, error) {
-	list, err := d.Query(sql_str, args...)
+func (d *DBA) QueryOne(sqlStr string, args ...interface{}) (utils.M, error) {
+	list, err := d.Query(sqlStr, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -310,8 +310,8 @@ func (d *DBA) QueryOne(sql_str string, args ...interface{}) (utils.M, error) {
 }
 
 //查询一条记录返回结构体
-func (d *DBA) QueryOneStruct(structInterFace interface{}, sql_str string, args ...interface{}) (interface{}, error) {
-	list, err := d.QueryStruct(structInterFace, sql_str, args...)
+func (d *DBA) QueryOneStruct(structInterFace interface{}, sqlStr string, args ...interface{}) (interface{}, error) {
+	list, err := d.QueryStruct(structInterFace, sqlStr, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -323,8 +323,8 @@ func (d *DBA) QueryOneStruct(structInterFace interface{}, sql_str string, args .
 	return list[0], nil
 }
 
-func (d *DBA) QueryRow(sql_str string, args ...interface{}) *sql.Row {
-	return d.db.QueryRow(sql_str, args...)
+func (d *DBA) QueryRow(sqlStr string, args ...interface{}) *sql.Row {
+	return d.db.QueryRow(sqlStr, args...)
 }
 
 //取得所有数据到结构体,没传结构体为默认 utils.M
@@ -360,7 +360,7 @@ func (d *DBA) FetchAllOfStructV2(query *sql.Rows, i interface{}) ([]interface{},
 
 		obj := reflect.New(reflect.TypeOf(i)).Interface()
 
-		utils.Map2Struct(result, obj)
+		_ = utils.Map2Struct(result, obj)
 
 		resultList = append(resultList, obj)
 	}
@@ -377,7 +377,7 @@ func (d *DBA) FetchAll(query *sql.Rows) ([]utils.M, error) {
 		scans[i] = &values[i]
 	}
 
-	results := []utils.M{}
+	var results []utils.M
 
 	for query.Next() {
 		if err := query.Scan(scans...); err != nil {
@@ -459,53 +459,53 @@ func (d *DBA) scanMap(scans []interface{}, columns []string) interface{} {
 
 //处理where条件列表
 func (d *DBA) WhereRecursion(where utils.M, icon string, table string) (string, []interface{}) {
-	var where_strings []string
+	var whereStrings []string
 	var values []interface{}
 	for i, v := range where {
-		if i == "AMD" || i == "OR" {
-			tmp_where, val := d.WhereRecursion(v.(utils.M), i, table)
-			where_strings = append(where_strings, tmp_where)
+		if i == "AND" || i == "OR" {
+			tmpWhere, val := d.WhereRecursion(v.(utils.M), i, table)
+			whereStrings = append(whereStrings, tmpWhere)
 			values = append(values, val...)
 		} else {
 			vtype := reflect.TypeOf(v).Kind()
 			if vtype == reflect.Slice || vtype == reflect.Array {
 				values = append(values, v.([]interface{})...)
 				//values = append(values, v)
-				where_strings = append(where_strings, d.formatWhere(i, table, len(v.([]interface{}))))
+				whereStrings = append(whereStrings, d.formatWhere(i, table, len(v.([]interface{}))))
 			} else {
 				values = append(values, v)
-				where_strings = append(where_strings, d.formatWhere(i, table, 0))
+				whereStrings = append(whereStrings, d.formatWhere(i, table, 0))
 			}
 		}
 	}
-	where_prefix := fmt.Sprintf(" %s ", icon)
-	where_str := fmt.Sprintf("(%s)", strings.Join(where_strings, where_prefix))
+	wherePrefix := fmt.Sprintf(" %s ", icon)
+	whereStr := fmt.Sprintf("(%s)", strings.Join(whereStrings, wherePrefix))
 
-	return where_str, values
+	return whereStr, values
 }
 
 //格式化WHERE条件
 func (d *DBA) formatWhere(column string, table string, length int) string {
 	field := d.explainColumn(column)
 
-	column_str := d.FormatColumn(field.Field)
+	columnStr := d.FormatColumn(field.Field)
 	icon := field.Icon
 
-	var format_str string
+	var formatStr string
 	if length > 0 {
-		var mask_args []string
-		where_icon := "IN"
+		var maskArgs []string
+		whereIcon := "IN"
 		for i := 0; i < length; i++ {
-			mask_args = append(mask_args, "?")
+			maskArgs = append(maskArgs, "?")
 		}
 		if icon == "!" {
-			where_icon = "NOT IN"
+			whereIcon = "NOT IN"
 		}
-		format_str = fmt.Sprintf("%s.%s %s (%s)", d.FormatColumn(table), column_str, where_icon, strings.Join(mask_args, ","))
+		formatStr = fmt.Sprintf("%s.%s %s (%s)", d.FormatColumn(table), columnStr, whereIcon, strings.Join(maskArgs, ","))
 	} else {
-		format_str = fmt.Sprintf("%s.%s %v ?", d.FormatColumn(table), column_str, utils.YN(icon == "!", "!=", icon))
+		formatStr = fmt.Sprintf("%s.%s %v ?", d.FormatColumn(table), columnStr, utils.YN(icon == "!", "!=", icon))
 	}
-	return format_str
+	return formatStr
 }
 
 //解释字段名
@@ -542,23 +542,23 @@ func (d *DBA) FormatColumn(column string) string {
 }
 
 func (d *DBA) Close() {
-	d.db.Close()
+	_ = d.db.Close()
 }
 
-func (d *DBA) ConvertData(org_data interface{}) (DM, error) {
-	t := reflect.TypeOf(org_data)
+func (d *DBA) ConvertData(orgData interface{}) (DM, error) {
+	t := reflect.TypeOf(orgData)
 	switch t.Kind() {
 	case reflect.Map:
 		if t.Name() == "DM" {
-			return org_data.(DM), nil
+			return orgData.(DM), nil
 		} else if t.Name() == "M" {
-			return DM(org_data.(utils.M)), nil
+			return DM(orgData.(utils.M)), nil
 		}
-		return DM(org_data.(map[string]interface{})), nil
+		return DM(orgData.(map[string]interface{})), nil
 	case reflect.Ptr:
 		fallthrough
 	case reflect.Struct:
-		return DM(utils.Struct2Map(org_data, nil)), nil
+		return DM(utils.Struct2Map(orgData, nil)), nil
 	default:
 		return nil, errors.New("not support this data")
 	}
@@ -569,7 +569,7 @@ func (d *DBA) SetQueryInterface(i interface{}) {
 }
 
 //输出表结构为GO struct
-func BuildTableStruct(table_name, db_name string, dbconf *DBConfig) {
+func BuildTableStruct(tableName, dbName string, dbConf *DBConfig) {
 	types := map[string]string{
 		"int":      "int",
 		"tinyint":  "int",
@@ -582,29 +582,29 @@ func BuildTableStruct(table_name, db_name string, dbconf *DBConfig) {
 		"smallint": "int",
 	}
 
-	dba, err := NewDBA(dbconf)
+	dba, err := NewDBA(dbConf)
 	if err != nil {
 		panic(err)
 	}
 
-	res, err := dba.Table("COLUMNS").Where(utils.M{"TABLE_NAME": table_name, "TABLE_SCHEMA": db_name}, "").Order(utils.M{"ORDINAL_POSITION": "ASC"}).Query().Result()
+	res, err := dba.Table("COLUMNS").Where(utils.M{"TABLE_NAME": tableName, "TABLE_SCHEMA": dbName}, "").Order(utils.M{"ORDINAL_POSITION": "ASC"}).Query().Result()
 	if err != nil {
 		panic(err)
 	}
 	var tmp []string
 	var (
-		column_name    string
-		column_type    string
-		column_comment string
+		columnName    string
+		columnType    string
+		columnComment string
 	)
 	for _, row := range res {
-		column_name = row["COLUMN_NAME"].(string)
-		column_type = row["DATA_TYPE"].(string)
-		column_comment = row["COLUMN_COMMENT"].(string)
-		tmp = append(tmp, fmt.Sprintf("\t%v %v `json:\"%v\" bson:\"%v\"` //%v", utils.Under2Hump(column_name), types[column_type], column_name, column_name, column_comment))
+		columnName = row["COLUMN_NAME"].(string)
+		columnType = row["DATA_TYPE"].(string)
+		columnComment = row["COLUMN_COMMENT"].(string)
+		tmp = append(tmp, fmt.Sprintf("\t%v %v `json:\"%v\" bson:\"%v\"` //%v", utils.Under2Hump(columnName), types[columnType], columnName, columnName, columnComment))
 	}
 
-	fmt.Println(fmt.Sprintf("type %s struct {", table_name))
+	fmt.Println(fmt.Sprintf("type %s struct {", tableName))
 	for _, v := range tmp {
 		fmt.Println(v)
 	}
