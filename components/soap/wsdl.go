@@ -242,7 +242,9 @@ func (w *Wsdl) explainComplexType() {
 
 		for _, e := range v.Element {
 			e.TargetNamespace = namespace
-			e.ComplexType.TargetNamespace = namespace
+			if e.ComplexType != nil {
+				e.ComplexType.TargetNamespace = namespace
+			}
 			w.elements[e.Name] = e
 		}
 	}
