@@ -913,7 +913,23 @@ func TestExplainXml(t *testing.T) {
 		panic(err)
 	}
 
-	soap_client.Call("")
+	res, err := soap_client.Call("appRequest", utils.M{
+		"appRequest": utils.M{
+			"arg0": utils.M{
+				"appInfos": []utils.M{{
+					"appBaseInfo": utils.M{
+						"appBirthday": "1994-02-10",
+						"appSex":      "1",
+					},
+					"cbnfcInfos": []utils.M{},
+				}},
+				"baseInfo":  utils.M{},
+				"kindInfos": []utils.M{},
+			},
+		},
+	})
+
+	fmt.Println(res, err)
 }
 
 func getSoapData() utils.M {

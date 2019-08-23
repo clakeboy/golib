@@ -199,6 +199,7 @@ func (s *SoapClient) explain(content []byte) error {
 func (s *SoapClient) buildSoapXML(fun *WsdlFunction, params interface{}) string {
 	ns := map[string]string{}
 	xml_con := "<?xml version='1.0' encoding='UTF-8'?>"
+	//utils.PrintAny(fun.RequestArgs)
 	xml_body := s.buildSoapBody(ArgsMap{fun.RequestArgs}, params, ns, false)
 	body_ns := ""
 	for k, v := range ns {
@@ -227,7 +228,7 @@ func (s *SoapClient) buildSoapBody(elms ArgsMap, params interface{}, ns map[stri
 			ns_el = "ck" + utils.RandStr(3, "123456789")
 			ns[v.Namespace] = ns_el
 		}
-		//fmt.Println(v.Name,v.Type,v.MaxOccurs,v.Elements,params)
+		fmt.Println(v.Name, v.Type, v.MaxOccurs, v.Elements, params)
 		if v.MaxOccurs == "unbounded" && !no_max {
 			switch params.(type) {
 			case []interface{}:

@@ -35,6 +35,14 @@ type CKRedis struct {
 
 var CKRedisPool *redis.Pool
 
+func GetActiveCount() int {
+	return CKRedisPool.ActiveCount()
+}
+
+func GetIdleCount() int {
+	return CKRedisPool.IdleCount()
+}
+
 func InitRedisPool(cfg *RedisConfig) {
 	CKRedisPool = &redis.Pool{
 		// 从配置文件获取maxidle以及maxactive，取不到则用后面的默认值

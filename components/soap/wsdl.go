@@ -72,6 +72,7 @@ type WsdlTypeElement struct {
 type WsdlSchemaElement struct {
 	XMLName         xml.Name         `xml:"element"`
 	Name            string           `xml:"name,attr"`
+	Type            string           `xml:"type,attr"`
 	ComplexType     *WsdlComplexType `xml:"complexType"`
 	TargetNamespace string
 }
@@ -189,7 +190,6 @@ func (w *Wsdl) Explain(body []byte) error {
 	if err != nil {
 		return err
 	}
-
 	w.ws = wsdl
 	w.explainPortType()
 	w.explainMessage()
@@ -242,9 +242,10 @@ func (w *Wsdl) explainComplexType() {
 
 		for _, e := range v.Element {
 			e.TargetNamespace = namespace
-			if e.ComplexType != nil {
-				e.ComplexType.TargetNamespace = namespace
+			if e.ComplexType == nil && e.Type != "" {
+				e.ComplexType = w.complexTypes[formatPrefixNs(e.Type)]
 			}
+			e.ComplexType.TargetNamespace = namespace
 			w.elements[e.Name] = e
 		}
 	}
