@@ -3,10 +3,17 @@ package utils
 import "encoding/json"
 
 type JsonParse struct {
+	ParseObject interface{}
+}
+
+func NewJsonParse(obj interface{}) *JsonParse {
+	return &JsonParse{
+		ParseObject: obj,
+	}
 }
 
 func (m *JsonParse) ToJson() []byte {
-	data, err := json.Marshal(m)
+	data, err := json.Marshal(m.ParseObject)
 	if err != nil {
 		return nil
 	}
@@ -22,7 +29,7 @@ func (m *JsonParse) ToJsonString() string {
 }
 
 func (m *JsonParse) ParseJson(data []byte) error {
-	err := json.Unmarshal(data, m)
+	err := json.Unmarshal(data, m.ParseObject)
 	if err != nil {
 		return err
 	}
