@@ -207,6 +207,16 @@ func (d *DBA) Update(data utils.M, where utils.M, table string) error {
 	return nil
 }
 
+//更新整条数据
+func (d *DBA) UpdateAny(data interface{}, where utils.M, table string) error {
+	convertData, err := d.ConvertData(data)
+	if err != nil {
+		return err
+	}
+
+	return d.Update(convertData, where, table)
+}
+
 //条件删除数据
 func (d *DBA) Delete(where utils.M, table string) (int, error) {
 	var values []interface{}
@@ -545,20 +555,20 @@ func (d *DBA) Close() {
 	_ = d.db.Close()
 }
 
-func (d *DBA) ConvertData(orgData interface{}) (DM, error) {
+func (d *DBA) ConvertData(orgData interface{}) (utils.M, error) {
 	t := reflect.TypeOf(orgData)
 	switch t.Kind() {
 	case reflect.Map:
 		if t.Name() == "DM" {
-			return orgData.(DM), nil
+			return orgData.(utils.M), nil
 		} else if t.Name() == "M" {
-			return DM(orgData.(utils.M)), nil
+			return utils.M(orgData.(utils.M)), nil
 		}
-		return DM(orgData.(map[string]interface{})), nil
+		return utils.M(orgData.(map[string]interface{})), nil
 	case reflect.Ptr:
 		fallthrough
 	case reflect.Struct:
-		return DM(utils.Struct2Map(orgData, nil)), nil
+		return utils.M(utils.Struct2Map(orgData, nil)), nil
 	default:
 		return nil, errors.New("not support this data")
 	}

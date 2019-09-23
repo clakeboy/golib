@@ -289,7 +289,18 @@ func (t *DBATable) Update(data utils.M) bool {
 	return true
 }
 
-func (t *DBATable) One(row_struct interface{}) error {
+//更新整条记录
+func (t *DBATable) UpdateAny(data interface{}) bool {
+	defer t.Clear()
+	err := t.db.UpdateAny(data, t.where, t.table)
+	if err != nil {
+		return false
+	}
+
+	return true
+}
+
+func (t *DBATable) One(rowStruct interface{}) error {
 	defer t.Clear()
 	return nil
 }
