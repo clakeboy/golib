@@ -560,7 +560,7 @@ func (d *DBA) ConvertData(orgData interface{}) (utils.M, error) {
 	switch t.Kind() {
 	case reflect.Map:
 		if t.Name() == "DM" {
-			return orgData.(utils.M), nil
+			return utils.M(orgData.(DM)), nil
 		} else if t.Name() == "M" {
 			return utils.M(orgData.(utils.M)), nil
 		}
