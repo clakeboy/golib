@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"time"
 )
 
 var MysqlDrivers = make(map[string]*sql.DB)
@@ -26,7 +27,11 @@ func InitMysqlDb(conf *DBConfig) (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	if conf.MaxLife > 0 {
+		MysqlDb.SetConnMaxLifetime(time.Duration(conf.MaxLife) * time.Second)
+	} else {
+		MysqlDb.SetConnMaxLifetime(300 * time.Second)
+	}
 	MysqlDb.SetMaxOpenConns(conf.DBPoolSize)
 	MysqlDb.SetMaxIdleConns(conf.DBIdleSize)
 

@@ -36,6 +36,7 @@ type DBConfig struct {
 	DBPassword string `json:"db_password" yaml:"db_password"`
 	DBPoolSize int    `json:"db_pool_size" yaml:"db_pool_size"`
 	DBIdleSize int    `json:"db_Idle_size" yaml:"db_Idle_size"`
+	MaxLife    int    `json:"max_life" yaml:"max_life"`
 	DBDebug    bool   `json:"db_debug" yaml:"db_debug"`
 }
 
