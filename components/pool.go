@@ -23,65 +23,65 @@ func NewPoll(number int, worker func(obj ...interface{}) bool) *GoroutinePool {
 	return p
 }
 
-func (this *GoroutinePool) Start() {
-	this.stop = false
-	for i := 0; i < this.Number; i++ {
-		this.wait.Add(1)
+func (g *GoroutinePool) Start() {
+	g.stop = false
+	for i := 0; i < g.Number; i++ {
+		g.wait.Add(1)
 		go func(idx int) {
 			isDone := false
 			for !isDone {
 				select {
-				case task, ok := <-this.Queue:
+				case task, ok := <-g.Queue:
 					if !ok {
 						isDone = true
 					}
-					this.Worker(task, idx)
+					g.Worker(task, idx, g)
 				default:
 					isDone = true
 				}
-				if this.stop {
+				if g.stop {
 					break
 				}
 			}
-			this.wait.Done()
+			g.wait.Done()
 		}(i)
 	}
 
-	this.wait.Wait()
+	g.wait.Wait()
 
-	if this.finishCallback != nil {
-		this.finishCallback()
+	if g.finishCallback != nil {
+		g.finishCallback()
 	}
-	this.Stop()
+	g.Stop()
 }
 
-func (this *GoroutinePool) AddTaskStrings(tasks []string) {
+func (g *GoroutinePool) AddTaskStrings(tasks []string) {
 	total := len(tasks)
-	this.Total = total
-	this.Queue = make(chan interface{}, total)
+	g.Total = total
+	g.Queue = make(chan interface{}, total)
 	for _, obj := range tasks {
-		this.Queue <- obj
+		g.Queue <- obj
 	}
 }
 
-func (this *GoroutinePool) AddTaskInterface(tasks []interface{}) {
+func (g *GoroutinePool) AddTaskInterface(tasks []interface{}) {
 	total := len(tasks)
-	this.Total = total
-	this.Queue = make(chan interface{}, total)
+	g.Total = total
+	g.Queue = make(chan interface{}, total)
 	for _, obj := range tasks {
-		this.Queue <- obj
+		g.Queue <- obj
 	}
 }
 
-func (this *GoroutinePool) AddTask(task interface{}) {
-	this.Queue <- task
+func (g *GoroutinePool) AddTask(task interface{}) {
+	g.Queue <- task
 }
 
-func (this *GoroutinePool) Stop() {
-	this.stop = true
-	close(this.Queue)
+func (g *GoroutinePool) Stop() {
+	g.stop = true
+	close(g.Queue)
 }
 
-func (this *GoroutinePool) SetFinishCallback(callback func()) {
-	this.finishCallback = callback
+func (g *GoroutinePool) SetFinishCallback(callback func()) {
+	g.finishCallback = callback
 }
