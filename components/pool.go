@@ -10,6 +10,7 @@ type GoroutinePool struct {
 	Worker         func(obj ...interface{}) bool
 	finishCallback func()
 	wait           sync.WaitGroup
+	stop           bool //关闭协程池信号
 }
 
 //新建一个协程池
@@ -23,16 +24,23 @@ func NewPoll(number int, worker func(obj ...interface{}) bool) *GoroutinePool {
 }
 
 func (this *GoroutinePool) Start() {
+	this.stop = false
 	for i := 0; i < this.Number; i++ {
 		this.wait.Add(1)
 		go func(idx int) {
-			isDone := true
-			for isDone {
+			isDone := false
+			for !isDone {
 				select {
-				case task := <-this.Queue:
+				case task, ok := <-this.Queue:
+					if !ok {
+						isDone = true
+					}
 					this.Worker(task, idx)
 				default:
-					isDone = false
+					isDone = true
+				}
+				if this.stop {
+					break
 				}
 			}
 			this.wait.Done()
@@ -70,6 +78,7 @@ func (this *GoroutinePool) AddTask(task interface{}) {
 }
 
 func (this *GoroutinePool) Stop() {
+	this.stop = true
 	close(this.Queue)
 }
 
