@@ -93,7 +93,7 @@ func (w *Weixin) Http(uri string) (string, error) {
 	}
 
 	if info.ErrorCode != 0 {
-		err := errors.New(fmt.Sprintf("error_code:%s,errmsg:%s", info.ErrorCode, info.ErrorMsg))
+		err := errors.New(fmt.Sprintf("error_code:%d,errmsg:%s", info.ErrorCode, info.ErrorMsg))
 		return "", err
 	}
 
@@ -112,7 +112,7 @@ func (w *Weixin) post(uri string, data utils.M) (string, error) {
 		return "", err
 	}
 	if info.ErrorCode != 0 {
-		err := errors.New(fmt.Sprintf("error_code:%s,errmsg:%s", info.ErrorCode, info.ErrorMsg))
+		err := errors.New(fmt.Sprintf("error_code:%d,errmsg:%s", info.ErrorCode, info.ErrorMsg))
 		return "", err
 	}
 
