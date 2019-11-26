@@ -1,6 +1,7 @@
 package components
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/DeanThompson/ginpprof"
 	"github.com/clakeboy/golib/utils"
@@ -17,6 +18,7 @@ func GetProperty(c *gin.Context) []byte {
 		fmt.Println(err)
 		panic(err)
 	}
+	c.Request.Body = ioutil.NopCloser(bytes.NewReader(data))
 	sid := c.Request.Header.Get("CK-Pro-S")
 	if sid != "" {
 		enc := utils.NewAes(sid)
