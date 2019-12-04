@@ -109,6 +109,7 @@ func BinaryStringToBytes(s string) (bs []byte) {
 			n = 0
 		}
 	}
+	bs = FixByesIntLen(bs)
 	return
 }
 
@@ -182,4 +183,24 @@ func BytesToInt(b []byte) int {
 	default:
 		return 0
 	}
+}
+
+//修正bytes int 数据长度
+func FixByesIntLen(b []byte) []byte {
+	var fixLen int
+	bytesLen := len(b)
+	if bytesLen == 1 || bytesLen == 2 || bytesLen == 4 || bytesLen == 8 {
+		return b
+	}
+	if bytesLen > 8 {
+		return b[:8]
+	}
+	if bytesLen > 2 && bytesLen < 4 {
+		fixLen = 4 - bytesLen
+	}
+	if bytesLen > 4 && bytesLen < 8 {
+		fixLen = 8 - bytesLen
+	}
+	fixHead := make([]byte, fixLen)
+	return append(fixHead, b...)
 }

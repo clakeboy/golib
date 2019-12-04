@@ -1,7 +1,11 @@
 package snowflake
 
 import (
+	"bytes"
+	"encoding/binary"
 	"fmt"
+	"github.com/clakeboy/golib/utils"
+	"sync"
 	"time"
 )
 
@@ -39,21 +43,42 @@ const (
 	sequenceMask int64 = ^(-1 << uint(sequenceBits))
 )
 
+var LongEpoch int64 = 1536297193013
+
 type SnowFlake struct {
 	epoch         int64 //开始的时间戳,毫秒级
 	workerId      int64 //工作ID (0-31)
 	dataCenterId  int64 //数据中心ID (0-31)
 	sequence      int64 //毫秒内序列 (0-4095)
 	lastTimestamp int64 //上次生成ID的时间戳,毫秒级
+	sync          sync.Mutex
 }
 
 type SnowId struct {
-	RawId int64
+	RawId        int64
+	Sequence     int64
+	WorkerId     int64
+	DataCenterId int64
+	Timestamp    int64
 }
 
 func SnowRaw(raw int64) *SnowId {
+	binStr := fmt.Sprintf("%b", raw)
+	binLen := int64(len(binStr))
+	sequenceStart := utils.YN(binLen < workerIdShift, int64(0), binLen-workerIdShift).(int64)
+	workerStart := utils.YN(binLen < dataCenterIdShift, int64(0), binLen-dataCenterIdShift).(int64)
+	timeStart := utils.YN(binLen < timestampLeftShift, int64(0), binLen-timestampLeftShift).(int64)
+	sequence := binStr[sequenceStart:]
+	workerId := utils.YN(sequenceStart == 0, "0", binStr[workerStart:sequenceStart]).(string)
+	dataCenterId := utils.YN(workerStart == 0, "0", binStr[timeStart:workerStart]).(string)
+	timeBin := utils.YN(timeStart == 0, "0", binStr[:timeStart]).(string)
+
 	return &SnowId{
-		RawId: raw,
+		RawId:        raw,
+		Sequence:     int64(utils.BytesToInt(utils.BinaryStringToBytes(sequence))),
+		WorkerId:     int64(utils.BytesToInt(utils.BinaryStringToBytes(workerId))),
+		DataCenterId: int64(utils.BytesToInt(utils.BinaryStringToBytes(dataCenterId))),
+		Timestamp:    int64(utils.BytesToInt(utils.BinaryStringToBytes(timeBin))) + LongEpoch,
 	}
 }
 
@@ -79,11 +104,12 @@ func NewShowFlake(epoch, workerId, dataCenterId int64) (*SnowFlake, error) {
 }
 
 //得到下一个ID
-func (s *SnowFlake) NextId() (*SnowId, error) {
-	currentTimestamp := getTimeMilliSecond()
+func (s *SnowFlake) NextId() (int64, error) {
+	s.sync.Lock()
+	currentTimestamp := GetTimeMilliSecond()
 	//如果当前时间小于上一次ID生成的时间戳，说明系统时钟回退过这个时候应当抛出异常
 	if currentTimestamp < s.lastTimestamp {
-		return nil, fmt.Errorf("Clock moved backwards.  Refusing to generate id for %d milliseconds", s.lastTimestamp-currentTimestamp)
+		return 0, fmt.Errorf("Clock moved backwards.  Refusing to generate id for %d milliseconds", s.lastTimestamp-currentTimestamp)
 	}
 
 	//如果是同一时间生成的，则进行毫秒内序列
@@ -104,15 +130,41 @@ func (s *SnowFlake) NextId() (*SnowId, error) {
 		(s.dataCenterId << uint(dataCenterIdShift)) |
 		(s.workerId << uint(workerIdShift)) |
 		s.sequence
-	return SnowRaw(rawId), nil
+	s.sync.Unlock()
+	return rawId, nil
 }
 
 func (s *SnowFlake) tilNextMillis() int64 {
 	time.Sleep(time.Millisecond)
-	return getTimeMilliSecond()
+	return GetTimeMilliSecond()
 }
 
 //得到毫秒时间戳
-func getTimeMilliSecond() int64 {
+func GetTimeMilliSecond() int64 {
 	return time.Now().UnixNano() / 1e6
+}
+
+func BytesToInt64(b []byte) int64 {
+	bytesBuffer := bytes.NewBuffer(b)
+	lens := len(b)
+	switch lens {
+	case 1:
+		tmp := int8(0)
+		binary.Read(bytesBuffer, binary.BigEndian, &tmp)
+		return int64(tmp)
+	case 2:
+		tmp := int16(0)
+		binary.Read(bytesBuffer, binary.BigEndian, &tmp)
+		return int64(tmp)
+	case 4:
+		tmp := int32(0)
+		binary.Read(bytesBuffer, binary.BigEndian, &tmp)
+		return int64(tmp)
+	case 8:
+		tmp := int64(0)
+		binary.Read(bytesBuffer, binary.BigEndian, &tmp)
+		return tmp
+	default:
+		return 0
+	}
 }
