@@ -75,6 +75,11 @@ func (l *SysLog) Info(msg string) {
 	l.Write([]byte(msg_str))
 }
 
+func (l *SysLog) PrintError(err interface{}) {
+	stack_str := stack(4)
+	fmt.Printf("%s", stack_str)
+}
+
 // stack returns a nicely formated stack frame, skipping skip frames
 func stack(skip int) []byte {
 	buf := new(bytes.Buffer) // the returned data
