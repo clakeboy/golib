@@ -25,7 +25,7 @@ func TestSnowFlake_NextId(t *testing.T) {
 	epoch := GetTimeMilliSecond()
 	fmt.Println(epoch)
 	fmt.Println(1288834974657)
-	snow, err := NewShowFlake(1288834974657, 3, 6)
+	snow, err := NewShowFlake(epoch, 3, 6)
 	if err != nil {
 		panic(err)
 	}
