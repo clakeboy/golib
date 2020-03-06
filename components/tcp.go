@@ -79,15 +79,24 @@ func (tp *TCPConnect) read() {
 			tp.conn.SetReadDeadline(time.Now().Add(tp.readTimeout))
 		}
 		buf := make([]byte, 256)
-		msg_len, err := tp.conn.Read(buf)
-		if err != nil {
-			log.Println(time.Now().String(), "Conn read error:", err)
-			break
+		var recv []byte
+		for {
+			msgLen, err := tp.conn.Read(buf)
+			if err != nil {
+				log.Println(time.Now().String(), "Conn read error:", err)
+				break
+			}
+			if msgLen == 0 {
+				break
+			}
+
+			recv = append(recv, buf[:msgLen]...)
 		}
+
 		if tp.debug {
-			fmt.Printf("[DEBUG] Read: %x,%d\n", buf[:msg_len], msg_len)
+			fmt.Printf("[DEBUG] Read: %x,%d\n", recv, len(recv))
 		}
-		tp.emit(TCPEventRecv, buf[:msg_len])
+		tp.emit(TCPEventRecv, recv)
 	}
 }
 
