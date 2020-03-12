@@ -31,6 +31,7 @@ type CKRedis struct {
 	rd       redis.Conn
 	listName string
 	conf     *RedisConfig
+	prefix   string //前缀
 }
 
 var CKRedisPool *redis.Pool
@@ -75,13 +76,23 @@ func NewCKRedis() (*CKRedis, error) {
 	return mq, nil
 }
 
+//设置前缀
+func (m *CKRedis) SetPrefix(prefix string) {
+	m.prefix = prefix
+}
+
+//得到有前缀的key
+func (m *CKRedis) Key(key string) string {
+	return m.prefix + key
+}
+
 //设置一个缓存值
 func (m *CKRedis) Set(key string, val interface{}, exp int) error {
 	var err error
 	if exp == -1 {
-		_, err = m.rd.Do("SET", key, val)
+		_, err = m.rd.Do("SET", m.Key(key), val)
 	} else {
-		_, err = m.rd.Do("SET", key, val, "EX", exp)
+		_, err = m.rd.Do("SET", m.Key(key), val, "EX", exp)
 	}
 	if err != nil {
 		return err
@@ -91,7 +102,7 @@ func (m *CKRedis) Set(key string, val interface{}, exp int) error {
 
 //得到一个缓存值
 func (m *CKRedis) Get(key string) (interface{}, error) {
-	val, err := m.rd.Do("GET", key)
+	val, err := m.rd.Do("GET", m.Key(key))
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +112,7 @@ func (m *CKRedis) Get(key string) (interface{}, error) {
 
 //是否存在一个缓存值
 func (m *CKRedis) Exists(key string) bool {
-	val, err := redis.Int(m.rd.Do("EXISTS", key))
+	val, err := redis.Int(m.rd.Do("EXISTS", m.Key(key)))
 	if err != nil {
 		return false
 	}
@@ -157,23 +168,23 @@ func (m *CKRedis) Keys(perm string) ([]string, error) {
 
 //添加一个member有序集合
 func (m *CKRedis) ZAdd(key string, score int, member string) (bool, error) {
-	return redis.Bool(m.rd.Do("ZADD", key, score, member))
+	return redis.Bool(m.rd.Do("ZADD", m.Key(key), score, member))
 }
 
 //返回有序集合的基数
 func (m *CKRedis) ZCard(key string) (int, error) {
-	return redis.Int(m.rd.Do("ZCARD", key))
+	return redis.Int(m.rd.Do("ZCARD", m.Key(key)))
 }
 
 //返回指定score 大小之间的成员数量
 func (m *CKRedis) ZCount(key string, min string, max string) (int, error) {
-	return redis.Int(m.rd.Do("ZCOUNT", key, min, max))
+	return redis.Int(m.rd.Do("ZCOUNT", m.Key(key), min, max))
 }
 
 //返回指定 score 大小之间的成员列表
 func (m *CKRedis) ZRangeByScore(key string, min string, max string, with_score bool) ([]string, error) {
 	args := []interface{}{
-		key, min, max,
+		m.Key(key), min, max,
 	}
 
 	if with_score {
@@ -185,29 +196,29 @@ func (m *CKRedis) ZRangeByScore(key string, min string, max string, with_score b
 
 //删除有序集合里面的成员
 func (m *CKRedis) ZRem(key, member string) (bool, error) {
-	return redis.Bool(m.rd.Do("ZREM", key, member))
+	return redis.Bool(m.rd.Do("ZREM", m.Key(key), member))
 }
 
 //----------------------------------- GEOHASH
 
 //添加一个坐标到 GEOHASH
 func (m *CKRedis) GAdd(key string, lon string, lat string, member string) (bool, error) {
-	return redis.Bool(m.rd.Do("GEOADD", key, lon, lat, member))
+	return redis.Bool(m.rd.Do("GEOADD", m.Key(key), lon, lat, member))
 }
 
 //得到一个member 的坐标
 func (m *CKRedis) GPos(key string, member string) ([]interface{}, error) {
-	return redis.Values(m.rd.Do("GEOPOS", key, member))
+	return redis.Values(m.rd.Do("GEOPOS", m.Key(key), member))
 }
 
 //计算两个位置的距离,返回米
 func (m *CKRedis) GDist(key string, member string, member2 string) (int, error) {
-	return redis.Int(m.rd.Do("GEODIST", key, member, member2))
+	return redis.Int(m.rd.Do("GEODIST", m.Key(key), member, member2))
 }
 
 //得到传入坐标半径的所有所坐标
 func (m *CKRedis) GRadius(key string, lon string, lat string, radius int) ([]*RedisGeo, error) {
-	list, err := redis.Values(m.rd.Do("GEORADIUS", key, lon, lat, radius, "m", "WITHCOORD", "WITHDIST", "ASC"))
+	list, err := redis.Values(m.rd.Do("GEORADIUS", m.Key(key), lon, lat, radius, "m", "WITHCOORD", "WITHDIST", "ASC"))
 	if err != nil {
 		return nil, err
 	}
@@ -233,12 +244,12 @@ func (m *CKRedis) transGeo(geo_list []interface{}) []*RedisGeo {
 //--- HASH ---
 //设置一个HASH值
 func (m *CKRedis) HSet(key, field string, val interface{}) (bool, error) {
-	return redis.Bool(m.rd.Do("HSET", key, field, val))
+	return redis.Bool(m.rd.Do("HSET", m.Key(key), field, val))
 }
 
 //得到一个HASH值
 func (m *CKRedis) HGet(key, field string) (interface{}, error) {
-	val, err := m.rd.Do("HGET", key, field)
+	val, err := m.rd.Do("HGET", m.Key(key), field)
 	if err != nil {
 		return nil, err
 	}
@@ -247,7 +258,7 @@ func (m *CKRedis) HGet(key, field string) (interface{}, error) {
 
 //检查是否存在一个HASH值
 func (m *CKRedis) HExists(key, field string) (bool, error) {
-	return redis.Bool(m.rd.Do("HEXISTS", key, field))
+	return redis.Bool(m.rd.Do("HEXISTS", m.Key(key), field))
 }
 
 //得到多个HASH 值
@@ -257,43 +268,43 @@ func (m *CKRedis) HMGet(key string, field ...interface{}) ([]interface{}, error)
 
 //删除一个 hash 值
 func (m *CKRedis) HDel(key, field string) (bool, error) {
-	return redis.Bool(m.rd.Do("HDEL", key, field))
+	return redis.Bool(m.rd.Do("HDEL", m.Key(key), field))
 }
 
 //得到所有 hash 键
 func (m *CKRedis) HKeys(key string) ([]interface{}, error) {
-	return redis.Values(m.rd.Do("HKEYS", key))
+	return redis.Values(m.rd.Do("HKEYS", m.Key(key)))
 }
 
 //得到 hash 长度
 func (m *CKRedis) HLen(key string) (int, error) {
-	return redis.Int(m.rd.Do("HLEN", key))
+	return redis.Int(m.rd.Do("HLEN", m.Key(key)))
 }
 
 //--- LIST 列表 ---
 //插入一条记录,或多条记录
 func (m *CKRedis) LPush(key string, value string) (int, error) {
-	return redis.Int(m.rd.Do("LPUSH", key, value))
+	return redis.Int(m.rd.Do("LPUSH", m.Key(key), value))
 }
 
 //得到LIST长度
 func (m *CKRedis) LLen(key string) (int, error) {
-	return redis.Int(m.rd.Do("LLEN", key))
+	return redis.Int(m.rd.Do("LLEN", m.Key(key)))
 }
 
 //得到一个区间的LIST值列表
 func (m *CKRedis) LRange(key string, start int, stop int) ([]interface{}, error) {
-	return redis.Values(m.rd.Do("LRANGE", key, start, stop))
+	return redis.Values(m.rd.Do("LRANGE", m.Key(key), start, stop))
 }
 
 //更新一个下标值
 func (m *CKRedis) LSet(key string, index int, value string) (int, error) {
-	return redis.Int(m.rd.Do("LSET", key, index, value))
+	return redis.Int(m.rd.Do("LSET", m.Key(key), index, value))
 }
 
 //删除列表尾记录并返回
 func (m *CKRedis) RPop(key string) (string, error) {
-	return redis.String(m.rd.Do("RPOP", key))
+	return redis.String(m.rd.Do("RPOP", m.Key(key)))
 }
 
 //执行命令
