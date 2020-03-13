@@ -6,11 +6,11 @@ require (
 	github.com/baiyubin/aliyun-sts-go-sdk v0.0.0-20180326062324-cfa1a18b161f // indirect
 	github.com/boltdb/bolt v1.3.1
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/garyburd/redigo v1.6.0
 	github.com/gin-gonic/gin v1.4.0
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
+	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/google/go-cmp v0.2.0 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/satori/go.uuid v1.2.0 // indirect
