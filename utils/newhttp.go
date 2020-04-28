@@ -193,3 +193,8 @@ func (h *HttpClient) Clear() {
 func (h *HttpClient) GetLastResponse() *HttpRequestData {
 	return h.lastRequest
 }
+
+//设置使用HTTP代理,tls证书访问等
+func (h *HttpClient) SetTransport(transport *http.Transport) {
+	h.client.Transport = transport
+}
