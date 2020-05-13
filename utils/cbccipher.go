@@ -74,7 +74,7 @@ func (a *AesEncrypt) Encrypt(plantText []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	plantText = a.PKCS7Padding(plantText, block.BlockSize())
+	plantText = PKCS7Padding(plantText, block.BlockSize())
 
 	var blockModel cipher.BlockMode
 
@@ -131,7 +131,7 @@ func (a *AesEncrypt) Decrypt(deStr []byte) ([]byte, error) {
 
 	plantText := make([]byte, len(ciphertext[:n]))
 	blockModel.CryptBlocks(plantText, ciphertext[:n])
-	plantText = a.PKCS7UnPadding(plantText)
+	plantText = PKCS7UnPadding(plantText)
 	return plantText, nil
 }
 
@@ -146,14 +146,14 @@ func (a *AesEncrypt) DecryptString(deStr string) (string, error) {
 }
 
 //PKCS7 处理
-func (a *AesEncrypt) PKCS7Padding(ciphertext []byte, blockSize int) []byte {
+func PKCS7Padding(ciphertext []byte, blockSize int) []byte {
 	padding := blockSize - len(ciphertext)%blockSize
 	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
 	return append(ciphertext, padtext...)
 }
 
 //PKCS7 反解
-func (a *AesEncrypt) PKCS7UnPadding(plantText []byte) []byte {
+func PKCS7UnPadding(plantText []byte) []byte {
 	length := len(plantText)
 	unpadding := int(plantText[length-1])
 	return plantText[:(length - unpadding)]

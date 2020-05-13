@@ -96,4 +96,5 @@ func (this *DBMongo) Collection(collection_name string) *CKCollection {
 }
 
 func (this *DBMongo) RunCmd() {
+
 }

@@ -621,3 +621,8 @@ func BuildTableStruct(tableName, dbName string, dbConf *DBConfig) {
 	}
 	fmt.Println("}")
 }
+
+//return mysql status
+func (d *DBA) Stats() sql.DBStats {
+	return d.db.Stats()
+}
