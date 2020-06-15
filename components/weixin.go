@@ -390,3 +390,115 @@ func (w *Weixin) SendCustomMessage(token, openid, msg_type string, data utils.M)
 	}
 	return res, err
 }
+
+///微信标签管理
+//创建用户标签
+func (w *Weixin) CreateTag(token, name string) (string, error) {
+	data := utils.M{
+		"access_token": token,
+		"name":         name,
+	}
+
+	urlStr := fmt.Sprintf("https://api.weixin.qq.com/cgi-bin/tags/create?access_token=%s", token)
+	res, err := utils.HttpPostJsonString(urlStr, data)
+	if err != nil {
+		return "", err
+	}
+	return res, err
+}
+
+//获取已创建标签
+func (w *Weixin) GetTags(token string) (string, error) {
+	urlStr := fmt.Sprintf("https://api.weixin.qq.com/cgi-bin/tags/get?access_token=%s", token)
+	res, err := utils.HttpGet(urlStr)
+	if err != nil {
+		return "", err
+	}
+	return res, err
+}
+
+//修改标签名
+func (w *Weixin) UpdateTag(token string, id int, name string) (string, error) {
+	data := utils.M{
+		"tag": utils.M{
+			"id":   id,
+			"name": name,
+		},
+	}
+	urlStr := fmt.Sprintf("https://api.weixin.qq.com/cgi-bin/tags/update?access_token=%s", token)
+	res, err := utils.HttpPostJsonString(urlStr, data)
+	if err != nil {
+		return "", err
+	}
+	return res, err
+}
+
+//删除标签
+func (w *Weixin) DeleteTag(token string, id int) (string, error) {
+	data := utils.M{
+		"tag": utils.M{
+			"id": id,
+		},
+	}
+	urlStr := fmt.Sprintf("https://api.weixin.qq.com/cgi-bin/tags/delete?access_token=%s", token)
+	res, err := utils.HttpPostJsonString(urlStr, data)
+	if err != nil {
+		return "", err
+	}
+	return res, err
+}
+
+// 获取标签下粉丝列表
+func (w *Weixin) GetTagUsers(token string, tagId int, nextOpenid string) (string, error) {
+	data := utils.M{
+		"tagid":       tagId,
+		"next_openid": nextOpenid,
+	}
+	urlStr := fmt.Sprintf("https://api.weixin.qq.com/cgi-bin/user/tag/get?access_token=%s", token)
+	res, err := utils.HttpPostJsonString(urlStr, data)
+	if err != nil {
+		return "", err
+	}
+	return res, err
+}
+
+//批量为用户打标签
+func (w *Weixin) SetUserTag(token string, tagId int, openIdList []string) (string, error) {
+	data := utils.M{
+		"tagid":       tagId,
+		"openid_list": openIdList,
+	}
+	urlStr := fmt.Sprintf("https://api.weixin.qq.com/cgi-bin/tags/members/batchtagging?access_token=%s", token)
+	res, err := utils.HttpPostJsonString(urlStr, data)
+	if err != nil {
+		return "", err
+	}
+	return res, err
+}
+
+//批量为用户取消标签
+func (w *Weixin) CancelUserTag(token string, tagId int, openIdList []string) (string, error) {
+	data := utils.M{
+		"tagid":       tagId,
+		"openid_list": openIdList,
+	}
+	urlStr := fmt.Sprintf("https://api.weixin.qq.com/cgi-bin/tags/members/batchuntagging?access_token=%s", token)
+	res, err := utils.HttpPostJsonString(urlStr, data)
+	if err != nil {
+		return "", err
+	}
+	return res, err
+}
+
+//获取用户身上的标签列表
+func (w *Weixin) GetUserTags(token, openId string) (string, error) {
+	data := utils.M{
+		"openid": openId,
+	}
+	urlStr := fmt.Sprintf("https://api.weixin.qq.com/cgi-bin/tags/getidlist?access_token=%s", token)
+	res, err := utils.HttpPostJsonString(urlStr, data)
+	if err != nil {
+		return "", err
+	}
+	return res, err
+}
