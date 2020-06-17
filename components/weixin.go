@@ -109,7 +109,7 @@ func (w *Weixin) post(uri string, data utils.M) (string, error) {
 	var info WxError
 	err = json.Unmarshal([]byte(res), &info)
 	if err != nil {
-		return "", err
+		return res, err
 	}
 	if info.ErrorCode != 0 {
 		err := errors.New(fmt.Sprintf("error_code:%d,errmsg:%s", info.ErrorCode, info.ErrorMsg))
@@ -392,29 +392,48 @@ func (w *Weixin) SendCustomMessage(token, openid, msg_type string, data utils.M)
 }
 
 ///微信标签管理
+//用户标签JSON
+type UserTag struct {
+	Id    int    `json:"id"`
+	Name  string `json:"name"`
+	Count int    `json:"count"`
+}
+
 //创建用户标签
 func (w *Weixin) CreateTag(token, name string) (string, error) {
 	data := utils.M{
-		"access_token": token,
-		"name":         name,
+		"tag": UserTag{
+			Name: name,
+		},
 	}
 
 	urlStr := fmt.Sprintf("https://api.weixin.qq.com/cgi-bin/tags/create?access_token=%s", token)
-	res, err := utils.HttpPostJsonString(urlStr, data)
-	if err != nil {
+	//res, err := utils.HttpPostJsonString(urlStr, data)
+	res, err := w.post(urlStr, data)
+	if err != nil && res == "" {
 		return "", err
 	}
+
 	return res, err
 }
 
+type TagList struct {
+	Tags []*UserTag `json:"tags"`
+}
+
 //获取已创建标签
-func (w *Weixin) GetTags(token string) (string, error) {
+func (w *Weixin) GetTags(token string) (*TagList, error) {
 	urlStr := fmt.Sprintf("https://api.weixin.qq.com/cgi-bin/tags/get?access_token=%s", token)
 	res, err := utils.HttpGet(urlStr)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return res, err
+	tags := &TagList{}
+	err = json.Unmarshal([]byte(res), tags)
+	if err != nil {
+		return nil, err
+	}
+	return tags, err
 }
 
 //修改标签名
@@ -469,7 +488,8 @@ func (w *Weixin) SetUserTag(token string, tagId int, openIdList []string) (strin
 		"openid_list": openIdList,
 	}
 	urlStr := fmt.Sprintf("https://api.weixin.qq.com/cgi-bin/tags/members/batchtagging?access_token=%s", token)
-	res, err := utils.HttpPostJsonString(urlStr, data)
+	//res, err := utils.HttpPostJsonString(urlStr, data)
+	res, err := w.post(urlStr, data)
 	if err != nil {
 		return "", err
 	}
@@ -483,7 +503,8 @@ func (w *Weixin) CancelUserTag(token string, tagId int, openIdList []string) (st
 		"openid_list": openIdList,
 	}
 	urlStr := fmt.Sprintf("https://api.weixin.qq.com/cgi-bin/tags/members/batchuntagging?access_token=%s", token)
-	res, err := utils.HttpPostJsonString(urlStr, data)
+	//res, err := utils.HttpPostJsonString(urlStr, data)
+	res, err := w.post(urlStr, data)
 	if err != nil {
 		return "", err
 	}
