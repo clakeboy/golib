@@ -7,7 +7,7 @@ import (
 
 func TestAesEncrypt_Encrypt(t *testing.T) {
 	cbc := NewAes("ck-cookie")
-	cipher_text, err := cbc.Encrypt([]byte("2"))
+	cipher_text, err := cbc.Encrypt([]byte("askdjfh3827349238^sdkfjh219222"))
 	if err != nil {
 		panic(err)
 	}
@@ -18,4 +18,18 @@ func TestAesEncrypt_Encrypt(t *testing.T) {
 	}
 
 	fmt.Println(string(text))
+
+	urlText, err := cbc.EncryptUrl([]byte("askdjfh3827349238^sdkfjh219222"))
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(string(urlText))
+
+	deUrlText, err := cbc.DecryptUrl(urlText)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(string(deUrlText))
 }

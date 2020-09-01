@@ -145,6 +145,34 @@ func (a *AesEncrypt) DecryptString(deStr string) (string, error) {
 	return string(res), nil
 }
 
+//加密返回BASE64 URL
+func (a *AesEncrypt) EncryptUrl(plantText []byte) ([]byte, error) {
+	res, err := a.Encrypt(plantText)
+	if err != nil {
+		return nil, err
+	}
+
+	cipherText, err := base64.StdEncoding.DecodeString(string(res))
+	if err != nil {
+		return nil, err
+	}
+	buf := make([]byte, base64.URLEncoding.EncodedLen(len(cipherText)))
+	base64.URLEncoding.Encode(buf, cipherText)
+	return buf, nil
+}
+
+//解密BASE64URL的密码
+func (a *AesEncrypt) DecryptUrl(plantText []byte) ([]byte, error) {
+	cipherText, err := base64.URLEncoding.DecodeString(string(plantText))
+	if err != nil {
+		return nil, err
+	}
+	buf := make([]byte, base64.StdEncoding.EncodedLen(len(cipherText)))
+	base64.StdEncoding.Encode(buf, cipherText)
+
+	return a.Decrypt(buf)
+}
+
 //PKCS7 处理
 func PKCS7Padding(ciphertext []byte, blockSize int) []byte {
 	padding := blockSize - len(ciphertext)%blockSize

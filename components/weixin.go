@@ -31,6 +31,7 @@ type Weixin struct {
 	appSecret string
 }
 
+//用户ACCESS
 type WxUserAccessToken struct {
 	AccessToken  string `json:"access_token"`
 	ExpiresIn    int    `json:"expires_in"`
@@ -383,7 +384,7 @@ func (w *Weixin) SendCustomMessage(token, openid, msg_type string, data utils.M)
 		msg_type:  data,
 	}
 
-	url_str := fmt.Sprintf("https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token==%s", token)
+	url_str := fmt.Sprintf("https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=%s", token)
 	res, err := utils.HttpPostJsonString(url_str, msg)
 	if err != nil {
 		return "", err
