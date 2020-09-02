@@ -591,7 +591,7 @@ func BuildTableStruct(tableName, dbName string, dbConf *DBConfig) {
 		"double":   "float64",
 		"float":    "float64",
 		"smallint": "int",
-		"bigint":   "string",
+		"bigint":   "int64",
 		"decimal":  "float64",
 	}
 
