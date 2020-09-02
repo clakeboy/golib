@@ -591,6 +591,8 @@ func BuildTableStruct(tableName, dbName string, dbConf *DBConfig) {
 		"double":   "float64",
 		"float":    "float64",
 		"smallint": "int",
+		"bigint":   "string",
+		"decimal":  "float64",
 	}
 
 	dba, err := NewDBA(dbConf)
