@@ -581,18 +581,39 @@ func (d *DBA) SetQueryInterface(i interface{}) {
 
 //输出表结构为GO struct
 func BuildTableStruct(tableName, dbName string, dbConf *DBConfig) {
-	types := map[string]string{
-		"int":      "int",
-		"tinyint":  "int",
-		"varchar":  "string",
-		"char":     "string",
-		"text":     "string",
-		"tinytext": "string",
-		"double":   "float64",
-		"float":    "float64",
-		"smallint": "int",
-		"bigint":   "int64",
-		"decimal":  "float64",
+	BuildTableStructSqlType(tableName, dbName, dbConf, false)
+}
+
+func BuildTableStructSqlType(tableName, dbName string, dbConf *DBConfig, isSqlType bool) {
+	var types map[string]string
+	if isSqlType {
+		types = map[string]string{
+			"int":      "sql.NullInt32",
+			"tinyint":  "sql.NullInt32",
+			"varchar":  "sql.NullString",
+			"char":     "sql.NullString",
+			"text":     "sql.NullString",
+			"tinytext": "sql.NullString",
+			"double":   "sql.NullFloat64",
+			"float":    "sql.NullFloat64",
+			"smallint": "sql.NullInt32",
+			"bigint":   "sql.NullInt64",
+			"decimal":  "sql.NullFloat64",
+		}
+	} else {
+		types = map[string]string{
+			"int":      "int",
+			"tinyint":  "int",
+			"varchar":  "string",
+			"char":     "string",
+			"text":     "string",
+			"tinytext": "string",
+			"double":   "float64",
+			"float":    "float64",
+			"smallint": "int",
+			"bigint":   "int64",
+			"decimal":  "float64",
+		}
 	}
 
 	dba, err := NewDBA(dbConf)
