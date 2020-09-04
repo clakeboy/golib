@@ -104,13 +104,14 @@ func Struct2Map(obj interface{}, fields []string) map[string]interface{} {
 	var data = make(map[string]interface{})
 
 	for i := 0; i < t.NumField(); i++ {
+		fieldName := strings.Split(t.Field(i).Tag.Get("json"), ",")[0]
 		if fields != nil {
-			flag := StringIndexOf(fields, t.Field(i).Tag.Get("json"))
+			flag := StringIndexOf(fields, fieldName)
 			if flag != -1 {
-				data[t.Field(i).Tag.Get("json")] = v.Field(i).Interface()
+				data[fieldName] = v.Field(i).Interface()
 			}
 		} else {
-			data[t.Field(i).Tag.Get("json")] = v.Field(i).Interface()
+			data[fieldName] = v.Field(i).Interface()
 		}
 	}
 
