@@ -33,7 +33,7 @@ func (ck *CKCollection) Insert(rows ...interface{}) error {
 }
 
 //更新数据
-func (ck *CKCollection) Update(where bson.M, update bson.M) error {
+func (ck *CKCollection) Update(where bson.M, update interface{}) error {
 	c := ck.db.Table(ck.tab)
 	err := c.Update(where, update)
 	if err != nil {
@@ -43,12 +43,12 @@ func (ck *CKCollection) Update(where bson.M, update bson.M) error {
 }
 
 //更新所有条件数据
-func (ck *CKCollection) UpdateAll(where bson.M, update bson.M) (*mgo.ChangeInfo, error) {
+func (ck *CKCollection) UpdateAll(where bson.M, update interface{}) (*mgo.ChangeInfo, error) {
 	c := ck.db.Table(ck.tab)
 	return c.UpdateAll(where, update)
 }
 
-func (ck *CKCollection) Upset(where bson.M, update bson.M) error {
+func (ck *CKCollection) Upset(where bson.M, update interface{}) error {
 	c := ck.db.Table(ck.tab)
 	_, err := c.Upsert(where, update)
 	if err != nil {
