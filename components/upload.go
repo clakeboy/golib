@@ -21,7 +21,8 @@ func NewUpload() *Upload {
 var ImageMime = map[string]string{
 	"image/jpeg": "jpg",
 	"image/jpg":  "jpg",
-	"image/png":  "png"}
+	"image/png":  "png",
+}
 
 const saveDir = "./assets/ig/"
 const httpSaveDir = "/assets/ig/"

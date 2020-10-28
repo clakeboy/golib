@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/clakeboy/golib/utils"
+	"regexp"
 	"sync"
 	"time"
 )
@@ -94,4 +95,37 @@ func (m *MemCache) Dump() {
 func (m *MemCache) Stat() {
 	fmt.Println("Numbers: ", len(m.content))
 	fmt.Println()
+}
+
+//得到所有key值,按指定条件
+// * 为得到所有
+
+func (m *MemCache) Keys(pattern string) ([]string, error) {
+	if pattern == "" {
+		return nil, fmt.Errorf("param is empty")
+	}
+	var keys []string
+	for k, _ := range m.content {
+		if m.condition(pattern, k) {
+			keys = append(keys, k)
+		}
+	}
+
+	return keys, nil
+}
+
+func (MemCache) condition(condition string, key string) bool {
+	if condition == "*" {
+		return true
+	}
+	var reg *regexp.Regexp
+	if condition[:1] == "*" {
+		reg = regexp.MustCompile(fmt.Sprintf("%s$", condition[1:]))
+	} else if condition[len(condition)-1:] == "*" {
+		reg = regexp.MustCompile(fmt.Sprintf("^%s", condition[:len(condition)-1]))
+	} else {
+		reg = regexp.MustCompile(condition)
+	}
+
+	return reg.MatchString(key)
 }
