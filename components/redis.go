@@ -307,6 +307,73 @@ func (m *CKRedis) RPop(key string) (string, error) {
 	return redis.String(m.rd.Do("RPOP", m.Key(key)))
 }
 
+//--- SET 集合 ---
+//添加一个或多个成员到集合
+func (m *CKRedis) SAdd(key string, member ...interface{}) (int, error) {
+	var args []interface{}
+	args = append(args, m.Key(key))
+	args = append(args, member...)
+	return redis.Int(m.rd.Do("SADD", args...))
+}
+
+//删除一个或多个成员
+func (m *CKRedis) SRem(key string, member ...interface{}) (bool, error) {
+	var args []interface{}
+	args = append(args, m.Key(key))
+	args = append(args, member...)
+	return redis.Bool(m.rd.Do("SREM", args...))
+}
+
+//获取集合的成员数
+func (m *CKRedis) SCard(key string) (int, error) {
+	return redis.Int(m.rd.Do("SCARD", m.Key(key)))
+}
+
+//查找是否存在成员
+func (m *CKRedis) SIsMember(key string, member string) (bool, error) {
+	return redis.Bool(m.rd.Do("SISMEMBER", m.Key(key), member))
+}
+
+//返回所有成员
+func (m *CKRedis) SMembers(key string) ([]interface{}, error) {
+	return redis.Values(m.rd.Do("SMEMBERS", m.Key(key)))
+}
+
+//移除并返回集合中的一个随机元素
+func (m *CKRedis) SPop(key string) ([]byte, error) {
+	return redis.Bytes(m.rd.Do("SPOP", m.Key(key)))
+}
+
+//扫描返回的集合数据
+type ScanList struct {
+	Cursor  int      `json:"cursor"`
+	Members []string `json:"members"`
+}
+
+//扫描集合
+func (m *CKRedis) SScan(key string, cursor int, match string, count int) (*ScanList, error) {
+	var commands []interface{}
+	commands = append(commands, m.Key(key), fmt.Sprintf("%d", cursor))
+	if match != "" {
+		commands = append(commands, "MATCH", match)
+	}
+	if count != 0 {
+		commands = append(commands, "COUNT", fmt.Sprintf("%d", count))
+	}
+	list, err := redis.Values(m.rd.Do("SSCAN", commands...))
+	if err != nil {
+		return nil, err
+	}
+	data := new(ScanList)
+	data.Cursor, _ = strconv.Atoi(string(list[0].([]byte)))
+	var members []string
+	for _, v := range list[1].([]interface{}) {
+		members = append(members, string(v.([]byte)))
+	}
+	data.Members = members
+	return data, nil
+}
+
 //执行命令
 func (m *CKRedis) Do(command string, args ...interface{}) (interface{}, error) {
 	return m.rd.Do(command, args...)

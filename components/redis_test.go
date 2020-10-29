@@ -2,6 +2,7 @@ package components
 
 import (
 	"fmt"
+	"github.com/clakeboy/golib/utils"
 	"log"
 	"testing"
 )
@@ -66,4 +67,24 @@ func TestCKRedis_GAdd(t *testing.T) {
 
 	list, err := rd.GRadius("obd_gps", "106.518648333333", "29.5621716666667", 1000)
 	fmt.Println(list[0])
+}
+
+func TestCKRedis_SAdd(t *testing.T) {
+	rd, _ := NewCKRedis()
+	n, err := rd.SAdd("test_set", "clake1", "clake2", "clake3", "clake4")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	fmt.Println("add success ", n)
+}
+
+func TestCKRedis_SScan(t *testing.T) {
+	rd, _ := NewCKRedis()
+	list, err := rd.SScan("test_set", 0, "", 1)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	utils.PrintAny(list)
 }
