@@ -374,6 +374,11 @@ func (m *CKRedis) SScan(key string, cursor int, match string, count int) (*ScanL
 	return data, nil
 }
 
+//复制并集
+func (m *CKRedis) SUnionStore(keys ...interface{}) (int, error) {
+	return redis.Int(m.rd.Do("SUNIONSTORE", keys...))
+}
+
 //执行命令
 func (m *CKRedis) Do(command string, args ...interface{}) (interface{}, error) {
 	return m.rd.Do(command, args...)
