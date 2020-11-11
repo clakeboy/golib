@@ -15,7 +15,7 @@ const (
 )
 
 type AesEncrypt struct {
-	key        string
+	key        []byte
 	stringType string
 	aesType    string
 	iv         []byte
@@ -39,6 +39,9 @@ func (a *AesEncrypt) SetKey(k string) {
 	if keyLen < 16 {
 		k = StrPad(k, "c", 16, STR_PAD_RIGHT)
 	}
+	a.key = []byte(k)
+}
+func (a *AesEncrypt) SetKeyBytes(k []byte) {
 	a.key = k
 }
 
@@ -50,20 +53,20 @@ func (a *AesEncrypt) SetIV(iv []byte) {
 //得到加密KEY
 func (a *AesEncrypt) GetKey() []byte {
 	keyLen := len(a.key)
-	if keyLen < 16 {
-		a.key = StrPad(a.key, "c", 16, STR_PAD_RIGHT)
-	}
-	arrKey := []byte(a.key)
+	//if keyLen < 16 {
+	//	a.key = StrPad(a.key, "c", 16, STR_PAD_RIGHT)
+	//}
+	//arrKey := []byte(a.key)
 	if keyLen >= 32 {
 		//取前32个字节
-		return arrKey[:32]
+		return a.key[:32]
 	}
 	if keyLen >= 24 {
 		//取前24个字节
-		return arrKey[:24]
+		return a.key[:24]
 	}
 	//取前16个字节
-	return arrKey[:16]
+	return a.key[:16]
 }
 
 //加密方法
@@ -74,7 +77,7 @@ func (a *AesEncrypt) Encrypt(plantText []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	plantText = PKCS7Padding(plantText, block.BlockSize())
+	plantText = PKCS7Padding(plantText, 32)
 
 	var blockModel cipher.BlockMode
 
