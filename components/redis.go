@@ -62,6 +62,10 @@ func InitRedisPool(cfg *RedisConfig) {
 			}
 			return r, nil
 		},
+		TestOnBorrow: func(c redis.Conn, t time.Time) error {
+			_, err := c.Do("PING")
+			return err
+		},
 	}
 }
 
