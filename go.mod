@@ -7,7 +7,7 @@ require (
 	github.com/boltdb/bolt v1.3.1
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gin-gonic/gin v1.4.0
-	github.com/go-sql-driver/mysql v1.4.1
+	github.com/go-sql-driver/mysql v1.6.0
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/gomodule/redigo/redis v0.0.0-20200429221454-e14091dffc1b
@@ -20,9 +20,8 @@ require (
 	go.mongodb.org/mongo-driver v1.0.1
 	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
 	golang.org/x/sync v0.0.0-20181221193216-37e7f081c4d4 // indirect
-	google.golang.org/appengine v1.4.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce
 )
 
-go 1.13
+go 1.16

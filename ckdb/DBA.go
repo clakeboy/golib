@@ -384,30 +384,50 @@ func (d *DBA) FetchAll(query *sql.Rows) ([]utils.M, error) {
 	//column, _ := query.Columns()
 	column, _ := query.ColumnTypes()
 	values := make([]interface{}, len(column))
-	scans := make([]interface{}, len(column))
-	for i := range values {
-		scans[i] = &values[i]
+	for i, _ := range values {
+		col := column[i]
+		switch strings.ToUpper(col.DatabaseTypeName()) {
+		case "VARCHAR", "CHAR", "TINYTEXT", "TEXT", "MEDIUMTEXT", "LONGTEXT":
+			values[i] = &sql.NullString{}
+		case "TINYINT", "SMALLINT", "MEDIUMINT", "INT", "BIGINT":
+			values[i] = &sql.NullInt64{}
+		case "FLOAT", "DOUBLE", "DECIMAL":
+			values[i] = &sql.NullFloat64{}
+		default:
+			values[i] = &sql.NullString{}
+		}
 	}
 
 	var results []utils.M
 
 	for query.Next() {
-		if err := query.Scan(scans...); err != nil {
+		if err := query.Scan(values...); err != nil {
 			return nil, err
 		}
 		row := utils.M{}
 		for k, v := range values {
 			col := column[k]
-			switch strings.ToUpper(col.DatabaseTypeName()) {
-			case "VARCHAR", "CHAR", "TINYTEXT", "TEXT", "MEDIUMTEXT", "LONGTEXT":
-				row[col.Name()] = string(v.([]byte))
-			case "TINYINT", "SMALLINT", "MEDIUMINT", "INT", "BIGINT":
-				row[col.Name()] = utils.BytesToInt(v.([]byte))
-			case "FLOAT", "DOUBLE", "DECIMAL":
-				row[col.Name()] = utils.ByteToFloat64(v.([]byte))
+			//fmt.Printf("%s:%s:%t\n",col.Name(),col.DatabaseTypeName(),v)
+			switch v.(type) {
+			case *sql.NullString:
+				row[col.Name()] = v.(*sql.NullString).String
+			case *sql.NullInt64:
+				row[col.Name()] = v.(*sql.NullInt64).Int64
+			case *sql.NullFloat64:
+				row[col.Name()] = v.(*sql.NullFloat64).Float64
 			default:
-				row[col.Name()] = v
+				row[col.Name()] = v.(*sql.NullString).String
 			}
+			//switch strings.ToUpper(col.DatabaseTypeName()) {
+			//case "VARCHAR", "CHAR", "TINYTEXT", "TEXT", "MEDIUMTEXT", "LONGTEXT":
+			//	row[col.Name()] = string(v.([]byte))
+			//case "TINYINT", "SMALLINT", "MEDIUMINT", "INT", "BIGINT":
+			//	row[col.Name()] = v
+			//case "FLOAT", "DOUBLE", "DECIMAL":
+			//	row[col.Name()] = utils.ByteToFloat64(v.([]byte))
+			//default:
+			//	row[col.Name()] = v
+			//}
 			//switch v.(type) {
 			//case []byte:
 			//	row[col.Name()] = string(v.([]byte))
