@@ -401,6 +401,10 @@ func (d *DBA) FetchAll(query *sql.Rows) ([]utils.M, error) {
 			switch strings.ToUpper(col.DatabaseTypeName()) {
 			case "VARCHAR", "CHAR", "TINYTEXT", "TEXT", "MEDIUMTEXT", "LONGTEXT":
 				row[col.Name()] = string(v.([]byte))
+			case "TINYINT", "SMALLINT", "MEDIUMINT", "INT", "BIGINT":
+				row[col.Name()] = utils.BytesToInt(v.([]byte))
+			case "FLOAT", "DOUBLE", "DECIMAL":
+				row[col.Name()] = utils.ByteToFloat64(v.([]byte))
 			default:
 				row[col.Name()] = v
 			}
