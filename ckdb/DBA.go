@@ -381,7 +381,8 @@ func (d *DBA) FetchAllOfStructV2(query *sql.Rows, i interface{}) ([]interface{},
 
 //取得所有数据
 func (d *DBA) FetchAll(query *sql.Rows) ([]utils.M, error) {
-	column, _ := query.Columns()
+	//column, _ := query.Columns()
+	column, _ := query.ColumnTypes()
 	values := make([]interface{}, len(column))
 	scans := make([]interface{}, len(column))
 	for i := range values {
@@ -396,13 +397,19 @@ func (d *DBA) FetchAll(query *sql.Rows) ([]utils.M, error) {
 		}
 		row := utils.M{}
 		for k, v := range values {
-			key := column[k]
-			switch v.(type) {
-			case []byte:
-				row[key] = string(v.([]byte))
+			col := column[k]
+			switch strings.ToUpper(col.DatabaseTypeName()) {
+			case "VARCHAR", "CHAR", "TINYTEXT", "TEXT", "MEDIUMTEXT", "LONGTEXT":
+				row[col.Name()] = string(v.([]byte))
 			default:
-				row[key] = v
+				row[col.Name()] = v
 			}
+			//switch v.(type) {
+			//case []byte:
+			//	row[col.Name()] = string(v.([]byte))
+			//default:
+			//	row[col.Name()] = v
+			//}
 
 		}
 
