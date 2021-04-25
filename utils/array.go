@@ -25,6 +25,18 @@ func MapKeys(m map[string]interface{}) []string {
 	return keys
 }
 
+func MapDump(m M) ([]string, []interface{}) {
+	keys := make([]string, len(m))
+	values := make([]interface{}, len(m))
+	idx := 0
+	for k, v := range m {
+		keys[idx] = k
+		values[idx] = v
+		idx++
+	}
+	return keys, values
+}
+
 func Contains(obj interface{}, target interface{}) (bool, error) {
 	targetValue := reflect.ValueOf(target)
 	switch reflect.TypeOf(target).Kind() {
