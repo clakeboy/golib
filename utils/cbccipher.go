@@ -19,13 +19,19 @@ type AesEncrypt struct {
 	stringType string
 	aesType    string
 	iv         []byte
+	isBase64   bool
 }
 
 //创建加密
 func NewAes(k string) *AesEncrypt {
-	enc := &AesEncrypt{aesType: AES_CBC}
+	enc := &AesEncrypt{aesType: AES_CBC, isBase64: true}
 	enc.SetKey(k)
 	return enc
+}
+
+//设置是否自动base64返回
+func (a *AesEncrypt) SetBase64(chk bool) {
+	a.isBase64 = chk
 }
 
 //设置加密类型
@@ -94,6 +100,9 @@ func (a *AesEncrypt) Encrypt(plantText []byte) ([]byte, error) {
 	blockModel.CryptBlocks(ciphertext, plantText)
 	//return base64.StdEncoding.EncodeToString(ciphertext), nil
 	//fmt.Println(hex.EncodeToString(ciphertext))
+	if !a.isBase64 {
+		return ciphertext, nil
+	}
 	buf := make([]byte, base64.StdEncoding.EncodedLen(len(ciphertext)))
 	base64.StdEncoding.Encode(buf, ciphertext)
 	return buf, nil
@@ -112,10 +121,18 @@ func (a *AesEncrypt) EncryptString(plantText string) (string, error) {
 //解密方法
 func (a *AesEncrypt) Decrypt(deStr []byte) ([]byte, error) {
 	key := a.GetKey()
-	ciphertext := make([]byte, base64.StdEncoding.DecodedLen(len(deStr)))
-	n, err := base64.StdEncoding.Decode(ciphertext, deStr)
-	if err != nil {
-		return nil, err
+	var cipherText []byte
+	var txtLen int
+	var err error
+	if a.isBase64 {
+		cipherText = make([]byte, base64.StdEncoding.DecodedLen(len(deStr)))
+		txtLen, err = base64.StdEncoding.Decode(cipherText, deStr)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		txtLen = len(deStr)
+		cipherText = deStr
 	}
 	block, err := aes.NewCipher(key) //选择加密算法
 	if err != nil {
@@ -132,8 +149,8 @@ func (a *AesEncrypt) Decrypt(deStr []byte) ([]byte, error) {
 		blockModel = cipher.NewCBCDecrypter(block, iv)
 	}
 
-	plantText := make([]byte, len(ciphertext[:n]))
-	blockModel.CryptBlocks(plantText, ciphertext[:n])
+	plantText := make([]byte, len(cipherText[:txtLen]))
+	blockModel.CryptBlocks(plantText, cipherText[:txtLen])
 	plantText = PKCS7UnPadding(plantText)
 	return plantText, nil
 }
