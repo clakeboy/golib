@@ -83,7 +83,7 @@ func (a *AesEncrypt) Encrypt(plantText []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	plantText = PKCS7Padding(plantText, 32)
+	plantText = PKCS7Padding(plantText, block.BlockSize())
 
 	var blockModel cipher.BlockMode
 
