@@ -14,6 +14,10 @@ import (
 	"time"
 )
 
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
 type M map[string]interface{}
 
 func (m *M) ToJson() []byte {
@@ -76,7 +80,6 @@ func RandStr(number int, r_table interface{}) string {
 	} else {
 		table = randTable
 	}
-	rand.Seed(time.Now().UnixNano())
 	var str []string
 	randLen := len(table)
 	for i := 0; i < number; i++ {
