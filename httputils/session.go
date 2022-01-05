@@ -2,7 +2,6 @@ package httputils
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/clakeboy/golib/ckdb"
 	"github.com/clakeboy/golib/components"
 	"github.com/clakeboy/golib/components/task"
@@ -24,7 +23,7 @@ var (
 	boltDriver  *ckdb.BoltDB
 )
 
-var sessionInit = false
+var initOptions *SessionOptions
 var sessiongc *task.Management
 
 //session 数据
@@ -76,34 +75,33 @@ type HttpSession struct {
 	data       *SessionData
 }
 
-func NewHttpSession(cookie *HttpCookie, options *SessionOptions) *HttpSession {
+func InitSession(options *SessionOptions) {
 	if options == nil {
 		options = &SessionOptions{
-			StorageType:  SessionFile,
+			StorageType:  SessionMem,
 			SurvivalTime: time.Minute * 20,
 			CookieName:   "CK-SESSION",
 		}
 	}
-	if !sessionInit {
-		fmt.Println(sessionInit)
-		switch options.StorageType {
-		case SessionMem:
-			memDriver = components.NewMemCache()
-		case SessionFile:
-			boltDriver = ckdb.NewBoltDB("./session/")
-		case SessionRedis:
-			redisDriver, _ = components.NewCKRedis()
-		}
-		sessionInit = true
+	switch options.StorageType {
+	case SessionMem:
+		memDriver = components.NewMemCache()
+	case SessionFile:
+		boltDriver = ckdb.NewBoltDB("./session/")
+	case SessionRedis:
+		redisDriver, _ = components.NewCKRedis()
 	}
+	initOptions = options
+}
 
-	sessionKey, err := cookie.Get(options.CookieName)
+func NewHttpSession(cookie *HttpCookie) *HttpSession {
+	sessionKey, err := cookie.Get(initOptions.CookieName)
 	if err != nil || sessionKey == "" {
 		sessionKey = utils.CreateUUID(false)
 	}
 
 	return &HttpSession{
-		options:    options,
+		options:    initOptions,
 		cookie:     cookie,
 		sessionKey: sessionKey,
 	}
@@ -111,8 +109,6 @@ func NewHttpSession(cookie *HttpCookie, options *SessionOptions) *HttpSession {
 
 //开始Session
 func (s *HttpSession) Start() {
-	s.InitGc()
-
 	sData := &SessionData{}
 
 	var data interface{}
@@ -183,34 +179,34 @@ func (s *HttpSession) Flush() {
 	}
 }
 
-//初始化GC
-func (s *HttpSession) InitGc() {
-	if s.options.StorageType != SessionFile || sessiongc != nil {
-		return
-	}
-
-	sessiongc = task.NewManagement()
-	sessiongc.AddTaskString("* */1 * * * *", func(item *task.Item) bool {
-		if boltDriver != nil {
-			var keys []string
-			sessionData := &SessionData{}
-			currentUnix := int(time.Now().Unix())
-			boltDriver.ForEach("session", func(key []byte, value []byte) error {
-				err := sessionData.ParseJson(value)
-				if err == nil {
-					if currentUnix > sessionData.Expire {
-						keys = append(keys, string(key))
-					}
-				}
-				fmt.Println(sessionData)
-				return nil
-			})
-			if len(keys) > 0 {
-				boltDriver.Delete("session", keys...)
-			}
-			fmt.Println("session has been gc")
-		}
-		return false
-	}, nil)
-	sessiongc.Start()
-}
+////初始化GC
+//func (s *HttpSession) InitGc() {
+//	if s.options.StorageType != SessionFile || sessiongc != nil {
+//		return
+//	}
+//
+//	sessiongc = task.NewManagement()
+//	sessiongc.AddTaskString("* */1 * * * *", func(item *task.Item) bool {
+//		if boltDriver != nil {
+//			var keys []string
+//			sessionData := &SessionData{}
+//			currentUnix := int(time.Now().Unix())
+//			boltDriver.ForEach("session", func(key []byte, value []byte) error {
+//				err := sessionData.ParseJson(value)
+//				if err == nil {
+//					if currentUnix > sessionData.Expire {
+//						keys = append(keys, string(key))
+//					}
+//				}
+//				fmt.Println(sessionData)
+//				return nil
+//			})
+//			if len(keys) > 0 {
+//				boltDriver.Delete("session", keys...)
+//			}
+//			fmt.Println("session has been gc")
+//		}
+//		return false
+//	}, nil)
+//	sessiongc.Start()
+//}

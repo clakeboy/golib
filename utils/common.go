@@ -76,13 +76,11 @@ func RandStr(number int, r_table interface{}) string {
 	} else {
 		table = randTable
 	}
-	time.Sleep(1)
-	//r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	rand.Seed(time.Now().UnixNano())
-	str := []string{}
-	rand_len := len(table)
+	var str []string
+	randLen := len(table)
 	for i := 0; i < number; i++ {
-		str = append(str, string(table[rand.Intn(rand_len)]))
+		str = append(str, string(table[rand.Intn(randLen)]))
 	}
 
 	return strings.Join(str, "")
