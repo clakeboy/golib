@@ -95,6 +95,12 @@ func RandRange(min, max int) int {
 	return z + min
 }
 
+//生成范围数字
+func RandRange64(min, max int64) int64 {
+	z := rand.Int63n(max - min)
+	return z + min
+}
+
 //结构转map
 func Struct2Map(obj interface{}, fields []string) map[string]interface{} {
 	var t reflect.Type
