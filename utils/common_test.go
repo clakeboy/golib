@@ -3,7 +3,6 @@ package utils
 import (
 	"fmt"
 	"github.com/clakeboy/golib/utils/uuid"
-	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -50,6 +49,7 @@ func TestSetTimeout(t *testing.T) {
 }
 
 func TestSplit(t *testing.T) {
-	str := strings.Split("sdfsdf", ",")[0]
-	fmt.Println(str)
+	for i := 0; i < 100; i++ {
+		fmt.Println(RandRange(500, 30000))
+	}
 }

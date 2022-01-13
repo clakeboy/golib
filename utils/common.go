@@ -89,6 +89,12 @@ func RandStr(number int, r_table interface{}) string {
 	return strings.Join(str, "")
 }
 
+//生成范围数字
+func RandRange(min, max int) int {
+	z := rand.Intn(max - min)
+	return z + min
+}
+
 //结构转map
 func Struct2Map(obj interface{}, fields []string) map[string]interface{} {
 	var t reflect.Type
