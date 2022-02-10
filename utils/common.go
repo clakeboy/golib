@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"reflect"
+	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -48,8 +49,11 @@ func (m *M) ParseJsonString(data string) error {
 	return m.ParseJson([]byte(data))
 }
 
-func Hump2Under(str string) {
-
+//驼峰转下划线
+func Hump2Under(str string) string {
+	reg := regexp.MustCompile(`[A-Z]{1}[a-z0-9]+`)
+	list := reg.FindAllString(str, -1)
+	return strings.Join(list, "_")
 }
 
 //下划线转驼峰
@@ -118,6 +122,9 @@ func Struct2Map(obj interface{}, fields []string) map[string]interface{} {
 
 	for i := 0; i < t.NumField(); i++ {
 		fieldName := strings.Split(t.Field(i).Tag.Get("json"), ",")[0]
+		if fieldName == "" {
+			continue
+		}
 		if fields != nil {
 			flag := StringIndexOf(fields, fieldName)
 			if flag != -1 {
