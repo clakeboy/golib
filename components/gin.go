@@ -32,6 +32,9 @@ func GetProperty(c *gin.Context) []byte {
 
 //调用Controller 的 Action 方法
 func CallAction(i interface{}, c *gin.Context) {
+	if i == nil {
+		fmt.Println("not found controller")
+	}
 	t := reflect.TypeOf(i)
 	method, ok := t.MethodByName("Action" + utils.Under2Hump(c.Param("action")))
 	if ok {
@@ -63,6 +66,9 @@ func CallAction(i interface{}, c *gin.Context) {
 
 //调用Controller 的 Action 方法 GET
 func CallActionGet(i interface{}, c *gin.Context) {
+	if i == nil {
+		fmt.Println("not found controller")
+	}
 	t := reflect.TypeOf(i)
 	method, ok := t.MethodByName("Action" + utils.Under2Hump(c.Param("action")))
 	if ok {
