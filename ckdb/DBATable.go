@@ -125,6 +125,30 @@ func (t *DBATable) Where(fields utils.M, table string) *DBATable {
 	return t
 }
 
+//设置where and
+func (t *DBATable) WhereAnd(fields utils.M, table string) *DBATable {
+	t.where = fields
+	if table == "" {
+		table = t.table
+	}
+	whereStr, val := t.db.WhereRecursion(fields, "AND", table)
+	t.where_str = fmt.Sprintf("%s AND %s", t.where_str, whereStr)
+	t.values = append(t.values, val...)
+	return t
+}
+
+//设置where and
+func (t *DBATable) WhereOr(fields utils.M, table string) *DBATable {
+	t.where = fields
+	if table == "" {
+		table = t.table
+	}
+	whereStr, val := t.db.WhereRecursion(fields, "AND", table)
+	t.where_str = fmt.Sprintf("%s OR %s", t.where_str, whereStr)
+	t.values = append(t.values, val...)
+	return t
+}
+
 //添加多外JOIN
 func (t *DBATable) Join(fields [][]string) *DBATable {
 	for _, join_str := range fields {

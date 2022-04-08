@@ -1,0 +1,387 @@
+
+<?xml version='1.0' encoding='UTF-8'?><wsdl:definitions name="AppServiceService" targetNamespace="http://service.webservice.yaic.com/" xmlns:ns1="http://cxf.apache.org/bindings/xformat" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://service.webservice.yaic.com/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <wsdl:types>
+        <xs:schema attributeFormDefault="unqualified" elementFormDefault="unqualified" targetNamespace="http://service.webservice.yaic.com/" xmlns:tns="http://service.webservice.yaic.com/" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+            <xs:complexType name="appRequestBean">
+                <xs:sequence>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="appInfos" nillable="true" type="tns:appInfo" />
+                    <xs:element minOccurs="0" name="baseInfo" type="tns:baseInfo" />
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="kindInfos" nillable="true" type="tns:kindInfo" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="appInfo">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="appBaseInfo" type="tns:appBaseInfo" />
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="cbnfcInfos" nillable="true" type="tns:cbnfcInfo" />
+                    <xs:element minOccurs="0" name="extraInfo" type="tns:extraInfo" />
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="insuredInfos" nillable="true" type="tns:insuredInfo" />
+                    <xs:element minOccurs="0" name="payInfo" type="tns:payInfo" />
+                    <xs:element minOccurs="0" name="payerInfo" type="tns:payerInfo" />
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="paymentInfos" nillable="true" type="tns:paymentInfo" />
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="propertyInfos" nillable="true" type="tns:propertyInfo" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="appBaseInfo">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="appBirthday" type="xs:dateTime" />
+                    <xs:element minOccurs="0" name="appSex" type="xs:string" />
+                    <xs:element minOccurs="0" name="appaddress" type="xs:string" />
+                    <xs:element minOccurs="0" name="appemail" type="xs:string" />
+                    <xs:element minOccurs="0" name="appid" type="xs:string" />
+                    <xs:element minOccurs="0" name="appmrk" type="xs:string" />
+                    <xs:element minOccurs="0" name="appname" type="xs:string" />
+                    <xs:element minOccurs="0" name="appphone" type="xs:string" />
+                    <xs:element minOccurs="0" name="apppost" type="xs:string" />
+                    <xs:element minOccurs="0" name="apprel" type="xs:string" />
+                    <xs:element minOccurs="0" name="apptel" type="xs:string" />
+                    <xs:element minOccurs="0" name="apptype" type="xs:string" />
+                    <xs:element minOccurs="0" name="appworkdpt" type="xs:string" />
+                    <xs:element minOccurs="0" name="businessid" type="xs:int" />
+                    <xs:element minOccurs="0" name="cntrcertfcde" type="xs:string" />
+                    <xs:element minOccurs="0" name="cntrcertfendtm" type="xs:dateTime" />
+                    <xs:element minOccurs="0" name="cntrnme" type="xs:string" />
+                    <xs:element minOccurs="0" name="legalcertfcde" type="xs:string" />
+                    <xs:element minOccurs="0" name="legalcertfendtm" type="xs:dateTime" />
+                    <xs:element minOccurs="0" name="legalnme" type="xs:string" />
+                    <xs:element minOccurs="0" name="resvtxt1" type="xs:string" />
+                    <xs:element minOccurs="0" name="resvtxt2" type="xs:string" />
+                    <xs:element minOccurs="0" name="resvtxt3" type="xs:string" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="cbnfcInfo">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="cbenford" type="xs:string" />
+                    <xs:element minOccurs="0" name="cbnfcnme" type="xs:string" />
+                    <xs:element minOccurs="0" name="ccertfcde" type="xs:string" />
+                    <xs:element minOccurs="0" name="ccertfcls" type="xs:string" />
+                    <xs:element minOccurs="0" name="crelcde" type="xs:string" />
+                    <xs:element minOccurs="0" name="csex" type="xs:string" />
+                    <xs:element minOccurs="0" name="nbenfprop" type="xs:double" />
+                    <xs:element minOccurs="0" name="tbirthday" type="xs:dateTime" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="extraInfo">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="agencycode" type="xs:string" />
+                    <xs:element minOccurs="0" name="agreementno" type="xs:string" />
+                    <xs:element minOccurs="0" name="businessnature" type="xs:string" />
+                    <xs:element minOccurs="0" name="businessnature2" type="xs:string" />
+                    <xs:element minOccurs="0" name="businessnature3" type="xs:string" />
+                    <xs:element minOccurs="0" name="cbrkslscde" type="xs:string" />
+                    <xs:element minOccurs="0" name="gscomcode" type="xs:string" />
+                    <xs:element minOccurs="0" name="handlercode" type="xs:string" />
+                    <xs:element minOccurs="0" name="handlername" type="xs:string" />
+                    <xs:element minOccurs="0" name="hxcdopercode" type="xs:string" />
+                    <xs:element minOccurs="0" name="prjctgmidtyp" type="xs:string" />
+                    <xs:element minOccurs="0" name="prjctgsubtyp" type="xs:string" />
+                    <xs:element minOccurs="0" name="prjctgtyp" type="xs:string" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="insuredInfo">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="accountBank" type="xs:string" />
+                    <xs:element minOccurs="0" name="accountNo" type="xs:string" />
+                    <xs:element minOccurs="0" name="allinesflag" type="xs:string" />
+                    <xs:element minOccurs="0" name="apprel" type="xs:string" />
+                    <xs:element minOccurs="0" name="businessPlace" type="xs:string" />
+                    <xs:element minOccurs="0" name="CResvTxt27" type="xs:string" />
+                    <xs:element minOccurs="0" name="CResvTxt5" type="xs:string" />
+                    <xs:element minOccurs="0" name="cduty" type="xs:string" />
+                    <xs:element minOccurs="0" name="clntaddr" type="xs:string" />
+                    <xs:element minOccurs="0" name="czipcde" type="xs:string" />
+                    <xs:element minOccurs="0" name="nperamt" type="xs:double" />
+                    <xs:element minOccurs="0" name="nperprm" type="xs:double" />
+                    <xs:element minOccurs="0" name="occupcde" type="xs:string" />
+                    <xs:element minOccurs="0" name="page" type="xs:int" />
+                    <xs:element minOccurs="0" name="pbirthday" type="xs:dateTime" />
+                    <xs:element minOccurs="0" name="pemail" type="xs:string" />
+                    <xs:element minOccurs="0" name="pid" type="xs:string" />
+                    <xs:element minOccurs="0" name="pmrk" type="xs:string" />
+                    <xs:element minOccurs="0" name="pname" type="xs:string" />
+                    <xs:element minOccurs="0" name="pphone" type="xs:string" />
+                    <xs:element minOccurs="0" name="psex" type="xs:string" />
+                    <xs:element minOccurs="0" name="ptel" type="xs:string" />
+                    <xs:element minOccurs="0" name="ptype" type="xs:string" />
+                    <xs:element minOccurs="0" name="pworkdpt" type="xs:string" />
+                    <xs:element minOccurs="0" name="resvtxt7" type="xs:string" />
+                    <xs:element minOccurs="0" name="resvtxt8" type="xs:string" />
+                    <xs:element minOccurs="0" name="socialSecurityNo" type="xs:string" />
+                    <xs:element minOccurs="0" name="socialSecurityNoPlace" type="xs:string" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="payInfo">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="amount" type="xs:double" />
+                    <xs:element minOccurs="0" name="currencyType" type="xs:string" />
+                    <xs:element minOccurs="0" name="dataType" type="xs:string" />
+                    <xs:element minOccurs="0" name="departmentCode" type="xs:string" />
+                    <xs:element minOccurs="0" name="inpaymentDate" type="xs:string" />
+                    <xs:element minOccurs="0" name="inpaymentTime" type="xs:string" />
+                    <xs:element minOccurs="0" name="insumidNo" type="xs:string" />
+                    <xs:element minOccurs="0" name="payAppNo" type="xs:string" />
+                    <xs:element minOccurs="0" name="payChannel" type="xs:string" />
+                    <xs:element minOccurs="0" name="payWay" type="xs:string" />
+                    <xs:element minOccurs="0" name="subCompany" type="xs:string" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="payerInfo">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="cardFlag" type="xs:string" />
+                    <xs:element minOccurs="0" name="custaccountNo" type="xs:string" />
+                    <xs:element minOccurs="0" name="cvv2" type="xs:string" />
+                    <xs:element minOccurs="0" name="expiredDate" type="xs:string" />
+                    <xs:element minOccurs="0" name="payerId" type="xs:string" />
+                    <xs:element minOccurs="0" name="payerName" type="xs:string" />
+                    <xs:element minOccurs="0" name="payerTel" type="xs:string" />
+                    <xs:element minOccurs="0" name="payerType" type="xs:string" />
+                    <xs:element minOccurs="0" name="cBankArea" type="xs:string" />
+                    <xs:element minOccurs="0" name="cBankCde" type="xs:string" />
+                    <xs:element minOccurs="0" name="cBankPro" type="xs:string" />
+                    <xs:element minOccurs="0" name="cPubPri" type="xs:string" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="paymentInfo">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="bsnum" type="xs:long" />
+                    <xs:element minOccurs="0" name="bsnums" type="xs:long" />
+                    <xs:element minOccurs="0" name="seqno" type="xs:long" />
+                    <xs:element minOccurs="0" name="serialno" type="xs:string" />
+                    <xs:element minOccurs="0" name="nPayablePrm" type="xs:double" />
+                    <xs:element minOccurs="0" name="nPrmVar" type="xs:double" />
+                    <xs:element minOccurs="0" name="tPayBgnTm" type="xs:dateTime" />
+                    <xs:element minOccurs="0" name="tPayEndTm" type="xs:dateTime" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="propertyInfo">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="blname" type="xs:string" />
+                    <xs:element minOccurs="0" name="blno" type="xs:string" />
+                    <xs:element minOccurs="0" name="carrybillno" type="xs:string" />
+                    <xs:element minOccurs="0" name="carshipno" type="xs:string" />
+                    <xs:element minOccurs="0" name="checicode" type="xs:string" />
+                    <xs:element minOccurs="0" name="classname" type="xs:string" />
+                    <xs:element minOccurs="0" name="conveyance" type="xs:string" />
+                    <xs:element minOccurs="0" name="country" type="xs:string" />
+                    <xs:element minOccurs="0" name="cresvtxt2" type="xs:string" />
+                    <xs:element minOccurs="0" name="cresvtxt4" type="xs:string" />
+                    <xs:element minOccurs="0" name="cresvtxt5" type="xs:string" />
+                    <xs:element minOccurs="0" name="cresvtxt6" type="xs:string" />
+                    <xs:element minOccurs="0" name="cresvtxt7" type="xs:string" />
+                    <xs:element minOccurs="0" name="ctgtaddr" type="xs:string" />
+                    <xs:element minOccurs="0" name="ctgttxtfld5" type="xs:string" />
+                    <xs:element minOccurs="0" name="ctgtzip" type="xs:string" />
+                    <xs:element minOccurs="0" name="delaydate" type="xs:dateTime" />
+                    <xs:element minOccurs="0" name="driverseatnum" type="xs:int" />
+                    <xs:element minOccurs="0" name="endsitename" type="xs:string" />
+                    <xs:element minOccurs="0" name="endtime" type="xs:dateTime" />
+                    <xs:element minOccurs="0" name="engineNo" type="xs:string" />
+                    <xs:element minOccurs="0" name="financialInstitution" type="xs:string" />
+                    <xs:element minOccurs="0" name="flyOrderNo" type="xs:string" />
+                    <xs:element minOccurs="0" name="flydate" type="xs:dateTime" />
+                    <xs:element minOccurs="0" name="flylanddate" type="xs:dateTime" />
+                    <xs:element minOccurs="0" name="flyno" type="xs:string" />
+                    <xs:element minOccurs="0" name="frameNo" type="xs:string" />
+                    <xs:element minOccurs="0" name="fromname" type="xs:string" />
+                    <xs:element minOccurs="0" name="hospital" type="xs:string" />
+                    <xs:element minOccurs="0" name="hospitallevel" type="xs:string" />
+                    <xs:element minOccurs="0" name="initLoanAmount" type="xs:double" />
+                    <xs:element minOccurs="0" name="licenseNo" type="xs:string" />
+                    <xs:element minOccurs="0" name="loanApprovalNo" type="xs:string" />
+                    <xs:element minOccurs="0" name="loanContractNo" type="xs:string" />
+                    <xs:element minOccurs="0" name="loanamount" type="xs:string" />
+                    <xs:element minOccurs="0" name="loanbankcode" type="xs:string" />
+                    <xs:element minOccurs="0" name="loanbegDate" type="xs:dateTime" />
+                    <xs:element minOccurs="0" name="loancontractno" type="xs:string" />
+                    <xs:element minOccurs="0" name="loandate" type="xs:dateTime" />
+                    <xs:element minOccurs="0" name="loanmonth" type="xs:int" />
+                    <xs:element minOccurs="0" name="loanstopDate" type="xs:dateTime" />
+                    <xs:element minOccurs="0" name="matchplace" type="xs:string" />
+                    <xs:element minOccurs="0" name="nresvnum1" type="xs:int" />
+                    <xs:element minOccurs="0" name="nresvnum2" type="xs:int" />
+                    <xs:element minOccurs="0" name="opertime" type="xs:dateTime" />
+                    <xs:element minOccurs="0" name="passengerseatnum" type="xs:int" />
+                    <xs:element minOccurs="0" name="payNumber" type="xs:string" />
+                    <xs:element minOccurs="0" name="power" type="xs:double" />
+                    <xs:element minOccurs="0" name="reflydate" type="xs:dateTime" />
+                    <xs:element minOccurs="0" name="reflyno" type="xs:string" />
+                    <xs:element minOccurs="0" name="repaiddate" type="xs:dateTime" />
+                    <xs:element minOccurs="0" name="repaidtype" type="xs:string" />
+                    <xs:element minOccurs="0" name="schoolname" type="xs:string" />
+                    <xs:element minOccurs="0" name="seatno" type="xs:string" />
+                    <xs:element minOccurs="0" name="seatnum" type="xs:int" />
+                    <xs:element minOccurs="0" name="seqno" type="xs:int" />
+                    <xs:element minOccurs="0" name="startsitename" type="xs:string" />
+                    <xs:element minOccurs="0" name="starttime" type="xs:dateTime" />
+                    <xs:element minOccurs="0" name="theBorrower" type="xs:string" />
+                    <xs:element minOccurs="0" name="ticketAmt" type="xs:double" />
+                    <xs:element minOccurs="0" name="ticketEndDate" type="xs:dateTime" />
+                    <xs:element minOccurs="0" name="ticketdate" type="xs:dateTime" />
+                    <xs:element minOccurs="0" name="ticketno" type="xs:string" />
+                    <xs:element minOccurs="0" name="toname" type="xs:string" />
+                    <xs:element minOccurs="0" name="university" type="xs:string" />
+                    <xs:element minOccurs="0" name="userquality" type="xs:string" />
+                    <xs:element minOccurs="0" name="yafcProDate1" type="xs:dateTime" />
+                    <xs:element minOccurs="0" name="yafcProDate2" type="xs:dateTime" />
+                    <xs:element minOccurs="0" name="yafcProNum1" type="xs:double" />
+                    <xs:element minOccurs="0" name="yafcProNum2" type="xs:double" />
+                    <xs:element minOccurs="0" name="yafcProNum3" type="xs:double" />
+                    <xs:element minOccurs="0" name="yafcProNum4" type="xs:int" />
+                    <xs:element minOccurs="0" name="yafcProText1" type="xs:string" />
+                    <xs:element minOccurs="0" name="yafcProText2" type="xs:string" />
+                    <xs:element minOccurs="0" name="yafcProText3" type="xs:string" />
+                    <xs:element minOccurs="0" name="yafcProText4" type="xs:string" />
+                    <xs:element minOccurs="0" name="yafcProText5" type="xs:string" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="baseInfo">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="amount" type="xs:double" />
+                    <xs:element minOccurs="0" name="amt" type="xs:double" />
+                    <xs:element minOccurs="0" name="arguesolution" type="xs:string" />
+                    <xs:element minOccurs="0" name="backurl" type="xs:string" />
+                    <xs:element minOccurs="0" name="bsnum" type="xs:int" />
+                    <xs:element minOccurs="0" name="businessno" type="xs:string" />
+                    <xs:element minOccurs="0" name="cagreeType" type="xs:string" />
+                    <xs:element minOccurs="0" name="ccardbsnstyp" type="xs:string" />
+                    <xs:element minOccurs="0" name="checkcode" type="xs:string" />
+                    <xs:element minOccurs="0" name="isgrp" type="xs:string" />
+                    <xs:element minOccurs="0" name="isticket" type="xs:string" />
+                    <xs:element minOccurs="0" name="opercode" type="xs:string" />
+                    <xs:element minOccurs="0" name="password" type="xs:string" />
+                    <xs:element minOccurs="0" name="payappno" type="xs:string" />
+                    <xs:element minOccurs="0" name="payflag" type="xs:string" />
+                    <xs:element minOccurs="0" name="rationcode" type="xs:string" />
+                    <xs:element minOccurs="0" name="realflag" type="xs:string" />
+                    <xs:element minOccurs="0" name="serialno" type="xs:string" />
+                    <xs:element minOccurs="0" name="tapptm" type="xs:dateTime" />
+                    <xs:element minOccurs="0" name="tinsrncbgntm" type="xs:dateTime" />
+                    <xs:element minOccurs="0" name="tinsrncendtm" type="xs:dateTime" />
+                    <xs:element minOccurs="0" name="tissuetm" type="xs:dateTime" />
+                    <xs:element minOccurs="0" name="user" type="xs:string" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="kindInfo">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="amount" type="xs:double" />
+                    <xs:element minOccurs="0" name="cresvtxt8" type="xs:string" />
+                    <xs:element minOccurs="0" name="itemcode" type="xs:string" />
+                    <xs:element minOccurs="0" name="kindcode" type="xs:string" />
+                    <xs:element minOccurs="0" name="ndductamt" type="xs:double" />
+                    <xs:element minOccurs="0" name="ndductrate" type="xs:double" />
+                    <xs:element minOccurs="0" name="nfloatrate" type="xs:double" />
+                    <xs:element minOccurs="0" name="nindemlmt" type="xs:double" />
+                    <xs:element minOccurs="0" name="nonceindemlmt" type="xs:double" />
+                    <xs:element minOccurs="0" name="nperamt" type="xs:double" />
+                    <xs:element minOccurs="0" name="nperprm" type="xs:double" />
+                    <xs:element minOccurs="0" name="nresvnum3" type="xs:int" />
+                    <xs:element minOccurs="0" name="premium" type="xs:double" />
+                    <xs:element minOccurs="0" name="rate" type="xs:double" />
+                    <xs:element minOccurs="0" name="yafcProNum1" type="xs:double" />
+                    <xs:element minOccurs="0" name="yafcProNum2" type="xs:double" />
+                    <xs:element minOccurs="0" name="yafcProNum3" type="xs:double" />
+                    <xs:element minOccurs="0" name="yafcProText1" type="xs:string" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="appResponseBean">
+                <xs:sequence>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="appInfoRes" nillable="true" type="tns:appInfoRes" />
+                    <xs:element minOccurs="0" name="flag" type="xs:string" />
+                    <xs:element minOccurs="0" name="reason" type="xs:string" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="appInfoRes">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="businessno" type="xs:string" />
+                    <xs:element minOccurs="0" name="payappno" type="xs:string" />
+                    <xs:element minOccurs="0" name="paymenturl" type="xs:string" />
+                    <xs:element minOccurs="0" name="pdfurl" type="xs:string" />
+                    <xs:element minOccurs="0" name="policyno" type="xs:string" />
+                    <xs:element minOccurs="0" name="seqno" type="xs:int" />
+                    <xs:element minOccurs="0" name="serialno" type="xs:string" />
+                    <xs:element minOccurs="0" name="nAddedTax" type="xs:double" />
+                    <xs:element minOccurs="0" name="nNoTaxPrm" type="xs:double" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="appBatchRequest" type="tns:appBatchRequest" />
+            <xs:complexType name="appBatchRequest">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="arg0" type="tns:appRequestBean" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="appBatchRequestResponse" type="tns:appBatchRequestResponse" />
+            <xs:complexType name="appBatchRequestResponse">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="return" type="tns:appResponseBean" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="appRequest" type="tns:appRequest" />
+            <xs:complexType name="appRequest">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="arg0" type="tns:appRequestBean" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="appRequestResponse" type="tns:appRequestResponse" />
+            <xs:complexType name="appRequestResponse">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="return" type="tns:appResponseBean" />
+                </xs:sequence>
+            </xs:complexType>
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:message name="appRequestResponse">
+        <wsdl:part element="tns:appRequestResponse" name="parameters">
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="appBatchRequest">
+        <wsdl:part element="tns:appBatchRequest" name="parameters">
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="appRequest">
+        <wsdl:part element="tns:appRequest" name="parameters">
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="appBatchRequestResponse">
+        <wsdl:part element="tns:appBatchRequestResponse" name="parameters">
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:portType name="AppService">
+        <wsdl:operation name="appBatchRequest">
+            <wsdl:input message="tns:appBatchRequest" name="appBatchRequest">
+            </wsdl:input>
+            <wsdl:output message="tns:appBatchRequestResponse" name="appBatchRequestResponse">
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="appRequest">
+            <wsdl:input message="tns:appRequest" name="appRequest">
+            </wsdl:input>
+            <wsdl:output message="tns:appRequestResponse" name="appRequestResponse">
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="AppServiceServiceSoapBinding" type="tns:AppService">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+        <wsdl:operation name="appBatchRequest">
+            <soap:operation soapAction="" style="document" />
+            <wsdl:input name="appBatchRequest">
+                <soap:body use="literal" />
+            </wsdl:input>
+            <wsdl:output name="appBatchRequestResponse">
+                <soap:body use="literal" />
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="appRequest">
+            <soap:operation soapAction="" style="document" />
+            <wsdl:input name="appRequest">
+                <soap:body use="literal" />
+            </wsdl:input>
+            <wsdl:output name="appRequestResponse">
+                <soap:body use="literal" />
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="AppServiceService">
+        <wsdl:port binding="tns:AppServiceServiceSoapBinding" name="AppServicePort">
+            <soap:address location="http://tapi.yaic.com.cn:80/yaicservice/api/appservice" />
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>
