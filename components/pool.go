@@ -1,6 +1,9 @@
 package components
 
-import "sync"
+import (
+	"github.com/clakeboy/golib/utils"
+	"sync"
+)
 
 //协程池
 type GoroutinePool struct {
@@ -25,7 +28,8 @@ func NewPoll(number int, worker func(obj ...interface{}) bool) *GoroutinePool {
 
 func (g *GoroutinePool) Start() {
 	g.stop = false
-	for i := 0; i < g.Number; i++ {
+	number := utils.YN(g.Total < g.Number, g.Total, g.Number).(int)
+	for i := 0; i < number; i++ {
 		g.wait.Add(1)
 		go func(idx int) {
 			isDone := false

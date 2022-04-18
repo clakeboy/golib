@@ -2,13 +2,14 @@ package task
 
 import (
 	"github.com/clakeboy/golib/components"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 )
 
-//时间类型
+// TimeType 时间类型
 type TimeType int
 
 const (
@@ -20,7 +21,7 @@ const (
 	DayOfWeek
 )
 
-//任务规则
+// Rule 任务规则
 type Rule struct {
 	Raw    string   //原始值
 	Type   TimeType //时间类型
@@ -28,38 +29,39 @@ type Rule struct {
 	Value  int      //循环值
 }
 
-//任务项
+// Item 任务项
 type Item struct {
 	RuleList     []*Rule               //规则列表
 	ExecFunc     func(item *Item) bool //任务执行方法
 	CallbackFunc func(item *Item)      //任务回调方法
 	LastExecDate time.Time             //最后执行任务的时间
 	Args         []interface{}         //任务数据
+	Lock         sync.RWMutex
 }
 
-//任务管理
+// Management 任务管理
 type Management struct {
 	stop     bool    //是否停止
 	list     []*Item //任务列表
 	listLock sync.Mutex
 }
 
-//创建管理任务工厂方法
+// NewManagement 创建管理任务工厂方法
 func NewManagement() *Management {
 	return &Management{
-		stop:     true,
-		listLock: sync.Mutex{},
+		stop: true,
+		//listLock: sync.Mutex{},
 	}
 }
 
-//添加一个任务项
+// Add 添加一个任务项
 func (m *Management) Add(item *Item) {
 	m.listLock.Lock()
 	m.list = append(m.list, item)
 	m.listLock.Unlock()
 }
 
-//删除列表中一个任务
+// RemoveTask 删除列表中一个任务
 func (m *Management) RemoveTask(item *Item) {
 	m.listLock.Lock()
 	for i, v := range m.list {
@@ -71,7 +73,7 @@ func (m *Management) RemoveTask(item *Item) {
 	m.listLock.Unlock()
 }
 
-//foreach 回调方法删除一个任务
+// RemoveForeach foreach 回调方法删除一个任务
 func (m *Management) RemoveForeach(f func(*Item) bool) {
 	m.listLock.Lock()
 	for i, v := range m.list {
@@ -84,14 +86,14 @@ func (m *Management) RemoveForeach(f func(*Item) bool) {
 	m.listLock.Unlock()
 }
 
-//清空任务列表
+// ClearTask 清空任务列表
 func (m *Management) ClearTask() {
 	m.listLock.Lock()
 	m.list = nil
 	m.listLock.Unlock()
 }
 
-//使用选项添加一个任务项
+// AddTask 使用选项添加一个任务项
 func (m *Management) AddTask(
 	second string,
 	minute string,
@@ -116,12 +118,14 @@ func (m *Management) AddTask(
 		ExecFunc:     exec,
 		CallbackFunc: callback,
 		Args:         args,
+		//Lock:         sync.RWMutex{}Mutex{},
+		LastExecDate: time.Now(),
 	}
 
 	m.Add(item)
 }
 
-//使用选项字符串添加一个任务项
+// AddTaskString 使用选项字符串添加一个任务项
 func (m *Management) AddTaskString(taskStr string, exec func(item *Item) bool, callback func(item *Item), args ...interface{}) {
 	typeList := strings.Split(taskStr, " ")
 	if len(typeList) < 6 {
@@ -167,7 +171,7 @@ func (m *Management) explainString2Type(str string, timeType TimeType) *Rule {
 	return rule
 }
 
-//开始
+// Start 开始
 func (m *Management) Start() {
 	m.stop = false
 	go m.run()
@@ -200,8 +204,9 @@ func (m *Management) run() {
 
 //执行任务
 func (m *Management) execute(currentDate time.Time) {
-	poll := components.NewPoll(8, func(obj ...interface{}) bool {
-		m.executeTask(obj[0].(*Item), currentDate)
+	poll := components.NewPoll(runtime.NumCPU(), func(obj ...interface{}) bool {
+		item := obj[0].(*Item)
+		m.executeTask(item, currentDate)
 		return true
 	})
 
@@ -209,7 +214,6 @@ func (m *Management) execute(currentDate time.Time) {
 	for _, v := range m.list {
 		taskList = append(taskList, v)
 	}
-
 	poll.AddTaskInterface(taskList)
 	poll.Start()
 }
@@ -220,13 +224,18 @@ func (m *Management) executeTask(item *Item, currentDate time.Time) {
 		return
 	}
 	//解释时间是否已可执行
+	item.Lock.RLock()
 	for _, rule := range item.RuleList {
 		if !m.explainType(rule, currentDate, item.LastExecDate) {
+			item.Lock.RUnlock()
 			return
 		}
 	}
+	item.Lock.RUnlock()
 	ok := item.ExecFunc(item)
+	item.Lock.Lock()
 	item.LastExecDate = currentDate
+	item.Lock.Unlock()
 	if ok && item.CallbackFunc != nil {
 		item.CallbackFunc(item)
 	}

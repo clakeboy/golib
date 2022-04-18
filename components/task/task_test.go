@@ -25,11 +25,11 @@ func TestManagement_Start(t *testing.T) {
 	taskService := NewManagement()
 	//every second execute func
 	taskService.AddTaskString("*/1 * * * * *", func(item *Item) bool {
-		fmt.Println(time.Now().Format("2006-01-02 15:04:05"), "Every second execute")
+		fmt.Println(utils.FmtColor(time.Now().Format("2006-01-02 15:04:05")+" Every second execute", utils.FCYAN))
 		return true
 	}, nil)
 	//10 second execute func
-	taskService.AddTaskString("10 * * * * *", func(item *Item) bool {
+	taskService.AddTaskString("*/10 * * * * *", func(item *Item) bool {
 		fmt.Println(time.Now().Format("2006-01-02 15:04:05"), "10 second execute")
 		return true
 	}, func(item *Item) {
@@ -39,7 +39,7 @@ func TestManagement_Start(t *testing.T) {
 		fmt.Println(time.Now().Format("2006-01-02 15:04:05"), "Every one minute execute")
 		return true
 	}, nil)
-	taskService.AddTaskString("1 18 11 * * *", func(item *Item) bool {
+	taskService.AddTaskString("1 59 9 * * *", func(item *Item) bool {
 		fmt.Println(time.Now().Format("2006-01-02 15:04:05"), "11:18:01 execute")
 		return true
 	}, nil)
