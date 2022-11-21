@@ -49,14 +49,24 @@ func (m *M) ParseJsonString(data string) error {
 	return m.ParseJson([]byte(data))
 }
 
-//驼峰转下划线
+// 驼峰转下划线
 func Hump2Under(str string) string {
 	reg := regexp.MustCompile(`[A-Z]{1}[a-z0-9]+`)
 	list := reg.FindAllString(str, -1)
+	if len(list) <= 0 {
+		return str
+	}
+	for i, v := range list {
+		list[i] = LcFirst(v)
+	}
+	if idx := strings.Index(str, UcFirst(list[0])); idx != -1 {
+		first := []string{str[:idx]}
+		return strings.Join(append(first, list...), "_")
+	}
 	return strings.Join(list, "_")
 }
 
-//下划线转驼峰
+// 下划线转驼峰
 func Under2Hump(str string) string {
 	list := strings.Split(str, "_")
 
@@ -67,16 +77,23 @@ func Under2Hump(str string) string {
 	return strings.Join(list, "")
 }
 
-//首字母大写
+// 首字母大写
 func UcFirst(str string) string {
 	first := str[0:1]
 	long := str[1:]
 	return strings.ToUpper(first) + long
 }
 
+// 首字母小写
+func LcFirst(str string) string {
+	first := str[0:1]
+	long := str[1:]
+	return strings.ToLower(first) + long
+}
+
 const randTable = "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890"
 
-//生成随机字符串
+// 生成随机字符串
 func RandStr(number int, r_table interface{}) string {
 	var table string
 	if r_table != nil {
@@ -93,19 +110,19 @@ func RandStr(number int, r_table interface{}) string {
 	return strings.Join(str, "")
 }
 
-//生成范围数字
+// 生成范围数字
 func RandRange(min, max int) int {
 	z := rand.Intn(max - min)
 	return z + min
 }
 
-//生成范围数字
+// 生成范围数字
 func RandRange64(min, max int64) int64 {
 	z := rand.Int63n(max - min)
 	return z + min
 }
 
-//结构转map
+// 结构转map
 func Struct2Map(obj interface{}, fields []string) map[string]interface{} {
 	var t reflect.Type
 	var v reflect.Value
@@ -138,7 +155,7 @@ func Struct2Map(obj interface{}, fields []string) map[string]interface{} {
 	return data
 }
 
-//map 转结构
+// map 转结构
 func Map2Struct(obj interface{}, stu interface{}) error {
 	json_data, err := json.Marshal(obj)
 	if err != nil {
@@ -152,7 +169,7 @@ func Map2Struct(obj interface{}, stu interface{}) error {
 	return nil
 }
 
-//创建UUID
+// 创建UUID
 func CreateUUID(step bool) string {
 	if runtime.GOOS == "windows" {
 		ui := uuid.Must(uuid.NewV4())
@@ -178,7 +195,7 @@ func CreateUUID(step bool) string {
 	}
 }
 
-//API输出
+// API输出
 func ApiResult(status bool, msg string, i interface{}) *map[string]interface{} {
 	res := &map[string]interface{}{"status": status, "msg": msg, "data": i}
 	return res
@@ -215,7 +232,7 @@ func Inet_aton(ipnr string) int64 {
 	return sum
 }
 
-//模拟二元操作符功能
+// 模拟二元操作符功能
 func YN(condition bool, yes interface{}, no interface{}) interface{} {
 	if condition {
 		return yes
@@ -223,7 +240,7 @@ func YN(condition bool, yes interface{}, no interface{}) interface{} {
 	return no
 }
 
-//转换任意数据为 float64
+// 转换任意数据为 float64
 func ConvertFloat(c interface{}) float64 {
 	rv := reflect.ValueOf(c)
 	switch rv.Kind() {
@@ -243,7 +260,7 @@ func ConvertFloat(c interface{}) float64 {
 	return 0
 }
 
-//设置时间回调
+// 设置时间回调
 func SetTimeout(step time.Duration, callback func()) {
 	go func() {
 		time.Sleep(step)

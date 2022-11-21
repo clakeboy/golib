@@ -6,14 +6,15 @@ import (
 	"github.com/DeanThompson/ginpprof"
 	"github.com/clakeboy/golib/utils"
 	"github.com/gin-gonic/gin"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"reflect"
 )
 
-//得到POST原始数据
+// 得到POST原始数据
 func GetProperty(c *gin.Context) []byte {
-	data, err := ioutil.ReadAll(c.Request.Body)
+	data, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		fmt.Println(err)
 		panic(err)
@@ -30,9 +31,9 @@ func GetProperty(c *gin.Context) []byte {
 	return data
 }
 
-//调用Controller 的 Action 方法
+// 调用Controller 的 Action 方法
 func CallAction(i interface{}, c *gin.Context) {
-	if i == nil {
+	if reflect.ValueOf(i).IsNil() {
 		fmt.Println("not found controller")
 	}
 	t := reflect.TypeOf(i)
@@ -64,9 +65,9 @@ func CallAction(i interface{}, c *gin.Context) {
 	}
 }
 
-//调用Controller 的 Action 方法 GET
+// 调用Controller 的 Action 方法 GET
 func CallActionGet(i interface{}, c *gin.Context) {
-	if i == nil {
+	if reflect.ValueOf(i).IsNil() {
 		fmt.Println("not found controller")
 	}
 	t := reflect.TypeOf(i)
@@ -99,7 +100,7 @@ func InitPprof(server *gin.Engine) {
 	ginpprof.Wrapper(server)
 }
 
-//是否可以跨域调用
+// 是否可以跨域调用
 func Cross(c *gin.Context, is_cross bool, org string) {
 	if is_cross {
 		c.Header("Access-Control-Allow-Origin", org)
@@ -109,7 +110,7 @@ func Cross(c *gin.Context, is_cross bool, org string) {
 	}
 }
 
-//显示HTML数据
+// 显示HTML数据
 func Display(c *gin.Context, html []byte) {
 	c.Data(http.StatusOK, "text/html;charset=utf-8", html)
 }

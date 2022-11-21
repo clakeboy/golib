@@ -5,7 +5,7 @@ import (
 	"sync"
 )
 
-//协程池
+// 协程池
 type GoroutinePool struct {
 	Queue          chan interface{} //队列池
 	Number         int              //并发协程数
@@ -16,7 +16,17 @@ type GoroutinePool struct {
 	stop           bool //关闭协程池信号
 }
 
-//新建一个协程池
+// NewPool 新建一个协程池
+func NewPool(number int, worker func(obj ...interface{}) bool) *GoroutinePool {
+	p := &GoroutinePool{
+		Number: number,
+		Worker: worker,
+		wait:   sync.WaitGroup{},
+	}
+	return p
+}
+
+// 新建一个协程池
 func NewPoll(number int, worker func(obj ...interface{}) bool) *GoroutinePool {
 	p := &GoroutinePool{
 		Number: number,
@@ -88,4 +98,12 @@ func (g *GoroutinePool) Stop() {
 
 func (g *GoroutinePool) SetFinishCallback(callback func()) {
 	g.finishCallback = callback
+}
+
+func ReplaceInterface[T any](anyList []T) []interface{} {
+	var list []interface{}
+	for _, v := range anyList {
+		list = append(list, v)
+	}
+	return list
 }
