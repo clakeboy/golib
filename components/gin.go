@@ -35,6 +35,8 @@ func GetProperty(c *gin.Context) []byte {
 func CallAction(i interface{}, c *gin.Context) {
 	if reflect.ValueOf(i).IsNil() {
 		fmt.Println("not found controller")
+		c.String(http.StatusNotFound, "not found controller")
+		return
 	}
 	t := reflect.TypeOf(i)
 	method, ok := t.MethodByName("Action" + utils.Under2Hump(c.Param("action")))
@@ -62,6 +64,7 @@ func CallAction(i interface{}, c *gin.Context) {
 		c.JSON(200, utils.ApiResult(rnflag, msg, list[0].Interface()))
 	} else {
 		fmt.Println("not found action")
+		c.String(http.StatusNotFound, "not found action")
 	}
 }
 
@@ -69,6 +72,8 @@ func CallAction(i interface{}, c *gin.Context) {
 func CallActionGet(i interface{}, c *gin.Context) {
 	if reflect.ValueOf(i).IsNil() {
 		fmt.Println("not found controller")
+		c.String(http.StatusNotFound, "not found controller")
+		return
 	}
 	t := reflect.TypeOf(i)
 	method, ok := t.MethodByName("Action" + utils.Under2Hump(c.Param("action")))
@@ -78,6 +83,7 @@ func CallActionGet(i interface{}, c *gin.Context) {
 		v.MethodByName(method.Name).Call(params)
 	} else {
 		fmt.Println("not found action")
+		c.String(http.StatusNotFound, "not found action")
 	}
 }
 
