@@ -31,7 +31,7 @@ type Weixin struct {
 	appSecret string
 }
 
-//用户ACCESS
+// 用户ACCESS
 type WxUserAccessToken struct {
 	AccessToken  string `json:"access_token"`
 	ExpiresIn    int    `json:"expires_in"`
@@ -41,7 +41,7 @@ type WxUserAccessToken struct {
 	UnionId      string `json:"unionid"`
 }
 
-//网页受权接口获取用户数据
+// 网页受权接口获取用户数据
 type WxUser struct {
 	NickName string `json:"nickname"`
 	OpenId   string `json:"openid"`
@@ -53,7 +53,7 @@ type WxUser struct {
 	UnionId  string `json:"unionid"`
 }
 
-//用公众号接口获取的用户数据
+// 用公众号接口获取的用户数据
 type WxUserInfo struct {
 	Subscribe      int    `json:"subscribe"`
 	Subscribe_time int    `json:"subscribe_time"`
@@ -71,7 +71,7 @@ type WxUserInfo struct {
 	Tagid_list     []int  `json:"tagid_list"`
 }
 
-//文件名
+// 文件名
 var fileReg = regexp.MustCompile(`filename="(.+)"`)
 
 func NewWeixin(app_id, app_secret string) *Weixin {
@@ -81,7 +81,7 @@ func NewWeixin(app_id, app_secret string) *Weixin {
 	}
 }
 
-//发起HTTP连接
+// 发起HTTP连接
 func (w *Weixin) Http(uri string) (string, error) {
 	s, err := utils.HttpGet(uri)
 	if err != nil {
@@ -101,7 +101,7 @@ func (w *Weixin) Http(uri string) (string, error) {
 	return s, nil
 }
 
-//发起HTTP POSTJSON
+// 发起HTTP POSTJSON
 func (w *Weixin) post(uri string, data utils.M) (string, error) {
 	res, err := utils.HttpPostJsonString(uri, data)
 	if err != nil {
@@ -120,7 +120,7 @@ func (w *Weixin) post(uri string, data utils.M) (string, error) {
 	return res, nil
 }
 
-//得到公众号全局 ACCESS_TOKEN
+// 得到公众号全局 ACCESS_TOKEN
 func (w *Weixin) GetAccessToken() (*WxAccessToken, error) {
 	url := fmt.Sprintf(
 		"https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%v&secret=%v",
@@ -140,7 +140,7 @@ func (w *Weixin) GetAccessToken() (*WxAccessToken, error) {
 	return &info, nil
 }
 
-//发起 WEB 验证受权
+// 发起 WEB 验证受权
 func (w *Weixin) WebAuth(redirect_uri string, mpid string, base bool) string {
 	scope := "snsapi_userinfo"
 	if base {
@@ -158,7 +158,7 @@ func (w *Weixin) WebAuth(redirect_uri string, mpid string, base bool) string {
 	return u
 }
 
-//使用code获取用户access token
+// 使用code获取用户access token
 func (w *Weixin) GetUserAccessToken(code string) (*WxUserAccessToken, error) {
 	url := fmt.Sprintf("https://api.weixin.qq.com/sns/oauth2/access_token?%v&%v&%v&%v",
 		"appid="+w.appId,
@@ -179,7 +179,7 @@ func (w *Weixin) GetUserAccessToken(code string) (*WxUserAccessToken, error) {
 	return &user_access, nil
 }
 
-//使用用户access token 获取用户信息
+// 使用用户access token 获取用户信息
 func (w *Weixin) GetUserInfoAccessToken(access_token string, openid string) (*WxUser, error) {
 	url := fmt.Sprintf("https://api.weixin.qq.com/sns/userinfo?%v&%v&%v",
 		"access_token="+access_token,
@@ -200,7 +200,7 @@ func (w *Weixin) GetUserInfoAccessToken(access_token string, openid string) (*Wx
 	return &wxuser, nil
 }
 
-//拉取用户信息
+// 拉取用户信息
 func (w *Weixin) GetUserInfo(access_token string, openid string) (*WxUserInfo, error) {
 	url := fmt.Sprintf("https://api.weixin.qq.com/cgi-bin/user/info?access_token=%v&openid=%v&lang=zh_CN",
 		access_token,
@@ -220,7 +220,7 @@ func (w *Weixin) GetUserInfo(access_token string, openid string) (*WxUserInfo, e
 	return &wxuser, nil
 }
 
-//获取JsTicket
+// 获取JsTicket
 func (w *Weixin) GetJsapiTicket(access_token string) (*WxJsapiTicket, error) {
 	url := fmt.Sprintf("https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=%v&type=jsapi", access_token)
 	raw, err := w.Http(url)
@@ -237,7 +237,7 @@ func (w *Weixin) GetJsapiTicket(access_token string) (*WxJsapiTicket, error) {
 	return &ticket, nil
 }
 
-//进行JSTICKET签名
+// 进行JSTICKET签名
 func (w *Weixin) SignJsTicket(data map[string]interface{}) string {
 	keys := utils.MapKeys(data)
 	sort.Strings(keys)
@@ -254,7 +254,7 @@ func (w *Weixin) SignJsTicket(data map[string]interface{}) string {
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
-//发送模板消息
+// 发送模板消息
 func (w *Weixin) SendTemplateMessage(access_token string, data utils.M) error {
 	url_str := fmt.Sprintf("https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=%s", access_token)
 	_, err := w.post(url_str, data)
@@ -271,7 +271,7 @@ type MediaData struct {
 	Content  []byte
 }
 
-//得到临时素材
+// 得到临时素材
 func (w *Weixin) GetMedia(access_token string, media_id string) (*MediaData, error) {
 	url_str := fmt.Sprintf(
 		"https://api.weixin.qq.com/cgi-bin/media/get?access_token=%s&media_id=%s",
@@ -292,6 +292,9 @@ func (w *Weixin) GetMedia(access_token string, media_id string) (*MediaData, err
 		dis := res.Headers.Get("Content-disposition")
 		//reg := regexp.MustCompile(`filename="(.+)"`)
 		list := fileReg.FindStringSubmatch(dis)
+		if len(list) == 0 {
+			return nil, fmt.Errorf("can not upload %s", dis)
+		}
 		media := &MediaData{
 			FileType: res.Headers.Get("Content-Type"),
 			FileName: list[1],
@@ -304,14 +307,14 @@ func (w *Weixin) GetMedia(access_token string, media_id string) (*MediaData, err
 	return nil, errors.New(fmt.Sprintf("code:%v,msg:%v", err_msg["errcode"], err_msg["errmsg"]))
 }
 
-//微信二维码结构
+// 微信二维码结构
 type WxQrCode struct {
 	Ticket        string `json:"ticket"`
 	ExpireSeconds int    `json:"expire_seconds"`
 	Url           string `json:"url"`
 }
 
-//创建临时二维码
+// 创建临时二维码
 func (w *Weixin) CreateTempQrCode(token, content string, time_s int) (*WxQrCode, error) {
 	data := utils.M{
 		"expire_seconds": time_s,
@@ -336,7 +339,7 @@ func (w *Weixin) CreateTempQrCode(token, content string, time_s int) (*WxQrCode,
 	return res_data, nil
 }
 
-//创建永久二维码
+// 创建永久二维码
 func (w *Weixin) CreateQrCode(token, content string) (*WxQrCode, error) {
 	data := utils.M{
 		"action_name": "QR_LIMIT_STR_SCENE",
@@ -360,7 +363,7 @@ func (w *Weixin) CreateQrCode(token, content string) (*WxQrCode, error) {
 	return res_data, nil
 }
 
-//创建微信小程序二维码
+// 创建微信小程序二维码
 func (w *Weixin) CreateWxAppQrCode(token, scene, page string, width int) (string, error) {
 	data := utils.M{
 		"scene": scene,
@@ -376,7 +379,7 @@ func (w *Weixin) CreateWxAppQrCode(token, scene, page string, width int) (string
 	return res, err
 }
 
-//向用户发送客户消息
+// 向用户发送客户消息
 func (w *Weixin) SendCustomMessage(token, openid, msg_type string, data utils.M) (string, error) {
 	msg := utils.M{
 		"touser":  openid,
@@ -392,15 +395,15 @@ func (w *Weixin) SendCustomMessage(token, openid, msg_type string, data utils.M)
 	return res, err
 }
 
-///微信标签管理
-//用户标签JSON
+// /微信标签管理
+// 用户标签JSON
 type UserTag struct {
 	Id    int    `json:"id"`
 	Name  string `json:"name"`
 	Count int    `json:"count"`
 }
 
-//创建用户标签
+// 创建用户标签
 func (w *Weixin) CreateTag(token, name string) (string, error) {
 	data := utils.M{
 		"tag": UserTag{
@@ -422,7 +425,7 @@ type TagList struct {
 	Tags []*UserTag `json:"tags"`
 }
 
-//获取已创建标签
+// 获取已创建标签
 func (w *Weixin) GetTags(token string) (*TagList, error) {
 	urlStr := fmt.Sprintf("https://api.weixin.qq.com/cgi-bin/tags/get?access_token=%s", token)
 	res, err := utils.HttpGet(urlStr)
@@ -437,7 +440,7 @@ func (w *Weixin) GetTags(token string) (*TagList, error) {
 	return tags, err
 }
 
-//修改标签名
+// 修改标签名
 func (w *Weixin) UpdateTag(token string, id int, name string) (string, error) {
 	data := utils.M{
 		"tag": utils.M{
@@ -453,7 +456,7 @@ func (w *Weixin) UpdateTag(token string, id int, name string) (string, error) {
 	return res, err
 }
 
-//删除标签
+// 删除标签
 func (w *Weixin) DeleteTag(token string, id int) (string, error) {
 	data := utils.M{
 		"tag": utils.M{
@@ -482,7 +485,7 @@ func (w *Weixin) GetTagUsers(token string, tagId int, nextOpenid string) (string
 	return res, err
 }
 
-//批量为用户打标签
+// 批量为用户打标签
 func (w *Weixin) SetUserTag(token string, tagId int, openIdList []string) (string, error) {
 	data := utils.M{
 		"tagid":       tagId,
@@ -497,7 +500,7 @@ func (w *Weixin) SetUserTag(token string, tagId int, openIdList []string) (strin
 	return res, err
 }
 
-//批量为用户取消标签
+// 批量为用户取消标签
 func (w *Weixin) CancelUserTag(token string, tagId int, openIdList []string) (string, error) {
 	data := utils.M{
 		"tagid":       tagId,
@@ -512,7 +515,7 @@ func (w *Weixin) CancelUserTag(token string, tagId int, openIdList []string) (st
 	return res, err
 }
 
-//获取用户身上的标签列表
+// 获取用户身上的标签列表
 func (w *Weixin) GetUserTags(token, openId string) (string, error) {
 	data := utils.M{
 		"openid": openId,
