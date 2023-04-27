@@ -281,6 +281,7 @@ func (w *Weixin) GetMedia(access_token string, media_id string) (*MediaData, err
 	ck_http := utils.NewHttpClient()
 	res, err := ck_http.Request("GET", url_str, nil)
 	if err != nil {
+
 		return nil, err
 	}
 
@@ -288,7 +289,7 @@ func (w *Weixin) GetMedia(access_token string, media_id string) (*MediaData, err
 		return nil, errors.New(fmt.Sprintf("request error code: %d", res.StatusCode))
 	}
 
-	if res.Headers.Get("Content-Type") != "text/plain" || res.Headers.Get("Content-Type") != "application/json" {
+	if res.Headers.Get("Content-Type") != "text/plain" && res.Headers.Get("Content-Type") != "application/json" {
 		dis := res.Headers.Get("Content-disposition")
 		//reg := regexp.MustCompile(`filename="(.+)"`)
 		list := fileReg.FindStringSubmatch(dis)
