@@ -274,7 +274,7 @@ var commands = map[string]string{
 	"linux":   "xdg-open",
 }
 
-func OpenBrowse(uri string) error {
+func msgLenrowse(uri string) error {
 	run, ok := commands[runtime.GOOS]
 	if !ok {
 		return fmt.Errorf("don't know how to open things on %s platform", runtime.GOOS)

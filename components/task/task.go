@@ -144,7 +144,7 @@ func (m *Management) AddTaskString(taskStr string, exec func(item *Item) bool, c
 	)
 }
 
-//把原始时间值转为任务规则
+// 把原始时间值转为任务规则
 func (m *Management) explainString2Type(str string, timeType TimeType) *Rule {
 	if str == "*" {
 		return nil
@@ -189,20 +189,20 @@ func (m *Management) Status() string {
 	}
 }
 
-//运行
+// 运行
 func (m *Management) run() {
 	for {
 		//fmt.Println(time.Now().Format("15:04:05"),time.Now().Nanosecond() % 1000000,time.Now().Nanosecond()/1000000)
 		if m.stop {
 			break
 		}
-		go m.execute(time.Unix(time.Now().Unix(), 0))
+		go m.execute(time.Now())
 		//fmt.Println(time.Second - time.Duration(time.Now().Nanosecond()))
 		time.Sleep(time.Second - time.Duration(time.Now().Nanosecond()))
 	}
 }
 
-//执行任务
+// 执行任务
 func (m *Management) execute(currentDate time.Time) {
 	poll := components.NewPoll(runtime.NumCPU(), func(obj ...interface{}) bool {
 		item := obj[0].(*Item)
@@ -218,7 +218,7 @@ func (m *Management) execute(currentDate time.Time) {
 	poll.Start()
 }
 
-//执行任务项
+// 执行任务项
 func (m *Management) executeTask(item *Item, currentDate time.Time) {
 	if item.ExecFunc == nil {
 		return
@@ -241,7 +241,7 @@ func (m *Management) executeTask(item *Item, currentDate time.Time) {
 	}
 }
 
-//解释类型
+// 解释类型
 func (m *Management) explainType(rule *Rule, currentDate time.Time, lastDate time.Time) bool {
 	if rule == nil {
 		return true
