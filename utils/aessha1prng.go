@@ -48,8 +48,8 @@ func SHAPRNGDecode(deText []byte, kenCode []byte) ([]byte, error) {
 	//return cipherText, nil
 	//---------------------------
 	key := AesKeySecureRandom(kenCode)
-	aesen := &AesEncrypt{aesType: AES_ECB}
-	aesen.SetKey(string(key))
+	aesen := &AesEncrypt{aesType: AES_ECB, key: key}
+	aesen.SetPkcs(false)
 	return aesen.Decrypt(deText)
 }
 

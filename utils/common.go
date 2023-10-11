@@ -3,7 +3,6 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/clakeboy/golib/utils/uuid"
 	"math/rand"
 	"os"
 	"os/exec"
@@ -13,6 +12,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/clakeboy/golib/utils/uuid"
 )
 
 func init() {
@@ -71,7 +72,9 @@ func Under2Hump(str string) string {
 	list := strings.Split(str, "_")
 
 	for i, caps := range list {
-		list[i] = UcFirst(caps)
+		if caps != "" {
+			list[i] = UcFirst(caps)
+		}
 	}
 
 	return strings.Join(list, "")

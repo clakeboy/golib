@@ -96,3 +96,26 @@ func decrypt(de string) ([]byte, error) {
 	}
 	return ut, nil
 }
+
+func TestNonePkcs(t *testing.T) {
+	key := EncodeMD5Std("mOzTwjD1o6Q0OhLu")
+	// key := "mOzTwjD1o6Q0OhLu"
+	// h := md5.New()
+	// h.Write([]byte(key))
+	// md5Char := h.Sum(nil)
+	println(len([]byte(key)))
+	str := "zkUpAGQlqyOzR+t8JtFrow=="
+	aes := NewAes(key)
+	// aes.SetKeyBytes(md5Char)
+	// aes.SetBase64(false)
+	// aes.SetPkcs(false)
+	aes.SetType(AES_ECB)
+	deStr, err := aes.DecryptString(str)
+	println(deStr, err)
+
+	enOrgStr := `Hello`
+
+	// aes.SetPkcs(true)
+	enStr, err := aes.EncryptString(enOrgStr)
+	println(enStr, err)
+}

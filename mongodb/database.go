@@ -1,4 +1,4 @@
-package mongo
+package mongodb
 
 import (
 	"context"
@@ -19,7 +19,8 @@ type Config struct {
 	Password string `json:"password" yaml:"password"`
 	Auth     string `json:"auth" yaml:"auth"`
 	DBName   string `json:"db_name" yaml:"db_name"`
-	PoolSize int    `json:"pool_size" yaml:"pool_size"`
+	PoolSize uint64 `json:"pool_size" yaml:"pool_size"`
+	Timeout  uint64 `json:"timeout" yaml:"timeout"`
 }
 
 // mongodb orm use official driver
@@ -32,6 +33,7 @@ func NewDatabase(conf *Config) (*Database, error) {
 	opts := options.Client()
 	opts.SetHosts([]string{fmt.Sprintf("%s:%s", conf.Host, conf.Port)})
 	opts.SetMaxPoolSize(uint64(conf.PoolSize))
+	opts.SetMinPoolSize(1)
 	opts.SetConnectTimeout(5 * time.Second)
 	opts.SetTimeout(30 * time.Second)
 	if conf.Auth != "" {
@@ -70,7 +72,7 @@ func (d *Database) SelectDatabase(dbName string) {
 }
 
 func (d *Database) ListDatabase() (mongo.ListDatabasesResult, error) {
-	return d.client.ListDatabases(context.Background())
+	return d.client.ListDatabases(context.Background(), bson.D{})
 }
 
 func (d *Database) ListDatabaseNames() ([]string, error) {

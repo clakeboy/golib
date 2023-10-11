@@ -1,12 +1,13 @@
 package task
 
 import (
-	"github.com/clakeboy/golib/components"
 	"runtime"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/clakeboy/golib/components"
 )
 
 // TimeType 时间类型
@@ -103,7 +104,7 @@ func (m *Management) AddTask(
 	dayOfWeek string,
 	exec func(item *Item) bool,
 	callback func(item *Item),
-	args ...interface{}) {
+	args ...interface{}) *Item {
 
 	var rules []*Rule
 	rules = append(rules, m.explainString2Type(second, Second))
@@ -123,15 +124,16 @@ func (m *Management) AddTask(
 	}
 
 	m.Add(item)
+	return item
 }
 
 // AddTaskString 使用选项字符串添加一个任务项
-func (m *Management) AddTaskString(taskStr string, exec func(item *Item) bool, callback func(item *Item), args ...interface{}) {
+func (m *Management) AddTaskString(taskStr string, exec func(item *Item) bool, callback func(item *Item), args ...interface{}) *Item {
 	typeList := strings.Split(taskStr, " ")
 	if len(typeList) < 6 {
-		return
+		return nil
 	}
-	m.AddTask(
+	return m.AddTask(
 		typeList[0],
 		typeList[1],
 		typeList[2],

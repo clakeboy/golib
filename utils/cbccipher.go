@@ -20,26 +20,27 @@ type AesEncrypt struct {
 	aesType    string
 	iv         []byte
 	isBase64   bool
+	isPkcs     bool
 }
 
-//创建加密
+// 创建加密
 func NewAes(k string) *AesEncrypt {
-	enc := &AesEncrypt{aesType: AES_CBC, isBase64: true}
+	enc := &AesEncrypt{aesType: AES_CBC, isBase64: true, isPkcs: true}
 	enc.SetKey(k)
 	return enc
 }
 
-//设置是否自动base64返回
+// 设置是否自动base64返回
 func (a *AesEncrypt) SetBase64(chk bool) {
 	a.isBase64 = chk
 }
 
-//设置加密类型
+// 设置加密类型
 func (a *AesEncrypt) SetType(t string) {
 	a.aesType = t
 }
 
-//设置加密KEY
+// 设置加密KEY
 func (a *AesEncrypt) SetKey(k string) {
 	keyLen := len(k)
 	if keyLen < 16 {
@@ -51,12 +52,17 @@ func (a *AesEncrypt) SetKeyBytes(k []byte) {
 	a.key = k
 }
 
-//设置向量IV
+// 设置向量IV
 func (a *AesEncrypt) SetIV(iv []byte) {
 	a.iv = iv
 }
 
-//得到加密KEY
+// 设置是否启动pkcs
+func (a *AesEncrypt) SetPkcs(flag bool) {
+	a.isPkcs = flag
+}
+
+// 得到加密KEY
 func (a *AesEncrypt) GetKey() []byte {
 	keyLen := len(a.key)
 	//if keyLen < 16 {
@@ -75,15 +81,16 @@ func (a *AesEncrypt) GetKey() []byte {
 	return a.key[:16]
 }
 
-//加密方法
+// 加密方法
 func (a *AesEncrypt) Encrypt(plantText []byte) ([]byte, error) {
 	key := a.GetKey()
 	block, err := aes.NewCipher(key) //选择加密算法
 	if err != nil {
 		return nil, err
 	}
-
-	plantText = PKCS7Padding(plantText, block.BlockSize())
+	if a.isPkcs {
+		plantText = PKCS7Padding(plantText, block.BlockSize())
+	}
 
 	var blockModel cipher.BlockMode
 
@@ -108,7 +115,7 @@ func (a *AesEncrypt) Encrypt(plantText []byte) ([]byte, error) {
 	return buf, nil
 }
 
-//加密返回字符串
+// 加密返回字符串
 func (a *AesEncrypt) EncryptString(plantText string) (string, error) {
 	res, err := a.Encrypt([]byte(plantText))
 	if err != nil {
@@ -118,7 +125,7 @@ func (a *AesEncrypt) EncryptString(plantText string) (string, error) {
 	return string(res), nil
 }
 
-//解密方法
+// 解密方法
 func (a *AesEncrypt) Decrypt(deStr []byte) ([]byte, error) {
 	key := a.GetKey()
 	var cipherText []byte
@@ -138,7 +145,6 @@ func (a *AesEncrypt) Decrypt(deStr []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	var blockModel cipher.BlockMode
 
 	switch a.aesType {
@@ -151,11 +157,13 @@ func (a *AesEncrypt) Decrypt(deStr []byte) ([]byte, error) {
 
 	plantText := make([]byte, len(cipherText[:txtLen]))
 	blockModel.CryptBlocks(plantText, cipherText[:txtLen])
-	plantText = PKCS7UnPadding(plantText)
+	if a.isPkcs {
+		plantText = PKCS7UnPadding(plantText)
+	}
 	return plantText, nil
 }
 
-//解密字符串
+// 解密字符串
 func (a *AesEncrypt) DecryptString(deStr string) (string, error) {
 	res, err := a.Decrypt([]byte(deStr))
 	if err != nil {
@@ -165,7 +173,7 @@ func (a *AesEncrypt) DecryptString(deStr string) (string, error) {
 	return string(res), nil
 }
 
-//加密返回BASE64 URL
+// 加密返回BASE64 URL
 func (a *AesEncrypt) EncryptUrl(plantText []byte) ([]byte, error) {
 	res, err := a.Encrypt(plantText)
 	if err != nil {
@@ -181,7 +189,7 @@ func (a *AesEncrypt) EncryptUrl(plantText []byte) ([]byte, error) {
 	return buf, nil
 }
 
-//解密BASE64URL的密码
+// 解密BASE64URL的密码
 func (a *AesEncrypt) DecryptUrl(plantText []byte) ([]byte, error) {
 	cipherText, err := base64.URLEncoding.DecodeString(string(plantText))
 	if err != nil {
@@ -193,17 +201,18 @@ func (a *AesEncrypt) DecryptUrl(plantText []byte) ([]byte, error) {
 	return a.Decrypt(buf)
 }
 
-//PKCS7 处理
+// PKCS7 处理
 func PKCS7Padding(ciphertext []byte, blockSize int) []byte {
 	padding := blockSize - len(ciphertext)%blockSize
 	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
 	return append(ciphertext, padtext...)
 }
 
-//PKCS7 反解
+// PKCS7 反解
 func PKCS7UnPadding(plantText []byte) []byte {
 	length := len(plantText)
 	unpadding := int(plantText[length-1])
+	// println(length, (length - unpadding))
 	return plantText[:(length - unpadding)]
 }
 
