@@ -3,7 +3,7 @@ package utils
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 )
@@ -57,7 +57,7 @@ func HttpPost(url_str string, post_data *url.Values) (M, error) {
 	return getRequestData(req)
 }
 
-//http post JSON 数据,返回一个MAP数据
+// http post JSON 数据,返回一个MAP数据
 func HttpPostJson(url_str string, post_data M) (M, error) {
 	b, err := json.Marshal(post_data)
 	if err != nil {
@@ -71,7 +71,7 @@ func HttpPostJson(url_str string, post_data M) (M, error) {
 	return getRequestData(req)
 }
 
-//http post JSON 数据,返回一个 string 数据
+// http post JSON 数据,返回一个 string 数据
 func HttpPostJsonString(url_str string, post_data M) (string, error) {
 	b, err := json.Marshal(post_data)
 	if err != nil {
@@ -85,7 +85,7 @@ func HttpPostJsonString(url_str string, post_data M) (string, error) {
 	return getRequestString(req)
 }
 
-//http post JSON 数据,返回一个 []byte 数组
+// http post JSON 数据,返回一个 []byte 数组
 func HttpPostJsonBytes(url_str string, post_data []byte) ([]byte, error) {
 	body := bytes.NewBuffer(post_data)
 	req, err := http.Post(url_str, "application/json;charset=utf-8", body)
@@ -95,7 +95,7 @@ func HttpPostJsonBytes(url_str string, post_data []byte) ([]byte, error) {
 	return getRequestBytes(req)
 }
 
-//http get 请求
+// http get 请求
 func HttpGet(url_str string) (string, error) {
 	req, err := http.Get(url_str)
 	if err != nil {
@@ -105,7 +105,7 @@ func HttpGet(url_str string) (string, error) {
 	return getRequestString(req)
 }
 
-//http get 请求
+// http get 请求
 func HttpGetBytes(urlStr string) ([]byte, error) {
 	req, err := http.Get(urlStr)
 	if err != nil {
@@ -115,7 +115,7 @@ func HttpGetBytes(urlStr string) ([]byte, error) {
 }
 
 func getRequestData(req *http.Response) (M, error) {
-	r, err := ioutil.ReadAll(req.Body)
+	r, err := io.ReadAll(req.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -127,7 +127,7 @@ func getRequestData(req *http.Response) (M, error) {
 }
 
 func getRequestString(req *http.Response) (string, error) {
-	r, err := ioutil.ReadAll(req.Body)
+	r, err := io.ReadAll(req.Body)
 	if err != nil {
 		return "", err
 	}
@@ -137,7 +137,7 @@ func getRequestString(req *http.Response) (string, error) {
 
 func getRequestBytes(req *http.Response) ([]byte, error) {
 	defer req.Body.Close()
-	r, err := ioutil.ReadAll(req.Body)
+	r, err := io.ReadAll(req.Body)
 	if err != nil {
 		return nil, err
 	}
