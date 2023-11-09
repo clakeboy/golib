@@ -209,9 +209,9 @@ func downloadFile(filepath string, url string, prog func(n int, total int)) (err
 	defer resp.Body.Close()
 	length := resp.Header.Get("Content-Length")
 	total, err := strconv.Atoi(length)
-	if err != nil {
-		return err
-	}
+	// if err != nil {
+	// 	return err
+	// }
 	_, err = io.Copy(out, &httpProgress{r: resp.Body, callbank: func(n int) {
 		if prog != nil {
 			prog(n, total)
