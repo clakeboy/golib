@@ -1,9 +1,11 @@
 package utils
 
 import (
+	"bytes"
 	"crypto/tls"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -104,6 +106,17 @@ func (h *HttpClient) PostJsonString(urlStr string, data string) ([]byte, error) 
 	return req.Content, nil
 }
 
+// 发起一个POST JSON请求 接收JSON 字节数组
+func (h *HttpClient) PostJsonBytes(urlStr string, data []byte) ([]byte, error) {
+	h.SetHeader("Content-Type", "application/json;charset=utf-8")
+	req, err := h.Request("POST", urlStr, bytes.NewReader(data))
+	if err != nil {
+		return nil, err
+	}
+
+	return req.Content, nil
+}
+
 // 发起一个POST XML请求
 func (h *HttpClient) PostXml(url_str string, data string) ([]byte, error) {
 	h.SetHeader("Content-Type", "text/xml;charset=utf-8")
@@ -118,6 +131,37 @@ func (h *HttpClient) PostXml(url_str string, data string) ([]byte, error) {
 // 发起一个GET请求
 func (h *HttpClient) Get(url_str string) ([]byte, error) {
 	resp, err := h.Request("GET", url_str, nil)
+	if err != nil {
+		return nil, err
+	}
+	return resp.Content, nil
+}
+
+// 上传文件
+func (h *HttpClient) Upload(urlStr string, fileName string, fs io.Reader, fields M) ([]byte, error) {
+	bodyBuf := &bytes.Buffer{}
+	bodyWrite := multipart.NewWriter(bodyBuf)
+	file, err := bodyWrite.CreateFormField(fileName)
+	if err != nil {
+		return nil, err
+	}
+	_, err = io.Copy(file, fs)
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range fields {
+		err = bodyWrite.WriteField(k, fmt.Sprintf("%s", v))
+		if err != nil {
+			return nil, err
+		}
+	}
+	err = bodyWrite.Close()
+	if err != nil {
+		return nil, err
+	}
+	h.SetHeader("Content-Type", bodyWrite.FormDataContentType())
+	resp, err := h.Request("POST", urlStr, bodyBuf)
 	if err != nil {
 		return nil, err
 	}
