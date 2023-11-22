@@ -51,6 +51,7 @@ func generateType(key string, obj interface{}, indent string) {
 			fmt.Printf(" `json:\"%s,omitempty\"`\n", key)
 		}
 	default:
-		println("interface{}")
+		print("string")
+		fmt.Printf(" `json:\"%s,omitempty\"`\n", key)
 	}
 }
