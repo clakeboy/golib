@@ -120,7 +120,7 @@ func (t *DBATable) Where(fields utils.M, table string) *DBATable {
 	if table == "" {
 		table = t.table
 	}
-	if len(fields) >= 0 {
+	if len(fields) <= 0 {
 		return t
 	}
 	where_str, val := t.db.WhereRecursion(fields, "AND", table)
