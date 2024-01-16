@@ -7,14 +7,14 @@ import (
 	"time"
 )
 
-//TCP状态常量
+// TCP状态常量
 const (
 	TCPStatusNone = iota
 	TCPStatusConnected
 	TCPStatusDisconnected
 )
 
-//TCP事件常量
+// TCP事件常量
 const (
 	TCPEventConnected = iota
 	TCPEventDisconnected
@@ -25,7 +25,7 @@ const (
 
 var endBytes = []byte{0x33, 0x34}
 
-//TCP连接
+// TCP连接
 type TCPConnect struct {
 	conn         net.Conn      //TCP连接
 	status       int           //TCP状态
@@ -37,7 +37,7 @@ type TCPConnect struct {
 	writeTimeout time.Duration //写入超时时间
 }
 
-//新建TCP服务连接
+// 新建TCP服务连接
 func NewTCPConnect(c net.Conn, evt IEventTCP) *TCPConnect {
 	return &TCPConnect{
 		conn:         c,
@@ -50,22 +50,22 @@ func NewTCPConnect(c net.Conn, evt IEventTCP) *TCPConnect {
 	}
 }
 
-//设置读取超时
+// 设置读取超时
 func (tp *TCPConnect) SetReadTimeout(step time.Duration) {
 	tp.readTimeout = step
 }
 
-//设置写入超时时间
+// 设置写入超时时间
 func (tp *TCPConnect) SetWriteTimeout(step time.Duration) {
 	tp.writeTimeout = step
 }
 
-//运行
+// 运行
 func (tp *TCPConnect) Run() {
 	go tp.mainRun()
 }
 
-//主TCP线程
+// 主TCP线程
 func (tp *TCPConnect) mainRun() {
 	tp.status = TCPStatusConnected
 	if tp.debug {
@@ -76,7 +76,7 @@ func (tp *TCPConnect) mainRun() {
 	tp.read()
 }
 
-//读取线程
+// 读取线程
 func (tp *TCPConnect) read() {
 	defer func() {
 		if tp.debug {
@@ -133,7 +133,7 @@ func (tp *TCPConnect) readByte(conn net.Conn) ([]byte, error) {
 	return data[:len(data)-2], nil
 }
 
-//写入线程
+// 写入线程
 func (tp *TCPConnect) write() {
 	defer func() {
 		if tp.debug {
@@ -174,12 +174,14 @@ func (tp *TCPConnect) write() {
 	}
 }
 
-//写入数据到TCP
+// 写入数据到TCP
 func (tp *TCPConnect) WriteData(data []byte) {
-	tp.writeChan <- data
+	if tp.status != TCPStatusDisconnected {
+		tp.writeChan <- data
+	}
 }
 
-//关闭连接
+// 关闭连接
 func (tp *TCPConnect) Close() {
 	if tp.status == TCPStatusDisconnected {
 		return
@@ -190,7 +192,7 @@ func (tp *TCPConnect) Close() {
 	tp.closeChan <- true
 }
 
-//触发一个事件
+// 触发一个事件
 func (tp *TCPConnect) emit(eventType int, data interface{}) {
 	evt := &TCPConnEvent{
 		EventType: eventType,
@@ -211,12 +213,12 @@ func (tp *TCPConnect) emit(eventType int, data interface{}) {
 	}
 }
 
-//得到当前TCP状态
+// 得到当前TCP状态
 func (tp *TCPConnect) Status() int {
 	return tp.status
 }
 
-//设置DEBUG状态
+// 设置DEBUG状态
 func (tp *TCPConnect) SetDebug(yes bool) {
 	tp.debug = yes
 }
@@ -225,7 +227,7 @@ func (tp *TCPConnect) RemoteAddr() string {
 	return tp.conn.RemoteAddr().String()
 }
 
-//事件类型结构数据
+// 事件类型结构数据
 type TCPConnEvent struct {
 	EventType int
 	Conn      *TCPConnect

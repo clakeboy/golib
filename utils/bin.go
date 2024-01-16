@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"math"
 	"regexp"
 )
@@ -141,7 +142,7 @@ func ByteToFloat64(bytes []byte) float64 {
 	return math.Float64frombits(bits)
 }
 
-//整形转换成字节
+// 整形转换成字节
 func IntToBytes(n int, bit int) []byte {
 	var tmp interface{}
 	switch bit {
@@ -159,7 +160,7 @@ func IntToBytes(n int, bit int) []byte {
 	return bytesBuffer.Bytes()
 }
 
-//字节转换成整形
+// 字节转换成整形
 func BytesToInt(b []byte) int {
 	bytesBuffer := bytes.NewBuffer(b)
 	lens := len(b)
@@ -185,7 +186,20 @@ func BytesToInt(b []byte) int {
 	}
 }
 
-//修正bytes int 数据长度
+// 字节转换成整形
+func BytesToInt64(b []byte) (int64, error) {
+	bytesBuffer := bytes.NewBuffer(b)
+	lens := len(b)
+	if lens > 8 {
+		return 0, fmt.Errorf("error bytes number")
+	}
+
+	tmp := int64(0)
+	err := binary.Read(bytesBuffer, binary.BigEndian, &tmp)
+	return tmp, err
+}
+
+// 修正bytes int 数据长度
 func FixByesIntLen(b []byte) []byte {
 	var fixLen int
 	bytesLen := len(b)
