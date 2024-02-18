@@ -4,10 +4,11 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/clakeboy/golib/utils"
 	"reflect"
 	"regexp"
 	"strings"
+
+	"github.com/clakeboy/golib/utils"
 )
 
 type DBA struct {
@@ -26,7 +27,7 @@ const (
 	DB_DRIVER_SQLITE = "sqlite"
 )
 
-//数据库配置
+// 数据库配置
 type DBConfig struct {
 	DBDriver   string `json:"db_driver" yaml:"db_driver"`
 	DBServer   string `json:"db_server" yaml:"db_server"`
@@ -49,7 +50,7 @@ type DBColumn struct {
 
 var columnReg = regexp.MustCompile(`(.+?)\[(\+|-|!|>|<|<=|>=|like)]`)
 
-//DBA专用数据
+// DBA专用数据
 type DM map[string]interface{}
 
 func InitDb(conf *DBConfig) (*sql.DB, error) {
@@ -63,7 +64,7 @@ func InitDb(conf *DBConfig) (*sql.DB, error) {
 	}
 }
 
-//新创建DBA操作库
+// 新创建DBA操作库
 func NewDBA(dbConf *DBConfig) (*DBA, error) {
 	driver, err := InitDb(dbConf)
 	if err != nil {
@@ -75,12 +76,12 @@ func NewDBA(dbConf *DBConfig) (*DBA, error) {
 	return dba, nil
 }
 
-//设置操作的表名
+// 设置操作的表名
 func (d *DBA) Table(tableName string) *DBATable {
 	return NewDBATable(d, tableName)
 }
 
-//开始事务
+// 开始事务
 func (d *DBA) BeginTrans() error {
 	var err error
 	d.tx, err = d.db.Begin()
@@ -90,7 +91,7 @@ func (d *DBA) BeginTrans() error {
 	return nil
 }
 
-//提交事务
+// 提交事务
 func (d *DBA) Commit() error {
 	err := d.tx.Commit()
 	if err != nil {
@@ -100,7 +101,7 @@ func (d *DBA) Commit() error {
 	return nil
 }
 
-//回滚事务
+// 回滚事务
 func (d *DBA) Rollback() error {
 	err := d.tx.Rollback()
 	if err != nil {
@@ -110,7 +111,7 @@ func (d *DBA) Rollback() error {
 	return nil
 }
 
-//插入记录到数据库
+// 插入记录到数据库
 func (d *DBA) Insert(table string, orgData interface{}) (int, bool) {
 	var columns []string
 	var values []interface{}
@@ -138,7 +139,7 @@ func (d *DBA) Insert(table string, orgData interface{}) (int, bool) {
 	return int(id), true
 }
 
-//插入多条记录
+// 插入多条记录
 func (d *DBA) InsertMulti(table string, dataList []interface{}) (int, bool) {
 	var columns []string
 	var values []interface{}
@@ -177,7 +178,7 @@ func (d *DBA) InsertMulti(table string, dataList []interface{}) (int, bool) {
 	return int(rows), true
 }
 
-//更新数据库数据
+// 更新数据库数据
 func (d *DBA) Update(data utils.M, where utils.M, table string) error {
 	var values []interface{}
 	var tmp []string
@@ -208,7 +209,7 @@ func (d *DBA) Update(data utils.M, where utils.M, table string) error {
 	return nil
 }
 
-//更新整条数据
+// 更新整条数据
 func (d *DBA) UpdateAny(data interface{}, where utils.M, table string) error {
 	convertData, err := d.ConvertData(data)
 	if err != nil {
@@ -218,7 +219,7 @@ func (d *DBA) UpdateAny(data interface{}, where utils.M, table string) error {
 	return d.Update(convertData, where, table)
 }
 
-//条件删除数据
+// 条件删除数据
 func (d *DBA) Delete(where utils.M, table string) (int, error) {
 	var values []interface{}
 	whereStr, whereVal := d.WhereRecursion(where, "AND", table)
@@ -237,7 +238,7 @@ func (d *DBA) Delete(where utils.M, table string) (int, error) {
 	return int(rows), err
 }
 
-//查询数据库
+// 查询数据库
 func (d *DBA) Query(sqlStr string, args ...interface{}) ([]utils.M, error) {
 	rows, err := d.db.Query(sqlStr, args...)
 	d.LastSql = sqlStr
@@ -253,7 +254,7 @@ func (d *DBA) Query(sqlStr string, args ...interface{}) ([]utils.M, error) {
 	return d.FetchAll(rows)
 }
 
-//查询数据库并返回结果 (传入结构体)
+// 查询数据库并返回结果 (传入结构体)
 func (d *DBA) QueryStruct(structInterFace interface{}, sqlStr string, args ...interface{}) ([]interface{}, error) {
 	rows, err := d.db.Query(sqlStr, args...)
 	d.LastSql = sqlStr
@@ -269,7 +270,7 @@ func (d *DBA) QueryStruct(structInterFace interface{}, sqlStr string, args ...in
 	return d.FetchAllOfStruct(rows, structInterFace)
 }
 
-//执行SQL语句
+// 执行SQL语句
 func (d *DBA) Exec(sqlStr string, args ...interface{}) (sql.Result, error) {
 	var res sql.Result
 	var err error
@@ -291,7 +292,7 @@ func (d *DBA) Exec(sqlStr string, args ...interface{}) (sql.Result, error) {
 	return res, err
 }
 
-//查询一条记录
+// 查询一条记录
 func (d *DBA) QueryOne(sqlStr string, args ...interface{}) (utils.M, error) {
 	list, err := d.Query(sqlStr, args...)
 	if err != nil {
@@ -320,7 +321,7 @@ func (d *DBA) QueryOne(sqlStr string, args ...interface{}) (utils.M, error) {
 	return list[0], nil
 }
 
-//查询一条记录返回结构体
+// 查询一条记录返回结构体
 func (d *DBA) QueryOneStruct(structInterFace interface{}, sqlStr string, args ...interface{}) (interface{}, error) {
 	list, err := d.QueryStruct(structInterFace, sqlStr, args...)
 	if err != nil {
@@ -338,7 +339,7 @@ func (d *DBA) QueryRow(sqlStr string, args ...interface{}) *sql.Row {
 	return d.db.QueryRow(sqlStr, args...)
 }
 
-//取得所有数据到结构体,没传结构体为默认 utils.M
+// 取得所有数据到结构体,没传结构体为默认 utils.M
 func (d *DBA) FetchAllOfStruct(query *sql.Rows, i interface{}) ([]interface{}, error) {
 	columns, _ := query.Columns()
 	scans := make([]interface{}, len(columns))
@@ -356,7 +357,7 @@ func (d *DBA) FetchAllOfStruct(query *sql.Rows, i interface{}) ([]interface{}, e
 	return resultList, nil
 }
 
-//取得所有数据到结构体,没传结构体为默认 utils.M
+// 取得所有数据到结构体,没传结构体为默认 utils.M
 func (d *DBA) FetchAllOfStructV2(query *sql.Rows, i interface{}) ([]interface{}, error) {
 	columns, _ := query.Columns()
 	scans := make([]interface{}, len(columns))
@@ -379,14 +380,16 @@ func (d *DBA) FetchAllOfStructV2(query *sql.Rows, i interface{}) ([]interface{},
 	return resultList, nil
 }
 
-//取得所有数据
+// 取得所有数据
 func (d *DBA) FetchAll(query *sql.Rows) ([]utils.M, error) {
 	//column, _ := query.Columns()
 	column, _ := query.ColumnTypes()
 	values := make([]interface{}, len(column))
-	for i, _ := range values {
+	for i := range values {
 		col := column[i]
-		switch strings.ToUpper(col.DatabaseTypeName()) {
+		typeName := strings.ToUpper(col.DatabaseTypeName())
+		typeName = strings.Replace(typeName, "UNSIGNED ", "", 1)
+		switch typeName {
 		case "VARCHAR", "CHAR", "TINYTEXT", "TEXT", "MEDIUMTEXT", "LONGTEXT":
 			values[i] = &sql.NullString{}
 		case "TINYINT", "SMALLINT", "MEDIUMINT", "INT", "BIGINT":
@@ -443,7 +446,7 @@ func (d *DBA) FetchAll(query *sql.Rows) ([]utils.M, error) {
 	return results, nil
 }
 
-//扫描数据到传入的类型
+// 扫描数据到传入的类型
 func (d *DBA) scanType(scans []interface{}, columns []string, i interface{}) interface{} {
 	if i == nil {
 		return d.scanMap(scans, columns)
@@ -461,7 +464,7 @@ func (d *DBA) scanType(scans []interface{}, columns []string, i interface{}) int
 	}
 }
 
-//扫描数据到结构体
+// 扫描数据到结构体
 func (d *DBA) scanStruct(t reflect.Type, scans []interface{}, columns []string) interface{} {
 	obj := reflect.New(t).Interface()
 	objV := reflect.ValueOf(obj).Elem()
@@ -477,7 +480,7 @@ func (d *DBA) scanStruct(t reflect.Type, scans []interface{}, columns []string) 
 	return obj
 }
 
-//在结构体查找TAG值是否存在
+// 在结构体查找TAG值是否存在
 func (d *DBA) findTagOfStruct(t reflect.Type, colName string) int {
 	for i := 0; i < t.NumField(); i++ {
 		val, ok := t.Field(i).Tag.Lookup("json")
@@ -488,7 +491,7 @@ func (d *DBA) findTagOfStruct(t reflect.Type, colName string) int {
 	return -1
 }
 
-//扫描数据到MAP 默认 utils.M
+// 扫描数据到MAP 默认 utils.M
 func (d *DBA) scanMap(scans []interface{}, columns []string) interface{} {
 	obj := utils.M{}
 	for i, v := range columns {
@@ -499,7 +502,7 @@ func (d *DBA) scanMap(scans []interface{}, columns []string) interface{} {
 	return obj
 }
 
-//处理where条件列表
+// 处理where条件列表
 func (d *DBA) WhereRecursion(where utils.M, icon string, table string) (string, []interface{}) {
 	var whereStrings []string
 	var values []interface{}
@@ -526,7 +529,7 @@ func (d *DBA) WhereRecursion(where utils.M, icon string, table string) (string, 
 	return whereStr, values
 }
 
-//格式化WHERE条件
+// 格式化WHERE条件
 func (d *DBA) formatWhere(column string, table string, length int) string {
 	field := d.explainColumn(column)
 
@@ -550,7 +553,7 @@ func (d *DBA) formatWhere(column string, table string, length int) string {
 	return formatStr
 }
 
-//解释字段名
+// 解释字段名
 func (d *DBA) explainColumn(column string) *DBColumn {
 	//reg := regexp.MustCompile(`(.+?)\[(\+|-|!|>|<|<=|>=|like)\]`)
 	match := columnReg.FindStringSubmatch(column)
@@ -565,7 +568,7 @@ func (d *DBA) explainColumn(column string) *DBColumn {
 	return field
 }
 
-//错误处理
+// 错误处理
 func (d *DBA) HaltError(err error) {
 	fmt.Println(d.LastSql)
 	fmt.Println(d.LastArgs)
@@ -573,12 +576,12 @@ func (d *DBA) HaltError(err error) {
 	d.LastError = err
 }
 
-//得到最后一条错误
+// 得到最后一条错误
 func (d *DBA) GetLastError() error {
 	return d.LastError
 }
 
-//格式化字段名
+// 格式化字段名
 func (d *DBA) FormatColumn(column string) string {
 	return fmt.Sprintf("`%s`", column)
 }
@@ -610,7 +613,7 @@ func (d *DBA) SetQueryInterface(i interface{}) {
 	d.queryInterface = i
 }
 
-//输出表结构为GO struct
+// 输出表结构为GO struct
 func BuildTableStruct(tableName, dbName string, dbConf *DBConfig) {
 	BuildTableStructSqlType(tableName, dbName, dbConf, false)
 }
@@ -676,7 +679,7 @@ func BuildTableStructSqlType(tableName, dbName string, dbConf *DBConfig, isSqlTy
 	fmt.Println("}")
 }
 
-//return mysql status
+// return mysql status
 func (d *DBA) Stats() sql.DBStats {
 	return d.db.Stats()
 }
