@@ -56,6 +56,20 @@ func NewDatabase(conf *Config) (*Database, error) {
 	}, nil
 }
 
+func NewDatabaseDsn(dsn string) (*Database, error) {
+	opts := options.Client()
+	opts.ApplyURI(dsn)
+	client, err := mongo.Connect(context.TODO(), opts)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Database{
+		client:        client,
+		currentDBName: "",
+	}, nil
+}
+
 // connect to mongodb
 func (d *Database) Open() error {
 	return d.Ping()
@@ -89,6 +103,7 @@ func (d *Database) Database(dbName ...string) *mongo.Database {
 
 // ping mongodb server
 func (d *Database) Ping() error {
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cencel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cencel()
 	return d.client.Ping(ctx, readpref.Primary())
 }
