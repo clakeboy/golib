@@ -2,7 +2,6 @@ package components
 
 import (
 	"fmt"
-	"github.com/clakeboy/golib/utils"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -10,6 +9,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/clakeboy/golib/utils"
 )
 
 type Template struct {
@@ -24,8 +25,8 @@ type TemplateCon struct {
 	ModTime int64
 }
 
-//变量 regexp
-var regVar = regexp.MustCompile(`\{%([0-9_a-zA-Z\[\]'"$\.\x7f-\xff]+)\}`)
+// 变量 regexp
+var regVar = regexp.MustCompile(`\{%([0-9_a-zA-Z\[\]'"$\.[\x7f-\xff]+)\}`)
 
 func NewTemplate(tempDir string) *Template {
 	return &Template{
@@ -36,7 +37,7 @@ func NewTemplate(tempDir string) *Template {
 	}
 }
 
-//编辑输出模块内容
+// 编辑输出模块内容
 func (t *Template) Parse(tempName string) (string, error) {
 	arr := strings.Split(tempName, ".")
 	allPath := fmt.Sprintf("%s/%s.%s", t.templateDir, strings.Join(arr, "/"), t.ext)
@@ -50,7 +51,7 @@ func (t *Template) Parse(tempName string) (string, error) {
 	return content, nil
 }
 
-//检查模板文件是否被修改
+// 检查模板文件是否被修改
 func (t *Template) checkAndGetFile(filePath string) ([]byte, error) {
 	fi, err := os.Stat(filePath)
 	if err != nil {
@@ -77,12 +78,12 @@ func (t *Template) checkAndGetFile(filePath string) ([]byte, error) {
 	return res, nil
 }
 
-//设置模板变量
+// 设置模板变量
 func (t *Template) Assign(key string, val interface{}) {
 	t.assigns[key] = val
 }
 
-//替换模板内变量
+// 替换模板内变量
 func (t *Template) replaceVariable(rawByte []byte) string {
 	content := string(rawByte)
 	//regVar := regexp.MustCompile(`\{%([0-9_a-zA-Z\[\]'"$\.\x7f-\xff]+)\}`)
@@ -102,7 +103,7 @@ func (t *Template) replaceVariable(rawByte []byte) string {
 	return content
 }
 
-//从MAP类型里返回一个值
+// 从MAP类型里返回一个值
 func (t *Template) getMapValue(obj interface{}, key string) interface{} {
 	v := reflect.ValueOf(obj)
 	switch v.Kind() {
@@ -118,15 +119,15 @@ func (t *Template) getMapValue(obj interface{}, key string) interface{} {
 	return nil
 }
 
-//检查变量名是否为调用 数据或HASH
+// 检查变量名是否为调用 数据或HASH
 func (t *Template) checkVarMap(varName string) {
-	regMap := regexp.MustCompile(`([0-9_a-zA-Z\x7f-\xff]+)\[(\d)\]`)
+	regMap := regexp.MustCompile(`([0-9_a-zA-Z\x7f-\xff]+)\[(\d)\]`)
 	if regMap.MatchString(varName) {
 
 	}
 }
 
-//向浏览器输出内容
+// 向浏览器输出内容
 func (t *Template) Display(resp http.ResponseWriter, html []byte) {
 	resp.Header().Set("content-type", "text/html;charset=utf-8")
 	resp.WriteHeader(200)

@@ -3,12 +3,12 @@ package components
 import (
 	"crypto/sha1"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"github.com/clakeboy/golib/utils"
 	"regexp"
 	"sort"
 	"strings"
+
+	"github.com/clakeboy/golib/utils"
 )
 
 type WxError struct {
@@ -94,7 +94,7 @@ func (w *Weixin) Http(uri string) (string, error) {
 	}
 
 	if info.ErrorCode != 0 {
-		err := errors.New(fmt.Sprintf("error_code:%d,errmsg:%s", info.ErrorCode, info.ErrorMsg))
+		err := fmt.Errorf("error_code:%d,errmsg:%s", info.ErrorCode, info.ErrorMsg)
 		return "", err
 	}
 
@@ -113,7 +113,7 @@ func (w *Weixin) post(uri string, data utils.M) (string, error) {
 		return res, err
 	}
 	if info.ErrorCode != 0 {
-		err := errors.New(fmt.Sprintf("error_code:%d,errmsg:%s", info.ErrorCode, info.ErrorMsg))
+		err := fmt.Errorf("error_code:%d,errmsg:%s", info.ErrorCode, info.ErrorMsg)
 		return "", err
 	}
 
@@ -286,7 +286,7 @@ func (w *Weixin) GetMedia(access_token string, media_id string) (*MediaData, err
 	}
 
 	if res.StatusCode != 200 {
-		return nil, errors.New(fmt.Sprintf("request error code: %d", res.StatusCode))
+		return nil, fmt.Errorf("request error code: %d", res.StatusCode)
 	}
 
 	if res.Headers.Get("Content-Type") != "text/plain" && res.Headers.Get("Content-Type") != "application/json" {
@@ -305,7 +305,7 @@ func (w *Weixin) GetMedia(access_token string, media_id string) (*MediaData, err
 	}
 	err_msg := utils.M{}
 	json.Unmarshal(res.Content, &err_msg)
-	return nil, errors.New(fmt.Sprintf("code:%v,msg:%v", err_msg["errcode"], err_msg["errmsg"]))
+	return nil, fmt.Errorf("code:%v,msg:%v", err_msg["errcode"], err_msg["errmsg"])
 }
 
 // 微信二维码结构
