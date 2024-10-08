@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"testing"
 	"time"
@@ -23,7 +24,7 @@ type AccountData struct {
 
 func TestStorm(t *testing.T) {
 	var err error
-	db, err = storm.Open("/Users/clakeboy/Documents/pcbx_project/pcbx-btm/db/sys.db", storm.BoltOptions(0, &bbolt.Options{
+	db, err = storm.Open("/Users/clakeboy/Documents/go-mod-projects/pingan_insurance_service/frontend/db/sys.db", storm.BoltOptions(0, &bbolt.Options{
 		Timeout:  1 * time.Second,
 		ReadOnly: true,
 	}))
@@ -32,28 +33,43 @@ func TestStorm(t *testing.T) {
 		return
 	}
 	db.Bolt.View(func(tx *bbolt.Tx) error {
-		b := tx.Bucket([]byte("Account"))
-		b = b.Bucket([]byte("AccountData"))
-		// b = b.Bucket([]byte("__storm_index_Name"))
-		b = b.Bucket([]byte("__storm_metadata"))
-		// b = b.Bucket([]byte("storm__ids"))
-		// c := b.Cursor()
-
-		// prefix := []byte("clake")
-		// for k, v := c.Seek(prefix); k != nil && bytes.HasPrefix(k, prefix); k, v = c.Next() {
-		// 	fmt.Printf("key=%s, value=%x\n", k, v)
-		// }
-		b.ForEach(func(k, v []byte) error {
-			idx, err := utils.BytesToInt64(k)
-			if err != nil {
-				fmt.Printf("key: %s, value: %s\n", string(k), string(v))
-			} else {
-				fmt.Printf("key: %d, value: %s\n", idx, string(v))
-			}
-
-			fmt.Printf("key: %X, value: %X\n", k, v)
+		var list []string
+		tx.ForEach(func(name []byte, b *bbolt.Bucket) error {
+			list = append(list, string(name))
 			return nil
 		})
+
+		b := tx.Bucket([]byte("car_policy"))
+		// b.Cursor().Bucket().Tx().ForEach(func(name []byte, b *bbolt.Bucket) error {
+		// 	list = append(list, string(name))
+		// 	return nil
+		// })
+		bs := b.Stats()
+		utils.PrintAny(bs)
+		utils.PrintAny(list)
+		b = b.Bucket([]byte("CarPolicyData"))
+		// b = b.Bucket([]byte("__storm_index_OrderNo"))
+		// b = b.Bucket([]byte("storm__ids"))
+		// b = b.Bucket([]byte("__storm_metadata"))
+
+		c := b.Cursor()
+		prefix := []byte("__storm")
+		k, v := c.Seek(prefix)
+		fmt.Printf("seek: key=%s, value=%x\n", k, v)
+		for k, v := c.Seek(prefix); k != nil && bytes.HasPrefix(k, prefix); k, v = c.Next() {
+			fmt.Printf("key=%s, value=%x\n", k, v)
+		}
+		// b.ForEach(func(k, v []byte) error {
+		// 	idx, err := utils.BytesToInt64(k)
+		// 	if err != nil {
+		// 		fmt.Printf("key: %s, value: %X\n", string(k), v)
+		// 	} else {
+		// 		fmt.Printf("key: %d, value: %s\n", idx, v)
+		// 	}
+
+		// 	// 	// fmt.Printf("key: %X, value: %X\n", k, v)
+		// 	return nil
+		// })
 		return nil
 	})
 	// var list []map[string]interface{}

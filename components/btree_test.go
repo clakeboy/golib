@@ -5,6 +5,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"runtime"
+	"slices"
 	"sort"
 	"testing"
 	"unsafe"
@@ -17,16 +18,31 @@ func TestNewBTreePlus(t *testing.T) {
 	ex := utils.NewExecTime()
 	b := NewBTreePlus(128)
 	ex.Start()
-	for i := 0; i < 10000000; i++ {
-		b.Insert(i, fmt.Sprintf("data:%d", i+1))
+	length := 10000000
+	var dataList []int
+	for i := 0; i < length; i++ {
+		idx := utils.RandRange(0, length)
+		dataList = append(dataList, idx)
+	}
+	slices.Sort(dataList)
+	for _, v := range dataList {
+		b.Insert(utils.IntToBytes(v, 32), []byte(fmt.Sprintf("data:%d", v)))
 	}
 	ex.End(true)
 	// b.Print()
 	ex.Start()
-	for i := 0; i < 100000; i++ {
-		// fmt.Println(b.Search(5))
-		b.Search(i)
+	for i := 0; i < 100; i++ {
+		idx := utils.RandRange(0, length)
+		key := utils.IntToBytes(idx, 32)
+
+		res, err := b.Search(key)
+		fmt.Println(idx, res, err)
+		// 	// break
+		// 	// b.Search(utils.RandRange(0, 10000000))
 	}
+	// b.ForEach(func(node *TreeNode) {
+	// 	fmt.Println(string(node.Data), node.IsLeaf)
+	// })
 	ex.End(true)
 	//var arr []int
 	//for i:= 0;i<100000000;i++ {
@@ -35,22 +51,19 @@ func TestNewBTreePlus(t *testing.T) {
 	//size := unsafe.Sizeof(0)
 	//fmt.Println("pass 10 second",size*100000000/1024/1024)
 	//time.Sleep(time.Second * 10)
-	//b.Print()
+	size := b.Size()
+	fmt.Printf("%.2f,", float64(size)/1024/1024)
+	fmt.Println(size)
+	fmt.Println("数据总数", b.Count())
 }
 
 func TestBTreePlus_Insert(t *testing.T) {
-	arr := []int{2, 5, 4, 3, 7, 1, 9}
-	//arr := []int{1,2,3,4,5,6,7,8,9}
-	b := NewBTreePlus(2)
-	for _, v := range arr {
-		b.Insert(v, fmt.Sprintf("data:%d", v))
-		b.Print()
-	}
-
-	fmt.Println(b.Search(6))
-	fmt.Println(b.Search(3))
-	fmt.Println(b.Search(5))
-	fmt.Println(b.Search(8))
+	fmt.Println(1 << 10)
+	b := []byte{1, 2, 3, 5, 3, 2, 3, 4, 2}
+	s := "asdflkwejriqjwersadfasdf"
+	c := &s
+	fmt.Println(unsafe.Sizeof(b))
+	fmt.Println(unsafe.Sizeof(c), unsafe.Sizeof(s))
 }
 
 func TestBTreePlus_Print(t *testing.T) {

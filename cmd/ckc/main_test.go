@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 
@@ -22,7 +21,7 @@ func TestMain(t *testing.T) {
 		fetchFrontFiles(savePath)
 	}
 	fmt.Println("清理下载文件...")
-	os.RemoveAll(savePath)
+	// os.RemoveAll(savePath)
 	fmt.Printf("完成项目 [%s] 初始化\n", CmdName)
 	fmt.Println("进入项目目录执行 go mod tidy 完成 golang 项目依赖安装")
 	if CmdFront {

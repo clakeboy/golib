@@ -43,6 +43,8 @@ var (
 	CmdFrontType string //前端项目模板类型 vite 默认,webpack
 	CmdName      string //项目名称
 	CmdOut       string //输出目录 默认当前执行目录
+	CmdProxy     bool   //是否使用代理下载
+	CmdGh        string //代理下载地址
 )
 
 func InitCommand() {
@@ -50,6 +52,8 @@ func InitCommand() {
 	flag.StringVar(&CmdFrontType, "front-type", "vite", "前端项目模板类型: vite (默认), webpack")
 	flag.StringVar(&CmdName, "name", "CKCDemo", "项目名称")
 	flag.StringVar(&CmdOut, "out", "./", "输出目录 默认当前执行目录")
+	flag.BoolVar(&CmdProxy, "out", false, "是否用代理下载")
+	flag.StringVar(&CmdGh, "gh", "https://gh.vramcc.com/", "代理下载地址")
 	flag.Parse()
 }
 
@@ -67,7 +71,7 @@ func fetchGolangFiles(savePath string) {
 		}
 	}
 	filePath := fmt.Sprintf("%s/%s", savePath, "golang.zip")
-	urlStr := "https://gitcode.net/clakeboy/cc_template/-/archive/master/cc_template-master.zip"
+	urlStr := "https://github.com/clakeboy/cc_template/archive/refs/heads/main.zip"
 	err := downloadFile(filePath, urlStr, nil)
 	if err != nil {
 		panic(fmt.Errorf("打开远程文件错误 %v", err))
@@ -129,9 +133,9 @@ func fetchFrontFiles(savePath string) {
 
 	filePath := fmt.Sprintf("%s/%s", savePath, "react.zip")
 
-	urlStr := "https://gitcode.net/clakeboy/cc_react_template/-/archive/master/cc_react_template-master.zip"
+	urlStr := "https://github.com/clakeboy/cc_react_template/archive/refs/heads/main.zip"
 	if CmdFrontType == "vite" {
-		urlStr = "https://gitcode.net/clakeboy/cc_react_template/-/archive/vite/cc_react_template-vite.zip"
+		urlStr = "https://github.com/clakeboy/cc_react_template/archive/refs/heads/vite.zip"
 	}
 	err := downloadFile(filePath, urlStr, nil)
 	if err != nil {

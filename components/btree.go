@@ -5,7 +5,10 @@ import (
 	"encoding/gob"
 	"errors"
 	"fmt"
+	"slices"
 	"sort"
+	"strings"
+	"unsafe"
 )
 
 type KeysInt []int
@@ -13,6 +16,14 @@ type KeysInt []int
 func (a KeysInt) Len() int           { return len(a) }
 func (a KeysInt) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a KeysInt) Less(i, j int) bool { return a[i] < a[j] }
+
+func (a *KeysInt) String() string {
+	var str []string
+	for _, v := range *a {
+		str = append(str, fmt.Sprintf("%d", v))
+	}
+	return strings.Join(str, ",")
+}
 func (a *KeysInt) Push(val ...int) {
 	*a = append(*a, val...)
 }
@@ -23,16 +34,17 @@ func (a *KeysInt) Pop() int {
 	return val
 }
 func (a *KeysInt) Insert(index int, val ...int) {
-	thisArr := *a
-	if index == 0 {
-		*a = append(KeysInt(val), thisArr...)
-	} else if index >= thisArr.Len() {
-		a.Push(val...)
-	} else {
-		end := append(KeysInt{}, thisArr[index:]...)
-		start := append(thisArr[:index], val...)
-		*a = append(start, end...)
-	}
+	*a = slices.Insert(*a, index, val...)
+	// thisArr := *a
+	// if index == 0 {
+	// 	*a = append(KeysInt(val), thisArr...)
+	// } else if index >= thisArr.Len() {
+	// 	a.Push(val...)
+	// } else {
+	// 	end := append(KeysInt{}, thisArr[index:]...)
+	// 	start := append(thisArr[:index], val...)
+	// 	*a = append(start, end...)
+	// }
 }
 
 type KeysData [][]byte
@@ -40,6 +52,14 @@ type KeysData [][]byte
 func (a KeysData) Len() int           { return len(a) }
 func (a KeysData) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a KeysData) Less(i, j int) bool { return bytes.Compare(a[i], a[j]) == -1 }
+func (a *KeysData) String() string {
+	fmt.Println("strings")
+	var str []string
+	for _, v := range *a {
+		str = append(str, string(v))
+	}
+	return fmt.Sprint(str)
+}
 func (a *KeysData) Push(val ...[]byte) {
 	*a = append(*a, val...)
 }
@@ -51,16 +71,17 @@ func (a *KeysData) Pop() []byte {
 }
 
 func (a *KeysData) Insert(index int, val ...[]byte) {
-	thisArr := *a
-	if index == 0 {
-		*a = append(KeysData(val), thisArr...)
-	} else if index >= thisArr.Len() {
-		a.Push(val...)
-	} else {
-		end := append(KeysData{}, thisArr[index:]...)
-		start := append(thisArr[:index], val...)
-		*a = append(start, end...)
-	}
+	*a = slices.Insert(*a, index, val...)
+	// thisArr := *a
+	// if index == 0 {
+	// 	*a = append(KeysData(val), thisArr...)
+	// } else if index >= thisArr.Len() {
+	// 	a.Push(val...)
+	// } else {
+	// 	end := append(KeysData{}, thisArr[index:]...)
+	// 	start := append(thisArr[:index], val...)
+	// 	*a = append(start, end...)
+	// }
 }
 
 type Nodes []*TreeNode
@@ -109,16 +130,17 @@ func Merge[T any](s ...[]T) (slice []T) {
 
 const TreeLimit = 2
 
+// 节点
 type TreeNode struct {
-	treeLimit   int
-	KeyNum      int         //存放KEY数量
-	Key         KeysInt     //实际数据
-	Parent      *TreeNode   //父节点
-	ParentIndex int         //父节点位置
-	Next        *TreeNode   //相连兄弟节点
-	Child       Nodes       //儿子节点
-	IsLeaf      bool        //是否叶子节点
-	Data        interface{} //数据
+	treeLimit   int       //每节点叶限制
+	KeyNum      int       //存放KEY数量
+	Key         KeysData  //实际索引数据
+	Parent      *TreeNode //父节点
+	ParentIndex int       //父节点位置
+	Next        *TreeNode //相连兄弟节点
+	Child       Nodes     //儿子节点
+	IsLeaf      bool      //是否叶子节点
+	Data        [][]byte  //数据
 }
 
 func NewTreeNode(nodeLimit int) *TreeNode {
@@ -136,87 +158,12 @@ func (t *TreeNode) IsFull() bool {
 }
 
 // 插入一个键值
-//
-//	func (t *TreeNode) Insert(key int, data interface{}, node *TreeNode) {
-//		//未满状态
-//		//没有值的时候直接插入
-//		if t.KeyNum == 0 {
-//			if node == nil {
-//				node = NewTreeNode()
-//				node.Data = data
-//			}
-//			t.insert(key, node, 0)
-//			t.ChangeParentIndex()
-//			return
-//		}
-//
-//		i := 0
-//		for i < TreeLimit {
-//			//没有值的时候直接插入
-//			if i >= t.KeyNum {
-//				//如果当前节点不是叶子节点,并且位置大于0
-//				if i > 0 && !t.IsLeaf && node == nil {
-//					t.Child[i-1].Insert(key, data, node)
-//					return
-//				}
-//				if node == nil {
-//					node = NewTreeNode()
-//					node.Data = data
-//				}
-//				t.insert(key, node, i)
-//				t.ChangeParentIndex()
-//				return
-//			}
-//			//KEY值相等就把数据插入到相等KEY的数据里
-//			if key == t.Key[i] {
-//				if !t.IsLeaf {
-//					t.Child[i].Insert(key, data, nil)
-//					return
-//				}
-//				t.Child[i].SetValue(data)
-//				return
-//			}
-//			//KEY值小于一个节点内的值
-//			if key < t.Key[i] {
-//				if !t.IsLeaf && node == nil {
-//					t.Child[i].Insert(key, data, nil)
-//					return
-//				}
-//				if node == nil {
-//					node = NewTreeNode()
-//					node.Data = data
-//				}
-//				kickKey, kickNode := t.insert(key, node, i)
-//				t.ChangeParentIndex()
-//				//如果要分裂新兄弟节点
-//				if kickNode != nil {
-//					siblingNode := t.Next
-//					if siblingNode != nil {
-//						t.Next.Insert(kickKey, kickNode.Data, nil)
-//						return
-//					}
-//					t.SplitNode(kickKey, kickNode.Data, kickNode)
-//					return
-//				}
-//
-//				return
-//			}
-//			i++
-//		}
-//		//如果没有找到小于的值,就插入到最后一个子节点里面
-//		if t.IsLeaf || node != nil {
-//			t.SplitNode(key, data, node)
-//			return
-//		}
-//		t.Child[i-1].Insert(key, data, node)
-//		return
-//	}
-func (t *TreeNode) Insert(key int, data interface{}, node *TreeNode) {
+func (t *TreeNode) Insert(key []byte, data []byte, node *TreeNode) {
 	//没有值的时候直接插入
 	if t.Key.Len() == 0 {
 		if node == nil {
 			node = NewTreeNode(t.treeLimit)
-			node.Data = data
+			node.SetValue(data)
 		}
 		t.insert(key, node, 0)
 		t.ChangeParentIndex()
@@ -224,13 +171,14 @@ func (t *TreeNode) Insert(key int, data interface{}, node *TreeNode) {
 	}
 
 	index := sort.Search(t.Key.Len(), func(i int) bool {
-		return t.Key[i] >= key
+		return bytes.Compare(t.Key[i], key) != -1
+		// return t.Key[i] >= key
 	})
-
+	// fmt.Println("found ", index, t.Key.Len())
 	//没有找到值,并且已满
 	if index == t.Key.Len() {
 		//如果没有找到小于的值,就插入到最后一个子节点里面
-		if t.KeyNum == t.treeLimit && (t.IsLeaf || node != nil) {
+		if t.IsFull() && (t.IsLeaf || node != nil) {
 			t.SplitNode(key, data, node)
 			return
 		}
@@ -241,7 +189,7 @@ func (t *TreeNode) Insert(key int, data interface{}, node *TreeNode) {
 
 		if node == nil {
 			node = NewTreeNode(t.treeLimit)
-			node.Data = data
+			node.SetValue(data)
 		}
 		t.insert(key, node, index)
 		t.ChangeParentIndex()
@@ -249,7 +197,7 @@ func (t *TreeNode) Insert(key int, data interface{}, node *TreeNode) {
 	}
 
 	//KEY值相等就把数据插入到相等KEY的数据里
-	if t.Key[index] == key {
+	if bytes.Equal(t.Key[index], key) {
 		if !t.IsLeaf {
 			t.Child[index].Insert(key, data, node)
 			return
@@ -265,40 +213,44 @@ func (t *TreeNode) Insert(key int, data interface{}, node *TreeNode) {
 	}
 	if node == nil {
 		node = NewTreeNode(t.treeLimit)
-		node.Data = data
+		node.SetValue(data)
 	}
 	kickKey, kickNode := t.insert(key, node, index)
 	t.ChangeParentIndex()
 	//如果要分裂新兄弟节点
 	if kickNode != nil {
 		if t.Next != nil {
-			t.Next.Insert(kickKey, kickNode.Data, nil)
+			t.Next.Insert(kickKey, nil, kickNode)
 			return
 		}
-		t.SplitNode(kickKey, kickNode.Data, kickNode)
+		t.SplitNode(kickKey, nil, kickNode)
 	}
 }
-func (t *TreeNode) insert(key int, node *TreeNode, index int) (outKey int, outNode *TreeNode) {
+func (t *TreeNode) insert(key []byte, node *TreeNode, index int) (outKey []byte, outNode *TreeNode) {
 	//如果已满弹出最后的值
 	node.Parent = t
 	node.ParentIndex = index
 	if t.KeyNum == t.treeLimit {
 		outKey = t.Key.Pop()
 		outNode = t.Child.Pop()
-		t.KeyNum = t.Key.Len()
+		node.Next = outNode
 	}
 	t.Key.Insert(index, key)
 	t.Child.Insert(index, node)
 	t.KeyNum = t.Key.Len()
+	if index > 0 {
+		t.Child[index-1].Next = node
+	}
 	return
 }
 
 // 分裂兄弟节点
-func (t *TreeNode) SplitNode(key int, data interface{}, node *TreeNode) {
+func (t *TreeNode) SplitNode(key []byte, data []byte, node *TreeNode) {
 	siblingNode := NewTreeNode(t.treeLimit)
 	siblingNode.IsLeaf = t.IsLeaf
 	t.Next = siblingNode
 	siblingNode.Insert(key, data, node)
+	t.Child[t.KeyNum-1].Next = siblingNode.Child[siblingNode.KeyNum-1]
 	if t.Parent != nil {
 		t.Parent.Insert(key, nil, siblingNode)
 	} else {
@@ -320,28 +272,29 @@ func (t *TreeNode) ChangeParentIndex() {
 }
 
 // 得到最右节点
-func (t *TreeNode) GetRightNode() (key int, node *TreeNode) {
+func (t *TreeNode) GetRightNode() (key []byte, node *TreeNode) {
 	key = t.Key[t.KeyNum-1]
 	node = t.Child[t.KeyNum-1]
 	return
 }
 
 // 得到最左节点
-func (t *TreeNode) GetLeftNode() (key int, node *TreeNode) {
+func (t *TreeNode) GetLeftNode() (key []byte, node *TreeNode) {
 	key = t.Key[0]
 	node = t.Child[0]
 	return
 }
 
 // 设置节点数据
-func (t *TreeNode) SetValue(data interface{}) {
-	t.Data = fmt.Sprintf("%v,%v", t.Data, data)
+func (t *TreeNode) SetValue(data []byte) {
+	t.Data = append(t.Data, data)
 }
 
 // 搜索索引值,得到存储的数据
-func (t *TreeNode) SearchIndex(idx int) (interface{}, error) {
+func (t *TreeNode) SearchIndex(idx []byte) ([][]byte, error) {
 	index := sort.Search(t.Key.Len(), func(i int) bool {
-		return t.Key[i] >= idx
+		return bytes.Compare(t.Key[i], idx) != -1
+		// return t.Key[i] >= idx
 	})
 	if index == t.Key.Len() {
 		return nil, errors.New("not found index")
@@ -350,7 +303,7 @@ func (t *TreeNode) SearchIndex(idx int) (interface{}, error) {
 	if !t.IsLeaf {
 		return t.Child[index].SearchIndex(idx)
 	}
-	if t.Key[index] == idx {
+	if bytes.Equal(t.Key[index], idx) {
 		return t.Child[index].Data, nil
 	} else {
 		return nil, errors.New("not found index")
@@ -367,6 +320,32 @@ func (t *TreeNode) GetBytes() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+// 得到实际占用内存大小
+func (t *TreeNode) GetSize() (count, self int64) {
+	count += int64(unsafe.Sizeof(t.treeLimit))
+	count += int64(unsafe.Sizeof(t.KeyNum))
+	count += int64(unsafe.Sizeof(t.Key))
+	count += int64(unsafe.Sizeof(t.Parent))
+	count += int64(unsafe.Sizeof(t.ParentIndex))
+	count += int64(unsafe.Sizeof(t.Next))
+	count += int64(unsafe.Sizeof(t.Child))
+	count += int64(unsafe.Sizeof(t.IsLeaf))
+	count += int64(unsafe.Sizeof(t.Data))
+	count += int64(len(t.Data))
+	for _, v := range t.Key {
+		count += int64(len(v))
+	}
+	self = count
+	for _, v := range t.Child {
+		s := int64(unsafe.Sizeof(v))
+		count += s
+		self += s
+		c, _ := v.GetSize()
+		count += c
+	}
+	return count, self
+}
+
 // b+tree
 type BTreePlus struct {
 	rootNode *TreeNode //根节点
@@ -380,7 +359,8 @@ func NewBTreePlus(limit int) *BTreePlus {
 	}
 }
 
-func (b *BTreePlus) Insert(key int, data interface{}) {
+// 插入记录
+func (b *BTreePlus) Insert(key []byte, data []byte) {
 	b.rootNode.Insert(key, data, nil)
 	if b.rootNode.Parent != nil {
 		b.rootNode = b.rootNode.Parent
@@ -391,29 +371,69 @@ func (b *BTreePlus) Remove(key int) {
 
 }
 
-func (b *BTreePlus) Search(key int) (interface{}, error) {
+// 查找索引
+func (b *BTreePlus) Search(key []byte) ([][]byte, error) {
 	return b.rootNode.SearchIndex(key)
 }
 
+// 遍历所有数据
+func (b *BTreePlus) ForEach(call func(node *TreeNode)) {
+	leaf := b.rootNode
+
+	for !leaf.IsLeaf && leaf.Child.Len() > 0 {
+		_, leaf = leaf.GetLeftNode()
+	}
+	for _, leaf = leaf.GetLeftNode(); leaf != nil; leaf = leaf.Next {
+		call(leaf)
+	}
+}
+
+func (b *BTreePlus) Count() int64 {
+	var count int64
+	leaf := b.rootNode
+
+	for !leaf.IsLeaf && leaf.Child.Len() > 0 {
+		_, leaf = leaf.GetLeftNode()
+	}
+	for leaf != nil {
+		count += int64(leaf.Child.Len())
+		leaf = leaf.Next
+	}
+	// for next := b.rootNode; next != nil && !next.IsLeaf; _, next = next.GetLeftNode() {
+	// 	fmt.Println(next.IsLeaf)
+	// 	if next.IsLeaf {
+	// 		for next != nil {
+	// 			count += int64(next.Child.Len())
+	// 			next = next.Next
+	// 		}
+	// 	}
+	// }
+	return count
+}
+
 func (b *BTreePlus) Print() {
-	tmp := b.rootNode
-	for !tmp.IsLeaf {
-		next := tmp
-		for next != nil {
+	idx := 0
+	for next := b.rootNode; next != nil && !next.IsLeaf; _, next = next.GetLeftNode() {
+		fmt.Println(idx)
+		for {
 			fmt.Print(next.Key)
+			if next.Next == nil {
+				break
+			}
 			next = next.Next
 		}
 		fmt.Println("")
-		tmp = tmp.Child[0]
+		idx++
 	}
-	next := tmp
-	for next != nil {
-		fmt.Print("[")
-		for i, v := range next.Key {
-			fmt.Printf("%v(%v)", v, next.Child[i].Data)
-		}
-		fmt.Print("]", " ")
-		next = next.Next
+}
+
+func (b *BTreePlus) formatPrint(list KeysData) {
+	for _, v := range list {
+		fmt.Println(v)
 	}
-	fmt.Println("")
+}
+
+func (b *BTreePlus) Size() int64 {
+	size, _ := b.rootNode.GetSize()
+	return size
 }

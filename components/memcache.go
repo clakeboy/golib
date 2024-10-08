@@ -158,7 +158,9 @@ func (m *MemCache) Store() error {
 	list := make(map[string]*MemCacheData)
 
 	m.content.Range(func(key, value any) bool {
-		list[key.(string)] = value.(*MemCacheData)
+		if !value.(*MemCacheData).IsExpire() {
+			list[key.(string)] = value.(*MemCacheData)
+		}
 		return true
 	})
 
