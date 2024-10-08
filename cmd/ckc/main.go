@@ -72,6 +72,9 @@ func fetchGolangFiles(savePath string) {
 	}
 	filePath := fmt.Sprintf("%s/%s", savePath, "golang.zip")
 	urlStr := "https://github.com/clakeboy/cc_template/archive/refs/heads/main.zip"
+	if CmdProxy {
+		urlStr = fmt.Sprintf("%s%s", CmdGh, urlStr)
+	}
 	err := downloadFile(filePath, urlStr, nil)
 	if err != nil {
 		panic(fmt.Errorf("打开远程文件错误 %v", err))
@@ -136,6 +139,9 @@ func fetchFrontFiles(savePath string) {
 	urlStr := "https://github.com/clakeboy/cc_react_template/archive/refs/heads/main.zip"
 	if CmdFrontType == "vite" {
 		urlStr = "https://github.com/clakeboy/cc_react_template/archive/refs/heads/vite.zip"
+	}
+	if CmdProxy {
+		urlStr = fmt.Sprintf("%s%s", CmdGh, urlStr)
 	}
 	err := downloadFile(filePath, urlStr, nil)
 	if err != nil {
