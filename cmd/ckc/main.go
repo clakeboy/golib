@@ -52,7 +52,7 @@ func InitCommand() {
 	flag.StringVar(&CmdFrontType, "front-type", "vite", "前端项目模板类型: vite (默认), webpack")
 	flag.StringVar(&CmdName, "name", "CKCDemo", "项目名称")
 	flag.StringVar(&CmdOut, "out", "./", "输出目录 默认当前执行目录")
-	flag.BoolVar(&CmdProxy, "out", false, "是否用代理下载")
+	flag.BoolVar(&CmdProxy, "proxy", false, "是否用代理下载")
 	flag.StringVar(&CmdGh, "gh", "https://gh.vramcc.com/", "代理下载地址")
 	flag.Parse()
 }
