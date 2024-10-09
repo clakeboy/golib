@@ -86,7 +86,7 @@ func fetchGolangFiles(savePath string) {
 	}
 	projectPath := fmt.Sprintf("%s/%s", strings.TrimSuffix(CmdOut, "/"), CmdName)
 	for _, item := range zp.File {
-		zfPath := fmt.Sprintf("%s%s", projectPath, strings.ReplaceAll(item.Name, "cc_template-master", ""))
+		zfPath := fmt.Sprintf("%s%s", projectPath, strings.ReplaceAll(item.Name, "cc_template-main", ""))
 		fmt.Printf("正在解压文件 %s -> %s:\n", item.Name, zfPath)
 
 		if item.FileInfo().IsDir() {
