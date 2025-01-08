@@ -12,6 +12,7 @@ import (
 const (
 	AES_CBC = "cbc"
 	AES_ECB = "ecb"
+	AES_CFB = "cfb"
 )
 
 type AesEncrypt struct {
@@ -93,20 +94,26 @@ func (a *AesEncrypt) Encrypt(plantText []byte) ([]byte, error) {
 	}
 
 	var blockModel cipher.BlockMode
-
+	var blockSteam cipher.Stream
 	switch a.aesType {
 	case AES_CBC:
 		iv := YN(a.iv == nil, key[:block.BlockSize()], a.iv).([]byte)
 		blockModel = cipher.NewCBCEncrypter(block, iv)
+	case AES_CFB:
+		iv := YN(a.iv == nil, key[:block.BlockSize()], a.iv).([]byte)
+		blockSteam = cipher.NewCFBEncrypter(block, iv)
 	case AES_ECB:
 		blockModel = NewECBEncrypter(block)
 	}
 
 	ciphertext := make([]byte, len(plantText))
+	switch a.aesType {
+	case AES_CFB:
+		blockSteam.XORKeyStream(ciphertext, plantText)
+	default:
+		blockModel.CryptBlocks(ciphertext, plantText)
+	}
 
-	blockModel.CryptBlocks(ciphertext, plantText)
-	//return base64.StdEncoding.EncodeToString(ciphertext), nil
-	//fmt.Println(hex.EncodeToString(ciphertext))
 	if !a.isBase64 {
 		return ciphertext, nil
 	}
@@ -146,17 +153,27 @@ func (a *AesEncrypt) Decrypt(deStr []byte) ([]byte, error) {
 		return nil, err
 	}
 	var blockModel cipher.BlockMode
-
+	var blockSteam cipher.Stream
 	switch a.aesType {
 	case AES_ECB:
 		blockModel = NewECBDecrypter(block)
 	case AES_CBC:
 		iv := YN(a.iv == nil, key[:block.BlockSize()], a.iv).([]byte)
 		blockModel = cipher.NewCBCDecrypter(block, iv)
+	case AES_CFB:
+		iv := YN(a.iv == nil, key[:block.BlockSize()], a.iv).([]byte)
+		blockSteam = cipher.NewCFBDecrypter(block, iv)
 	}
 
 	plantText := make([]byte, len(cipherText[:txtLen]))
-	blockModel.CryptBlocks(plantText, cipherText[:txtLen])
+
+	switch a.aesType {
+	case AES_CFB:
+		blockSteam.XORKeyStream(plantText, cipherText[:txtLen])
+	default:
+		blockModel.CryptBlocks(plantText, cipherText[:txtLen])
+	}
+
 	if a.isPkcs {
 		plantText = PKCS7UnPadding(plantText)
 	}
