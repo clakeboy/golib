@@ -13,14 +13,15 @@ import (
 
 // dsn mongodb://root:WiaQ82n7B3L5Cz*2#10m@172.18.76.150:27017?authSource=admin
 type Config struct {
-	Host     string `json:"host" yaml:"host"`
-	Port     string `json:"port" yaml:"port"`
-	User     string `json:"user" yaml:"user"`
-	Password string `json:"password" yaml:"password"`
-	Auth     string `json:"auth" yaml:"auth"`
-	DBName   string `json:"db_name" yaml:"db_name"`
-	PoolSize uint64 `json:"pool_size" yaml:"pool_size"`
-	Timeout  uint64 `json:"timeout" yaml:"timeout"`
+	Host        string `json:"host" yaml:"host"`
+	Port        string `json:"port" yaml:"port"`
+	User        string `json:"user" yaml:"user"`
+	Password    string `json:"password" yaml:"password"`
+	Auth        string `json:"auth" yaml:"auth"`
+	DBName      string `json:"db_name" yaml:"db_name"`
+	PoolSize    uint64 `json:"pool_size" yaml:"pool_size"`
+	Timeout     uint64 `json:"timeout" yaml:"timeout"`
+	Compression bool   `json:"compression" yaml:"compression"`
 }
 
 // mongodb orm use official driver
@@ -44,6 +45,9 @@ func NewDatabase(conf *Config) (*Database, error) {
 			Password:      conf.Password,
 			PasswordSet:   true,
 		})
+	}
+	if conf.Compression {
+		opts.SetCompressors([]string{"snappy", "zlib", "zstd"})
 	}
 	client, err := mongo.Connect(context.TODO(), opts)
 	if err != nil {
