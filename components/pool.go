@@ -1,23 +1,30 @@
 package components
 
 import (
-	"github.com/clakeboy/golib/utils"
 	"sync"
+
+	"github.com/clakeboy/golib/utils"
 )
+
+type Args struct {
+	Data  interface{}
+	Index int
+	Pool  *GoroutinePool
+}
 
 // 协程池
 type GoroutinePool struct {
 	Queue          chan interface{} //队列池
 	Number         int              //并发协程数
 	Total          int              //处理数据量
-	Worker         func(obj ...interface{}) bool
+	Worker         func(*Args) bool
 	finishCallback func()
 	wait           sync.WaitGroup
 	stop           bool //关闭协程池信号
 }
 
 // NewPool 新建一个协程池
-func NewPool(number int, worker func(obj ...interface{}) bool) *GoroutinePool {
+func NewPool(number int, worker func(*Args) bool) *GoroutinePool {
 	p := &GoroutinePool{
 		Number: number,
 		Worker: worker,
@@ -27,7 +34,7 @@ func NewPool(number int, worker func(obj ...interface{}) bool) *GoroutinePool {
 }
 
 // 新建一个协程池
-func NewPoll(number int, worker func(obj ...interface{}) bool) *GoroutinePool {
+func NewPoll(number int, worker func(*Args) bool) *GoroutinePool {
 	p := &GoroutinePool{
 		Number: number,
 		Worker: worker,
@@ -49,7 +56,11 @@ func (g *GoroutinePool) Start() {
 					if !ok {
 						isDone = true
 					}
-					g.Worker(task, idx, g)
+					g.Worker(&Args{
+						Data:  task,
+						Index: idx,
+						Pool:  g,
+					})
 				default:
 					isDone = true
 				}

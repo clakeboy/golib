@@ -206,8 +206,8 @@ func (m *Management) run() {
 
 // 执行任务
 func (m *Management) execute(currentDate time.Time) {
-	poll := components.NewPoll(runtime.NumCPU(), func(obj ...interface{}) bool {
-		item := obj[0].(*Item)
+	poll := components.NewPoll(runtime.NumCPU(), func(args *components.Args) bool {
+		item := args.Data.(*Item)
 		m.executeTask(item, currentDate)
 		return true
 	})

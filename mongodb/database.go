@@ -111,3 +111,30 @@ func (d *Database) Ping() error {
 	defer cencel()
 	return d.client.Ping(ctx, readpref.Primary())
 }
+
+// get mongodb host info
+func (d *Database) HostInfo() (bson.M, error) {
+	ctx, cencel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cencel()
+	var hostInfo bson.M
+	err := d.client.Database("test").RunCommand(ctx, bson.D{{Key: "hostInfo", Value: 1}}).Decode(&hostInfo)
+	return hostInfo, err
+}
+
+// get mongodb build info
+func (d *Database) BuildInfo() (bson.M, error) {
+	ctx, cencel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cencel()
+	var hostInfo bson.M
+	err := d.client.Database("test").RunCommand(ctx, bson.D{{Key: "buildInfo", Value: 1}}).Decode(&hostInfo)
+	return hostInfo, err
+}
+
+// get mongodb database status
+func (d *Database) DbStats(dbname string) (bson.M, error) {
+	ctx, cencel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cencel()
+	var hostInfo bson.M
+	err := d.client.Database(dbname).RunCommand(ctx, bson.D{{Key: "dbStats", Value: 1}}).Decode(&hostInfo)
+	return hostInfo, err
+}

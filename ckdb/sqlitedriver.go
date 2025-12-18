@@ -14,9 +14,9 @@ func InitSqliteDb(conf *DBConfig) (*sql.DB, error) {
 		conf.DBName,
 	)
 
-	if db, ok := SqliteDrivers[dsn]; ok {
-		return db, nil
-	}
+	// if db, ok := SqliteDrivers[dsn]; ok {
+	// 	return db, nil
+	// }
 
 	sqliteDb, err := sql.Open("sqlite3", dsn)
 	if err != nil {
@@ -31,7 +31,7 @@ func InitSqliteDb(conf *DBConfig) (*sql.DB, error) {
 		return nil, err
 	}
 
-	SqliteDrivers[dsn] = sqliteDb
+	// SqliteDrivers[dsn] = sqliteDb
 
 	return sqliteDb, nil
 }
