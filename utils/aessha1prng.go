@@ -6,8 +6,8 @@ import (
 
 func SHAPRNGEncode(plantText []byte, kenCode []byte) ([]byte, error) {
 	key := AesKeySecureRandom(kenCode)
-	aesen := &AesEncrypt{aesType: AES_ECB}
-	aesen.SetKey(string(key))
+	aesen := &AesEncrypt{aesType: AES_ECB, isPkcs: true}
+	aesen.SetKeyBytes(key)
 	//block, err := aes.NewCipher(key) //选择加密算法
 	//if err != nil {
 	//	return nil, err
@@ -49,7 +49,7 @@ func SHAPRNGDecode(deText []byte, kenCode []byte) ([]byte, error) {
 	//---------------------------
 	key := AesKeySecureRandom(kenCode)
 	aesen := &AesEncrypt{aesType: AES_ECB, key: key}
-	aesen.SetPkcs(false)
+	aesen.SetPkcs(true)
 	return aesen.Decrypt(deText)
 }
 
