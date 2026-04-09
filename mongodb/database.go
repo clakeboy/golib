@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
 )
 
 // dsn mongodb://root:WiaQ82n7B3L5Cz*2#10m@172.18.76.150:27017?authSource=admin
@@ -49,7 +49,7 @@ func NewDatabase(conf *Config) (*Database, error) {
 	if conf.Compression {
 		opts.SetCompressors([]string{"snappy", "zlib", "zstd"})
 	}
-	client, err := mongo.Connect(context.TODO(), opts)
+	client, err := mongo.Connect(opts)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +63,7 @@ func NewDatabase(conf *Config) (*Database, error) {
 func NewDatabaseDsn(dsn string) (*Database, error) {
 	opts := options.Client()
 	opts.ApplyURI(dsn)
-	client, err := mongo.Connect(context.TODO(), opts)
+	client, err := mongo.Connect(opts)
 	if err != nil {
 		return nil, err
 	}
