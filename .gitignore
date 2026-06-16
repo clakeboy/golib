@@ -2,3 +2,4 @@
 .idea
 go.sum
 golib_cache
+logs
